@@ -68,6 +68,10 @@ end
 
 Library:Notify('Place the unit you will use in the first slot', 5)
 
+local Tabs = {
+    Main = Window:AddTab('Main'),
+}
+
 local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Player")
 
 LeftGroupBox:AddToggle("AEIC", {
