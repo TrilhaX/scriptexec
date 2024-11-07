@@ -26,7 +26,7 @@ warn('[TEMPEST HUB] Last Checking')
 wait(1)
 
 function joinInfCastle()
-    while getgenv().joinInfCastle == true do 
+    while getgenv().joinInfCastle do 
         repeat task.wait() until game:IsLoaded()
         game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
         wait(0.4)
@@ -72,7 +72,7 @@ local Tabs = {
     Main = Window:AddTab('Main'),
 }
 
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Player")
+local LeftGroupBox = Tabs.Main:AddLeftGroupbox("FARM")
 
 LeftGroupBox:AddToggle("AEIC", {
 	Text = "Auto Enter Inf Castle",
