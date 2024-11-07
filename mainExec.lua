@@ -3,7 +3,8 @@ local Games = {
 }
 
 local function LoadGame(GameId)
-    local GameName
+    local GameName = nil
+
     for name, ids in pairs(Games) do
         for _, id in ipairs(ids) do
             if id == GameId then
@@ -15,10 +16,16 @@ local function LoadGame(GameId)
     end
 
     if GameName then
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/scriptexec/main/Games/"..GameName..".lua"))()
+        local success, result = pcall(function()
+            return loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/scriptexec/main/Games/"..GameName..".lua"))()
+        end)
+        
+        if not success then
+            warn("Failed to load script for the game:", result)
+        end
     else
         warn("Game not supported")
     end
 end
 
-LoadGame(game.GameId)
+LoadGame(game.PlaceId)
