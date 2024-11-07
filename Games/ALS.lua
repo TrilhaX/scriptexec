@@ -54,14 +54,11 @@ end
 function placeUnit()
     while getgenv().placeUnit == true do
         local unit = game:GetService("Players")[game.Players.LocalPlayer.Name].Slots.Slot1.Value
-        if unit then
-            local args = {
-                [1] = unit,
-                [2] = CFrame.new(-164.9412384033203, 197.93942260742188, 15.210136413574219) * CFrame.Angles(-0, 0, -0)
-            }
-            game:GetService("ReplicatedStorage").Remotes.PlaceTower:FireServer(unpack(args))    
-            wait(1)
-        end
+        local args = {
+            [1] = unit,
+            [2] = CFrame.new(-164.9412384033203, 197.93942260742188, 15.210136413574219) * CFrame.Angles(-0, 0, -0)
+        }
+        game:GetService("ReplicatedStorage").Remotes.PlaceTower:FireServer(unpack(args))    
         wait()
     end
 end
