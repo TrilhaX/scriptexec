@@ -1,5 +1,5 @@
 local Games = {
-    ["ALS"] = {12886143095, 18583778121},
+    ["ALS"] = {12886143095, 18583778121, 12900046592},
 }
 
 local function LoadGame(GameId)
