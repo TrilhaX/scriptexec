@@ -125,6 +125,12 @@ while getgenv().webhook == true do
         sendWebhook()
     end
 end
+local webhookURL = ""
+
+if webhookURL == "" then
+    warn("Webhook URL is not set.")
+    return
+end
 
 
 Library:Notify('Place the unit you will use in the first slot', 5)
