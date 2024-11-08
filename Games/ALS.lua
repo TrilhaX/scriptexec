@@ -80,7 +80,7 @@ function webhook()
             embeds = {
                 {
                     title = "Account Situation",
-                    description = string.format("Name: %s\nLevel: %s\nYen: %s\nRC: %s\nReputation: %s\nTotal Focus Point: %s\nFocus: %s\nEto Yoshimura KIlls: %s\nKoutarou Amon Kills: %s\nNishiki Nishio Kills: %s\nTouka Kirishima Kills: %s\nGya Sacs: %s\nExperience: %s\n2x Exp Time: %s\nDurability: %s\n\n------------------------------------", name, level, yen, rc, rp, TotalFocusPoints, Focus, EtoYoshimuraKills, KoutarouAmonKills, NishikiNishioKills, ToukaKirishimaKills, GyaSacs, Experience, ExpTime2x, Durability),
+                    description = string.format("Name: %s\nYou Win 2 more RRS\n\n------------------------------------", name),
                     color = 10098630,
                     fields = {
                         {
