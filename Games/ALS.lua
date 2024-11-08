@@ -18,6 +18,7 @@ local Window = Library:CreateWindow({
 })
 
 Library:Notify('Loading INF CASTLE Script', 5)
+Library:Notify('Script made thanks to JustLevel', 5)
 warn('[TEMPEST HUB] Loading Function')
 wait(1)
 warn('[TEMPEST HUB] Loading Toggles')
