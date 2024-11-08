@@ -35,7 +35,7 @@ function joinInfCastle()
             game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
             wait(1)
             game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
-            wait(1)
+            break
         else
             wait(.5)
         end
@@ -49,7 +49,7 @@ function quitInfCastle()
         if uiEndGame then
             wait(1)
             game:GetService("ReplicatedStorage").Remotes.TeleportBack:FireServer()
-            wait(1)
+            break
         else
             wait(.5)
         end
@@ -70,7 +70,7 @@ function placeUnit()
                     [2] = CFrame.new(-164.9412384033203, 197.93942260742188, 15.210136413574219)
                 }
                 game:GetService("ReplicatedStorage").Remotes.PlaceTower:FireServer(unpack(args))    
-                wait(1)
+                break
             end
         else
             wait(.5)
@@ -103,7 +103,6 @@ function webhook()
             local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
             local name = game:GetService("Players").LocalPlayer.Name
 
-            -- Formatando o nome com spoilers
             local formattedName = "||" .. name .. "||"
 
             local payload = {
@@ -122,28 +121,49 @@ function webhook()
 
             local payloadJson = game:GetService("HttpService"):JSONEncode(payload)
 
-            local response = syn.request({
-                Url = discordWebhookUrl,
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json"
-                },
-                Body = payloadJson
-            })
+            if syn and syn.request then
+                local response = syn.request({
+                    Url = discordWebhookUrl,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = payloadJson
+                })
 
-            if response.Success then
-                print("Webhook sent successfully!")
-                break
+                if response.Success then
+                    print("Webhook sent successfully")
+                    break
+                else
+                    warn("Error sending message to Discord with syn.request:", response.StatusCode, response.Body)
+                end
+            elseif http_request then
+                local response = http_request({
+                    Url = discordWebhookUrl,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = payloadJson
+                })
+
+                if response.Success then
+                    print("Webhook sent successfully")
+                    break
+                else
+                    warn("Error sending message to Discord with http_request:", response.StatusCode, response.Body)
+                end
             else
-                warn("Error sending message to Discord:", response.StatusCode, response.Body)
+                print("Synchronization not supported on this device.")
             end
         else
-            wait(.5)
+            wait(0.5)
         end
 
         wait(0.5)
     end
 end
+
 
 Library:Notify('Place the unit you will use in the first slot', 5)
 
