@@ -71,7 +71,7 @@ function placeUnit()
 end
 
 function sendWebhook()
-    while getgenv().webhook == true do
+    while getgenv().sendWebhook == true do
         local Players = game:GetService("Players")
         local HttpService = game:GetService("HttpService")
         local localPlayer = Players.LocalPlayer
@@ -176,6 +176,7 @@ LeftGroupBox:AddToggle("Webhook", {
 	Default = false,
 	Callback = function(Value)
 		getgenv().webhook = Value
+		sendWebhook()
 	end,
 })
 
