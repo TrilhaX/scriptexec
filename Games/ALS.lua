@@ -1,5 +1,3 @@
-warn('[TEMPEST HUB] Loading Bypass')
-wait(1)
 warn('[TEMPEST HUB] Loading Ui')
 wait(1)
 local repo = 'https://raw.githubusercontent.com/TrapstarKSSKSKSKKS/LinoriaLib/main/'
@@ -27,21 +25,28 @@ warn('[TEMPEST HUB] Last Checking')
 wait(1)
 
 function joinInfCastle()
-    while getgenv().joinInfCastle do 
+    while getgenv().joinInfCastle == true do 
         repeat task.wait() until game:IsLoaded()
-        game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-        wait(0.4)
-        game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-        wait(1)
-        game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
-        wait(1)
+        local asta = workspace.Lobby.Npcs.Asta
+        if asta then
+            wait(.5)
+            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
+            wait(.4)
+            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
+            wait(1)
+            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
+            wait(1)
+        else
+            wait(.5)
+        end
+        wait()
     end
 end
 
 function quitInfCastle()
     while getgenv().quitInfCastle == true do
         local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
-        if uiEndGame.visible == true then
+        if uiEndGame then
             wait(1)
             game:GetService("ReplicatedStorage").Remotes.TeleportBack:FireServer()
             wait(1)
@@ -55,18 +60,85 @@ end
 function placeUnit()
     while getgenv().placeUnit == true do
         local unit = game:GetService("Players")[game.Players.LocalPlayer.Name].Slots.Slot1
+        local Remotes = game:GetService("ReplicatedStorage").Remotes
         if unit then
-            wait(.5)
-            local args = {
-                [1] = unit.Value,
-                [2] = CFrame.new(-164.9412384033203, 197.93942260742188, 15.210136413574219)
-            }
-            game:GetService("ReplicatedStorage").Remotes.PlaceTower:FireServer(unpack(args))    
-            wait(1)
+            local PlaceTower = Remotes.PlaceTower
+            if PlaceTower then
+                wait(.5)
+                local args = {
+                    [1] = unit.Value,
+                    [2] = CFrame.new(-164.9412384033203, 197.93942260742188, 15.210136413574219)
+                }
+                game:GetService("ReplicatedStorage").Remotes.PlaceTower:FireServer(unpack(args))    
+                wait(1)
+            end
         else
             wait(.5)
         end
         wait()
+    end
+end
+
+function autoGamespeed()
+    while getgenv().autoGamespeed == true do
+        local Remotes = game:GetService("ReplicatedStorage").Remotes
+        if Remotes then
+            local VoteChangeTimeScale = Remotes.VoteChangeTimeScale
+            if VoteChangeTimeScale then
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("VoteChangeTimeScale"):FireServer(true)
+                break
+            end
+        else
+            wait(1)
+        end
+        wait()
+    end
+end
+
+function webhook()
+    while getgenv().webhook == true do
+        local discordWebhookUrl = urlwebhook
+        local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
+        if uiEndGame then
+            local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
+            local name = game:GetService("Players").LocalPlayer.Name
+
+            local payload = {
+                content = "Tempest Hub",
+                embeds = {
+                    {
+                        title = "Account Situation",
+                        description = string.format("Name: %s\nResult: %s\n\n------------------------------------", name, result),
+                        color = 10098630,
+                        author = {
+                            name = "ALS INF CASTLE"
+                        },
+                    }
+                }
+            }
+
+            local payloadJson = game:GetService("HttpService"):JSONEncode(payload)
+
+            local response = syn.request({
+                Url = discordWebhookUrl,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = payloadJson
+            })
+
+            if response.Success then
+                print("Webhook sent successfully!")
+                break
+            else
+                warn("Error sending message to Discord:", response.StatusCode, response.Body)
+            end
+        else
+            wait(.5)
+        end
+
+        wait(0.5)
     end
 end
 
@@ -103,6 +175,35 @@ LeftGroupBox:AddToggle("APU", {
 		getgenv().placeUnit = Value
 		placeUnit()
 	end,
+})
+
+LeftGroupBox:AddToggle("AIG", {
+	Text = "Auto Increase Gamespeed",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoGamespeed = Value
+		autoGamespeed()
+	end,
+})
+
+LeftGroupBox:AddInput('WebhookURL', {
+    Default = '',
+    Text = "Webhook URL",
+    Numeric = false,
+    Finished = false,
+    Placeholder = 'Press enter after paste',
+    Callback = function(Value)
+        urlwebhook = Value
+    end
+})
+
+LeftGroupBox:AddToggle("Webhook", {
+    Text = "Send Webhook when finish game",
+    Default = false,
+    Callback = function(Value)
+        getgenv().webhook = Value
+        webhook()
+    end,
 })
 
 local FrameTimer = tick()
