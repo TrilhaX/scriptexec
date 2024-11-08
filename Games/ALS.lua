@@ -167,7 +167,12 @@ LeftGroupBox:AddToggle("Webhook", {
     Callback = function(Value)
         getgenv().webhook = Value
         if Value then
-            sendWebhook()
+            local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
+            if uiEndGame and uiEndGame.Visible then
+                sendWebhook()
+            else
+                wait(1)
+            end            
         end
     end,
 })
