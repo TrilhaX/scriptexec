@@ -41,7 +41,7 @@ end
 function quitInfCastle()
     while getgenv().quitInfCastle == true do
         local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
-        if uiEndGame then
+        if uiEndGame.visible == true then
             wait(1)
             game:GetService("ReplicatedStorage").Remotes.TeleportBack:FireServer()
             wait(1)
@@ -69,6 +69,63 @@ function placeUnit()
         wait()
     end
 end
+
+function sendWebhook()
+    if getgenv().webhook == true then
+        local Players = game:GetService("Players")
+        local HttpService = game:GetService("HttpService")
+        local localPlayer = Players.LocalPlayer
+        local discordWebhookUrl = webhookURL
+        local payload = {
+            content = "Tempest Hub",
+            embeds = {
+                {
+                    title = "Situação da Conta",
+                    description = string.format("Nome: %s\n You Got More 2 RRS", 
+                                                localPlayer.Name),
+                    color = 10098630,
+                    author = {
+                        name = "Anime Last Stand Inf Castle"
+                    },
+                    image = {
+                        url = "https://cdn.discordapp.com/attachments/1060039153494007900/1234607717549740062/Imagem_do_WhatsApp_de_2024-04-22_as_22.38.07_6779880f.jpg?ex=6632ab09&is=66315989&hm=a8e2e1b059838b45701b6959ba8e257413b2a099ef79a8c6bba056669a9f8c4b&"
+                    },
+                    thumbnail = {
+                        url = "https://tr.rbxcdn.com/2a201e67272f350e2478d8d2f1c4d9af/150/150/Image/Webp"
+                    }
+                }
+            }
+        }
+
+        local payloadJson = HttpService:JSONEncode(payload)
+
+        local success, response = pcall(function()
+            return HttpService:RequestAsync({
+                Url = discordWebhookUrl,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = payloadJson
+            })
+        end)
+
+        if success and response.Success then
+            print("Mensagem enviada para o Discord com sucesso.")
+        else
+            warn("Erro ao enviar mensagem para o Discord:", response.StatusCode, response.Body)
+        end
+    else
+        warn("Webhook não está ativado.")
+    end
+end
+while getgenv().webhook == true do
+    local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
+    if uiEndGame and uiEndGame.Visible then
+        sendWebhook()
+    end
+end
+
 
 Library:Notify('Place the unit you will use in the first slot', 5)
 
@@ -102,6 +159,26 @@ LeftGroupBox:AddToggle("APU", {
 	Callback = function(Value)
 		getgenv().placeUnit = Value
 		placeUnit()
+	end,
+})
+
+LeftGroupBox:AddInput('WebhookURL', {
+    Default = 'Put ur Webhook URL here',
+    Numeric = false,
+    Finished = false,
+
+    Placeholder = 'Put ur Webhook URL here',
+
+    Callback = function(Value)
+        webhookURL = Value
+    end
+})
+
+LeftGroupBox:AddToggle("Webhook", {
+	Text = "Send Webhook when finish game",
+	Default = false,
+	Callback = function(Value)
+		getgenv().webhook = Value
 	end,
 })
 
