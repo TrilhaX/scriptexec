@@ -71,7 +71,7 @@ function placeUnit()
 end
 
 function sendWebhook()
-    if getgenv().webhook == true then
+    while getgenv().webhook == true do
         local Players = game:GetService("Players")
         local HttpService = game:GetService("HttpService")
         local localPlayer = Players.LocalPlayer
@@ -110,26 +110,17 @@ function sendWebhook()
             })
         end)
 
+        local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
+        if uiEndGame and uiEndGame.Visible then
+            sendWebhook()
+        end        
+
         if success and response.Success then
             print("Mensagem enviada para o Discord com sucesso.")
         else
             warn("Erro ao enviar mensagem para o Discord:", response.StatusCode, response.Body)
         end
-    else
-        warn("Webhook não está ativado.")
     end
-end
-while getgenv().webhook == true do
-    local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
-    if uiEndGame and uiEndGame.Visible then
-        sendWebhook()
-    end
-end
-local webhookURL = ""
-
-if webhookURL == "" then
-    warn("Webhook URL is not set.")
-    return
 end
 
 
@@ -169,7 +160,7 @@ LeftGroupBox:AddToggle("APU", {
 })
 
 LeftGroupBox:AddInput('WebhookURL', {
-    Default = 'Put ur Webhook URL here',
+    Default = '',
     Numeric = false,
     Finished = false,
 
