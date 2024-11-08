@@ -103,12 +103,15 @@ function webhook()
             local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
             local name = game:GetService("Players").LocalPlayer.Name
 
+            -- Formatando o nome com spoilers
+            local formattedName = "||" .. name .. "||"
+
             local payload = {
                 content = "Tempest Hub",
                 embeds = {
                     {
                         title = "Account Situation",
-                        description = string.format("Name: %s\nResult: %s\n\n------------------------------------", name, result),
+                        description = string.format("Name: %s\nResult: %s\n\n------------------------------------", formattedName, result),
                         color = 10098630,
                         author = {
                             name = "ALS INF CASTLE"
