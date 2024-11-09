@@ -58,13 +58,49 @@ function placeUnit()
         if unit then
             local PlaceTower = Remotes.PlaceTower
             if PlaceTower then
+                local UnitPlaced = workspace.Towers
+                local unitExists = false
+                for _, child in ipairs(UnitPlaced:GetChildren()) do
+                    if child == unit.Value then
+                        unitExists = true
+                        break
+                    end
+                end
+
+                if not unitExists then
+                    wait(0.5)
+                    local args = {
+                        [1] = unit.Value,
+                        [2] = CFrame.new(-164.9412384033203, 197.93942260742188, 15.210136413574219)
+                    }
+                    PlaceTower:FireServer(unpack(args))    
+                    wait(0.5)
+                else
+                    break
+                end
+            end
+        else
+            wait(0.5)
+        end
+        wait()
+    end
+end
+
+
+function upgradeUnit()
+    while getgenv().upgradeUnit == true do
+        local unit = game:GetService("Players")[game.Players.LocalPlayer.Name].Slots.Slot1
+        local Remotes = game:GetService("ReplicatedStorage").Remotes
+        if unit then
+            local PlaceTower = Remotes.PlaceTower
+            if PlaceTower then
                 wait(.5)
                 local args = {
-                    [1] = unit.Value,
-                    [2] = CFrame.new(-164.9412384033203, 197.93942260742188, 15.210136413574219)
+                    [1] = workspace:WaitForChild("Towers"):WaitForChild(unit.Value)
                 }
-                game:GetService("ReplicatedStorage").Remotes.PlaceTower:FireServer(unpack(args))    
-                break
+                
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Upgrade"):InvokeServer(unpack(args))                
+                wait(.5)
             end
         else
             wait(.5)
@@ -89,6 +125,66 @@ function autoGamespeed()
     end
 end
 
+function extremeFpsBoost()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+    game.Lighting.GlobalShadows = false
+    game.Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Part") or obj:IsA("MeshPart") or obj:IsA("UnionOperation") then
+            obj.Material = Enum.Material.SmoothPlastic
+            obj.Color = Color3.new(0.5, 0.5, 0.5)
+            obj.Transparency = 0
+            obj.CanCollide = true
+        elseif obj:IsA("Mesh") or obj:IsA("SpecialMesh") then
+            obj:Destroy()
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            obj:Destroy()
+        elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+            obj.Enabled = false
+        end
+
+        wait(.1)
+    end
+
+    for _, effect in pairs(game.Lighting:GetChildren()) do
+        if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") then
+            effect.Enabled = false
+        end
+
+        wait(.1)
+    end
+end
+
+function HPI()
+    local overhead = game.Players.LocalPlayer.Character.Head.Overhead
+    overhead:Destroy()
+end
+
+function deleteMap()
+    local objetos = workspace.Map.Map:GetChildren()
+
+    for _, objeto in ipairs(objetos) do
+        if string.find(string.lower(objeto.Name), "model") or string.find(string.lower(objeto.Name), "building%d") then
+            objeto:Destroy()
+            wait(.5)
+        end
+    end
+end
+
+function deleteNotErro()
+    while getgenv().deleteNotErro == true do
+        local erroNot = game:GetService("Players").LocalPlayer.PlayerGui.MessageUI.ErrorHolder
+        if erroNot then
+            erroNot:Destroy()
+            break
+        else
+            wait(.5)
+        end
+    end
+end
+
 function webhook()
     while getgenv().webhook == true do
         local discordWebhookUrl = urlwebhook
@@ -99,12 +195,32 @@ function webhook()
 
             local formattedName = "||" .. name .. "||"
 
+            local elapsedTimeText = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.ElapsedTime.Text
+            local timeOnly = string.sub(elapsedTimeText, 13) -- A partir do 13º caractere (ignora "Total Time: ")
+
+            local Rerolls1 = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Rewards.Holder:FindFirstChild("Rerolls")
+            local formattedAmount = "N/A"
+            
+            if Rerolls1 then
+                local Amount = Rerolls1:FindFirstChild("Amount")
+                if Amount and Amount.Text then
+                    formattedAmount = Amount.Text
+                end
+            end
+
+            local Rerolls = game:GetService("Players").LocalPlayer:FindFirstChild("Rerolls")
+            local rerollsValue = "N/A"
+    
+            if Rerolls and Rerolls.Value then
+                rerollsValue = Rerolls.Value
+            end
+
             local payload = {
-                content = "Tempest Hub",
+                content = "",
                 embeds = {
                     {
-                        title = "Account Situation",
-                        description = string.format("Name: %s\nResult: %s\n\n------------------------------------", formattedName, result),
+                        title = "Tempest Hub",
+                        description = string.format("------------------------------------\nName: %s\nResult: %s\nElapsed Time: %s\nRewards: Rerolls %s\nRerolls: %s\n------------------------------------", formattedName, result, timeOnly, formattedAmount, rerollsValue),
                         color = 10098630,
                         author = {
                             name = "ALS INF CASTLE"
@@ -158,14 +274,13 @@ function webhook()
     end
 end
 
-
 Library:Notify('Place the unit you will use in the first slot', 5)
 
 local Tabs = {
     Main = Window:AddTab('Main'),
 }
 
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("FARM")
+local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Farm")
 
 LeftGroupBox:AddToggle("AEIC", {
 	Text = "Auto Enter Inf Castle",
@@ -194,6 +309,16 @@ LeftGroupBox:AddToggle("APU", {
 	end,
 })
 
+LeftGroupBox:AddToggle("AUU", {
+	Text = "Auto Upgrade Unit",
+	Default = false,
+	Callback = function(Value)
+		getgenv().upgradeUnit = Value
+		upgradeUnit()
+	end,
+})
+
+
 LeftGroupBox:AddToggle("AIG", {
 	Text = "Auto Increase Gamespeed",
 	Default = false,
@@ -214,7 +339,7 @@ LeftGroupBox:AddInput('WebhookURL', {
     end
 })
 
-LeftGroupBox:AddToggle("Webhook", {
+LeftGroupBox:AddToggle("WebhookFG", {
     Text = "Send Webhook when finish game",
     Default = false,
     Callback = function(Value)
@@ -222,6 +347,43 @@ LeftGroupBox:AddToggle("Webhook", {
         webhook()
     end,
 })
+
+local RightGroupbox = Tabs.Main:AddRightGroupbox("Player")
+
+RightGroupbox:AddToggle("HPI", {
+	Text = "Hide Player Info",
+	Default = false,
+	Callback = function(Value)
+		HPI()
+	end,
+})
+
+RightGroupbox:AddToggle("DEN", {
+	Text = "Delete Error Notifications", 
+	Default = false,
+	Callback = function(Value)
+        getgenv().deleteNotErro = Value
+		deleteNotErro()
+	end,
+})
+
+RightGroupbox:AddToggle("FPSBoost", {
+	Text = "FPS Boost",
+	Default = false,
+	Callback = function(Value)
+		extremeFpsBoost()
+	end,
+})
+
+RightGroupbox:AddToggle("DeleteMap", {
+	Text = "Delete Map",
+	Default = false,
+	Callback = function(Value)
+		deleteMap()
+	end,
+})
+
+Library:SetWatermarkVisibility(true)
 
 local FrameTimer = tick()
 local FrameCounter = 0
