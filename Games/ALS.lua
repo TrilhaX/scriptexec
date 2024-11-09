@@ -27,18 +27,12 @@ wait(1)
 function joinInfCastle()
     while getgenv().joinInfCastle == true do 
         repeat task.wait() until game:IsLoaded()
-        local asta = workspace.Lobby.Npcs.Asta
-        if asta then
-            wait(.5)
-            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-            wait(.4)
-            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-            wait(1)
-            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
-            break
-        else
-            wait(.5)
-        end
+        wait(1)
+        game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
+        wait(.4)
+        game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
+        wait(1)
+        game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
         wait()
     end
 end
