@@ -16,6 +16,7 @@ local Window = Library:CreateWindow({
 })
 
 Library:Notify('Loading INF CASTLE Script', 5)
+Library:Notify('Script made thanks to JustLevel', 5)
 warn('[TEMPEST HUB] Loading Function')
 wait(1)
 warn('[TEMPEST HUB] Loading Toggles')
@@ -23,15 +24,105 @@ wait(1)
 warn('[TEMPEST HUB] Last Checking')
 wait(1)
 
+local TweenService = game:GetService("TweenService")
+local speed = 1000
+
+local function tweenModel(model, targetCFrame)
+    if not model.PrimaryPart then
+        warn("PrimaryPart is not set for the model")
+        return
+    end
+    
+    local duration = (model.PrimaryPart.Position - targetCFrame.Position).Magnitude / speed
+    local info = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+    
+    local cframeValue = Instance.new("CFrameValue")
+    cframeValue.Value = model:GetPrimaryPartCFrame()
+    
+    cframeValue:GetPropertyChangedSignal("Value"):Connect(function()
+        model:SetPrimaryPartCFrame(cframeValue.Value)
+    end)
+    
+    local tween = TweenService:Create(cframeValue, info, {
+        Value = targetCFrame,
+    })
+    
+    tween:Play()
+    tween.Completed:Connect(function()
+        cframeValue:Destroy()
+    end)
+    
+    return tween
+end
+
+local function GetCFrame(obj, height, angle)
+    local cframe = CFrame.new()
+
+    if typeof(obj) == "Vector3" then
+        cframe = CFrame.new(obj)
+    elseif typeof(obj) == "table" then
+        cframe = CFrame.new(unpack(obj))
+    elseif typeof(obj) == "string" then
+        local parts = {}
+        for val in obj:gmatch("[^,]+") do
+            table.insert(parts, tonumber(val))
+        end
+        if #parts >= 3 then
+            cframe = CFrame.new(unpack(parts))
+        end
+    elseif typeof(obj) == "Instance" then
+        if obj:IsA("Model") then
+            local rootPart = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Torso")
+            if rootPart then
+                cframe = rootPart.CFrame
+            end
+        elseif obj:IsA("Part") then
+            cframe = obj.CFrame
+        end
+    end
+
+    if height then
+        cframe = cframe + Vector3.new(0, height, 0)
+    end
+    if angle then
+        cframe = cframe * CFrame.Angles(0, math.rad(angle), 0)
+    end
+    
+    return cframe
+end
+
 function joinInfCastle()
     while getgenv().joinInfCastle == true do 
-        repeat task.wait() until game:IsLoaded()
-        wait(1)
-        game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-        wait(.4)
-        game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-        wait(1)
-        game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
+        if getgenv().joinMethod == 'Method 1' then
+            repeat task.wait() until game:IsLoaded()
+            wait(1)
+            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
+            wait(.4)
+            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
+            wait(1)
+            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
+            wait()
+            break
+        elseif getgenv().joinMethod == "Method 2" then
+            repeat task.wait() until game:IsLoaded()
+            wait(1)
+            local asta = workspace.Lobby.Npcs.Asta
+            if asta then
+                local TeleportCFrame = GetCFrame(asta, -5)
+                local tween = tweenModel(game.Players.LocalPlayer.Character, TeleportCFrame)
+                tween:Play()
+                tween.Completed:Wait()
+                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
+                wait(.1)
+                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
+                wait(.1)
+                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
+                wait()
+                break
+            else
+                wait(.5)
+            end
+        end
         wait()
     end
 end
@@ -84,7 +175,6 @@ function placeUnit()
         wait()
     end
 end
-
 
 function upgradeUnit()
     while getgenv().upgradeUnit == true do
@@ -167,7 +257,7 @@ function deleteMap()
     for _, objeto in ipairs(objetos) do
         if string.find(string.lower(objeto.Name), "model") or string.find(string.lower(objeto.Name), "building%d") then
             objeto:Destroy()
-            wait(.5)
+            wait()
         end
     end
 end
@@ -181,6 +271,7 @@ function deleteNotErro()
         else
             wait(.5)
         end
+        wait()
     end
 end
 
@@ -188,14 +279,14 @@ function webhook()
     while getgenv().webhook == true do
         local discordWebhookUrl = urlwebhook
         local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
+        
         if uiEndGame then
             local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
             local name = game:GetService("Players").LocalPlayer.Name
 
             local formattedName = "||" .. name .. "||"
-
             local elapsedTimeText = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.ElapsedTime.Text
-            local timeOnly = string.sub(elapsedTimeText, 13) -- A partir do 13º caractere (ignora "Total Time: ")
+            local timeOnly = string.sub(elapsedTimeText, 13)
 
             local Rerolls1 = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Rewards.Holder:FindFirstChild("Rerolls")
             local formattedAmount = "N/A"
@@ -207,15 +298,28 @@ function webhook()
                 end
             end
 
-            local Rerolls = game:GetService("Players").LocalPlayer:FindFirstChild("Rerolls")
+            local args = {
+                [1] = game:GetService("Players"):WaitForChild("TempestGpo2"),
+            }
+            
+            local retorno = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetPlayerData"):InvokeServer(unpack(args))
+            
             local rerollsValue = "N/A"
-    
-            if Rerolls and Rerolls.Value then
-                rerollsValue = Rerolls.Value
+            
+            if type(retorno) == "table" then
+                local chaveDesejada = "Rerolls"
+                if retorno[chaveDesejada] then
+                    rerollsValue = retorno[chaveDesejada]
+                end
+            end            
+
+            local pingContent = ""
+            if getgenv().pingUser and getgenv().pingUserId then
+                pingContent = "<@" .. getgenv().pingUserId .. ">"
             end
 
             local payload = {
-                content = "",
+                content = pingContent,
                 embeds = {
                     {
                         title = "Tempest Hub",
@@ -266,10 +370,10 @@ function webhook()
                 print("Synchronization not supported on this device.")
             end
         else
-            wait(0.5)
+            wait(.5)
         end
 
-        wait(0.5)
+        wait()
     end
 end
 
@@ -280,6 +384,18 @@ local Tabs = {
 }
 
 local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Farm")
+
+LeftGroupBox:AddDropdown('MyDropdown', {
+    Values = { 'Method 1', 'Method 2',},
+    Default = "Method 1",
+    Multi = false,
+
+    Text = 'Method To Join in Inf Castle',
+
+    Callback = function(Value)
+        getgenv().joinMethod = Value
+    end
+})
 
 LeftGroupBox:AddToggle("AEIC", {
 	Text = "Auto Enter Inf Castle",
@@ -338,12 +454,31 @@ LeftGroupBox:AddInput('WebhookURL', {
     end
 })
 
+LeftGroupBox:AddInput('pingUser@', {
+    Default = '',
+    Text = "User ID",
+    Numeric = false,
+    Finished = false,
+    Placeholder = 'Press enter after paste',
+    Callback = function(Value)
+        getgenv().pingUserId = Value
+    end
+})
+
 LeftGroupBox:AddToggle("WebhookFG", {
     Text = "Send Webhook when finish game",
     Default = false,
     Callback = function(Value)
         getgenv().webhook = Value
         webhook()
+    end,
+})
+
+LeftGroupBox:AddToggle("pingUser", {
+    Text = "Ping user",
+    Default = false,
+    Callback = function(Value)
+        getgenv().pingUser = Value
     end,
 })
 
