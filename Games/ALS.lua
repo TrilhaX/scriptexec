@@ -316,6 +316,10 @@ function webhook()
             local pingContent = ""
             if getgenv().pingUser and getgenv().pingUserId then
                 pingContent = "<@" .. getgenv().pingUserId .. ">"
+            elseif getgenv().pingUser and not getgenv().pingUserId then
+                pingContent = "@"
+            else
+                pingContent = ""
             end
 
             local payload = {
