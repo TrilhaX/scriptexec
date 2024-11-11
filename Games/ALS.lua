@@ -97,10 +97,10 @@ function joinInfCastle()
             repeat task.wait() until game:IsLoaded()
             wait(1)
             game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-            wait(1)
+            wait(.4)
             game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
             wait(1)
-            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
+            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 5, "True")
             wait()
             break
         elseif getgenv().joinMethod == "Method 2" then
@@ -116,14 +116,14 @@ function joinInfCastle()
                 wait(.1)
                 game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
                 wait(.1)
-                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
+                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 5, "True")
                 wait()
                 break
             else
                 wait(.5)
             end
         end
-        wait(.5)
+        wait()
     end
 end
 
@@ -131,13 +131,13 @@ function quitInfCastle()
     while getgenv().quitInfCastle == true do
         local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
         if uiEndGame then
-            wait(2)
+            wait(1)
             game:GetService("ReplicatedStorage").Remotes.TeleportBack:FireServer()
             break
         else
             wait(.5)
         end
-        wait(.5)
+        wait()
     end
 end
 
@@ -275,19 +275,20 @@ function deleteNotErro()
     end
 end
 
+local HttpService = game:GetService("HttpService")
+
 function webhook()
     while getgenv().webhook == true do
         local discordWebhookUrl = urlwebhook
         local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
+        
         if uiEndGame then
             local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
             local name = game:GetService("Players").LocalPlayer.Name
-
             local formattedName = "||" .. name .. "||"
-
             local elapsedTimeText = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.ElapsedTime.Text
-            local timeOnly = string.sub(elapsedTimeText, 13) -- A partir do 13º caractere (ignora "Total Time: ")
-
+            local timeOnly = string.sub(elapsedTimeText, 13) -- After "Total Time: "
+            
             local Rerolls1 = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Rewards.Holder:FindFirstChild("Rerolls")
             local formattedAmount = "N/A"
             
@@ -299,27 +300,21 @@ function webhook()
             end
 
             local args = {
-                [1] = game:GetService("Players"):WaitForChild("TempestGpo2"),
+                [1] = game.Players.LocalPlayer,
             }
             
             local retorno = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetPlayerData"):InvokeServer(unpack(args))
-            
             local rerollsValue = "N/A"
             
-            if type(retorno) == "table" then
-                local chaveDesejada = "Rerolls"
-                if retorno[chaveDesejada] then
-                    rerollsValue = retorno[chaveDesejada]
-                end
-            end            
+            if type(retorno) == "table" and retorno["Rerolls"] then
+                rerollsValue = retorno["Rerolls"]
+            end
 
             local pingContent = ""
             if getgenv().pingUser and getgenv().pingUserId then
                 pingContent = "<@" .. getgenv().pingUserId .. ">"
-            elseif getgenv().pingUser and not getgenv().pingUserId then
+            elseif getgenv().pingUser then
                 pingContent = "@"
-            else
-                pingContent = ""
             end
 
             local payload = {
@@ -329,97 +324,53 @@ function webhook()
                         title = "Tempest Hub",
                         description = string.format("------------------------------------\nName: %s\nResult: %s\nElapsed Time: %s\nRewards: Rerolls %s\nRerolls: %s\n------------------------------------", formattedName, result, timeOnly, formattedAmount, rerollsValue),
                         color = 10098630,
-                        author = {
-                            name = "ALS INF CASTLE"
-                        },
+                        author = { name = "ALS INF CASTLE" },
                     }
                 }
             }
 
-function webhook()
-    while getgenv().webhook == true do
-        local discordWebhookUrl = urlwebhook
-        local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
-        if uiEndGame then
-            local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
-            local name = game:GetService("Players").LocalPlayer.Name
-
-            local formattedName = "||" .. name .. "||"
-
-            local elapsedTimeText = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.ElapsedTime.Text
-            local timeOnly = string.sub(elapsedTimeText, 13) -- A partir do 13º caractere (ignora "Total Time: ")
-
-            local Rerolls1 = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Rewards.Holder:FindFirstChild("Rerolls")
-            local formattedAmount = "N/A"
-            
-            if Rerolls1 then
-                local Amount = Rerolls1:FindFirstChild("Amount")
-                if Amount and Amount.Text then
-                    formattedAmount = Amount.Text
-                end
-            end
-
-            local args = {
-                [1] = game:GetService("Players"):WaitForChild("TempestGpo2"),
-            }
-            
-            local retorno = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetPlayerData"):InvokeServer(unpack(args))
-            
-            local rerollsValue = "N/A"
-            
-            if type(retorno) == "table" then
-                local chaveDesejada = "Rerolls"
-                if retorno[chaveDesejada] then
-                    rerollsValue = retorno[chaveDesejada]
-                end
-            end            
-
-            local pingContent = ""
-            if getgenv().pingUser and getgenv().pingUserId then
-                pingContent = "<@" .. getgenv().pingUserId .. ">"
-            elseif getgenv().pingUser and not getgenv().pingUserId then
-                pingContent = "@"
-            else
-                pingContent = ""
-            end
-
-            local payload = {
-                content = pingContent,
-                embeds = {
-                    {
-                        title = "Tempest Hub",
-                        description = string.format("------------------------------------\nName: %s\nResult: %s\nElapsed Time: %s\nRewards: Rerolls %s\nRerolls: %s\n------------------------------------", formattedName, result, timeOnly, formattedAmount, rerollsValue),
-                        color = 10098630,
-                        author = {
-                            name = "ALS INF CASTLE"
-                        },
-                    }
-                }
-            }
-
-            local HttpService = game:GetService("HttpService")
             local payloadJson = HttpService:JSONEncode(payload)
-						
-            local response = request({
-                Url = discordWebhookUrl,
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json"
-                },
-                Body = payloadJson
-            })
 
-            if response.Success then
-                print("Webhook sent successfully")
-                break
+            if syn and syn.request then
+                local response = syn.request({
+                    Url = discordWebhookUrl,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = payloadJson
+                })
+
+                if response.Success then
+                    print("Webhook sent successfully")
+                    break
+                else
+                    warn("Error sending message to Discord with syn.request:", response.StatusCode, response.Body)
+                end
+            elseif http_request then
+                local response = http_request({
+                    Url = discordWebhookUrl,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = payloadJson
+                })
+
+                if response.Success then
+                    print("Webhook sent successfully")
+                    break
+                else
+                    warn("Error sending message to Discord with http_request:", response.StatusCode, response.Body)
+                end
             else
-                warn("Error sending message to Discord with request:", response.StatusCode, response.Body)
+                print("Synchronization not supported on this device.")
             end
         else
-            wait()
+            wait(0.5)
         end
 
-        wait()
+        wait(0.5)
     end
 end
 
