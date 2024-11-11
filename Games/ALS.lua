@@ -97,7 +97,7 @@ function joinInfCastle()
             repeat task.wait() until game:IsLoaded()
             wait(1)
             game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-            wait(.4)
+            wait(1)
             game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
             wait(1)
             game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 5, "True")
@@ -120,7 +120,7 @@ function joinInfCastle()
                 wait()
                 break
             else
-                wait(.5)
+                wait()
             end
         end
         wait()
@@ -367,10 +367,10 @@ function webhook()
                 print("Synchronization not supported on this device.")
             end
         else
-            wait(0.5)
+            wait()
         end
 
-        wait(0.5)
+        wait()
     end
 end
 
