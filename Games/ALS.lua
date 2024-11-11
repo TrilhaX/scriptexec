@@ -336,42 +336,84 @@ function webhook()
                 }
             }
 
-            local payloadJson = game:GetService("HttpService"):JSONEncode(payload)
+function webhook()
+    while getgenv().webhook == true do
+        local discordWebhookUrl = urlwebhook
+        local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
+        if uiEndGame then
+            local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
+            local name = game:GetService("Players").LocalPlayer.Name
 
-            if syn and syn.request then
-                local response = syn.request({
-                    Url = discordWebhookUrl,
-                    Method = "POST",
-                    Headers = {
-                        ["Content-Type"] = "application/json"
-                    },
-                    Body = payloadJson
-                })
+            local formattedName = "||" .. name .. "||"
 
-                if response.Success then
-                    print("Webhook sent successfully")
-                    break
-                else
-                    warn("Error sending message to Discord with syn.request:", response.StatusCode, response.Body)
+            local elapsedTimeText = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.ElapsedTime.Text
+            local timeOnly = string.sub(elapsedTimeText, 13) -- A partir do 13º caractere (ignora "Total Time: ")
+
+            local Rerolls1 = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Rewards.Holder:FindFirstChild("Rerolls")
+            local formattedAmount = "N/A"
+            
+            if Rerolls1 then
+                local Amount = Rerolls1:FindFirstChild("Amount")
+                if Amount and Amount.Text then
+                    formattedAmount = Amount.Text
                 end
-            elseif http_request then
-                local response = http_request({
-                    Url = discordWebhookUrl,
-                    Method = "POST",
-                    Headers = {
-                        ["Content-Type"] = "application/json"
-                    },
-                    Body = payloadJson
-                })
+            end
 
-                if response.Success then
-                    print("Webhook sent successfully")
-                    break
-                else
-                    warn("Error sending message to Discord with http_request:", response.StatusCode, response.Body)
+            local args = {
+                [1] = game:GetService("Players"):WaitForChild("TempestGpo2"),
+            }
+            
+            local retorno = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetPlayerData"):InvokeServer(unpack(args))
+            
+            local rerollsValue = "N/A"
+            
+            if type(retorno) == "table" then
+                local chaveDesejada = "Rerolls"
+                if retorno[chaveDesejada] then
+                    rerollsValue = retorno[chaveDesejada]
                 end
+            end            
+
+            local pingContent = ""
+            if getgenv().pingUser and getgenv().pingUserId then
+                pingContent = "<@" .. getgenv().pingUserId .. ">"
+            elseif getgenv().pingUser and not getgenv().pingUserId then
+                pingContent = "@"
             else
-                print("Synchronization not supported on this device.")
+                pingContent = ""
+            end
+
+            local payload = {
+                content = pingContent,
+                embeds = {
+                    {
+                        title = "Tempest Hub",
+                        description = string.format("------------------------------------\nName: %s\nResult: %s\nElapsed Time: %s\nRewards: Rerolls %s\nRerolls: %s\n------------------------------------", formattedName, result, timeOnly, formattedAmount, rerollsValue),
+                        color = 10098630,
+                        author = {
+                            name = "ALS INF CASTLE"
+                        },
+                    }
+                }
+            }
+
+            local HttpService = game:GetService("HttpService")
+            local payloadJson = HttpService:JSONEncode(payload)
+						
+            local response = request({
+                Url = discordWebhookUrl,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = payloadJson
+            })
+
+            if response.Success then
+                print("Webhook sent successfully")
+                break
+            else
+                warn("Error sending message to Discord with request:", response.StatusCode, response.Body)
             end
         else
             wait()
