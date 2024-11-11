@@ -374,7 +374,7 @@ function webhook()
                 print("Synchronization not supported on this device.")
             end
         else
-            wait(.5)
+            wait()
         end
 
         wait()
