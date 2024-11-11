@@ -97,7 +97,7 @@ function joinInfCastle()
             repeat task.wait() until game:IsLoaded()
             wait(1)
             game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-            wait(.4)
+            wait(1)
             game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
             wait(1)
             game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 0, "True")
@@ -123,7 +123,7 @@ function joinInfCastle()
                 wait(.5)
             end
         end
-        wait()
+        wait(.5)
     end
 end
 
@@ -131,13 +131,13 @@ function quitInfCastle()
     while getgenv().quitInfCastle == true do
         local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
         if uiEndGame then
-            wait(1)
+            wait(2)
             game:GetService("ReplicatedStorage").Remotes.TeleportBack:FireServer()
             break
         else
             wait(.5)
         end
-        wait()
+        wait(.5)
     end
 end
 
@@ -377,7 +377,7 @@ function webhook()
             wait(.5)
         end
 
-        wait(.5)
+        wait()
     end
 end
 
