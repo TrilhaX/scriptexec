@@ -108,7 +108,7 @@ function joinInfCastle()
             wait(1)
             local asta = workspace.Lobby.Npcs.Asta
             if asta then
-                local TeleportCFrame = GetCFrame(asta, -5)
+                local TeleportCFrame = GetCFrame(asta)
                 local tween = tweenModel(game.Players.LocalPlayer.Character, TeleportCFrame)
                 tween:Play()
                 tween.Completed:Wait()
@@ -279,14 +279,14 @@ function webhook()
     while getgenv().webhook == true do
         local discordWebhookUrl = urlwebhook
         local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
-        
         if uiEndGame then
             local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
             local name = game:GetService("Players").LocalPlayer.Name
 
             local formattedName = "||" .. name .. "||"
+
             local elapsedTimeText = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.ElapsedTime.Text
-            local timeOnly = string.sub(elapsedTimeText, 13)
+            local timeOnly = string.sub(elapsedTimeText, 13) -- A partir do 13º caractere (ignora "Total Time: ")
 
             local Rerolls1 = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Rewards.Holder:FindFirstChild("Rerolls")
             local formattedAmount = "N/A"
@@ -377,7 +377,7 @@ function webhook()
             wait(.5)
         end
 
-        wait()
+        wait(.5)
     end
 end
 
@@ -390,8 +390,8 @@ local Tabs = {
 local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Farm")
 
 LeftGroupBox:AddDropdown('MyDropdown', {
-    Values = { 'Method 1', 'Method 2',},
-    Default = "Method 1",
+    Values = {'None', 'Method 1', 'Method 2',},
+    Default = "None",
     Multi = false,
 
     Text = 'Method To Join in Inf Castle',
