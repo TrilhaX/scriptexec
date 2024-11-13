@@ -426,7 +426,7 @@ function webhook()
             local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
             local resultOnly = string.sub(result, 7)
 
-            if resultOnly == "Cleared!" then
+            if resultOnly == "cleared!" then
                 resultOnly = "Victory"
             else
                 resultOnly = "Defeat"
@@ -458,7 +458,7 @@ function webhook()
                         fields = {
                             {
                                 name = "Discord",
-                                value = "https://discord.gg/tvQqnYKF7j"
+                                value = "https://discord.gg/ey83AwMvAn"
                             }
                         },
                         author = {
@@ -528,7 +528,7 @@ local Tabs = {
 
 local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Farm")
 
-LeftGroupBox:AddDropdown('MyDropdown', {
+LeftGroupBox:AddDropdown('dropdownMethod', {
     Values = {'None', 'Method 1', 'Method 2',},
     Default = "None",
     Multi = false,
@@ -558,7 +558,7 @@ LeftGroupBox:AddToggle("AL", {
 	end,
 })
 
-LeftGroupBox:AddDropdown('MyDropdown', {
+LeftGroupBox:AddDropdown('dropdownSlot', {
     Values = {'1', '2', '3', '4', '5', '6'},
     Default = "None",
     Multi = false,
