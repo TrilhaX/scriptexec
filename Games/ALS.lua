@@ -453,7 +453,7 @@ function webhook()
                 content = pingContent,
                 embeds = {
                     {
-                        description = string.format("User: %s\nLevel: %s\n\nPlayer Stats:\n%s\n\n++++++++++++++\n\nRewards:\n%s\n++++++++++++++\nMatch Result: %s", formattedName, formattedLevel, playerStats, formattedAmount, formattedResult),
+                        description = string.format("User: %s\nLevel: %s\n\nPlayer Stats:\n%s\n\n++++++++++++++\n\nRewards:\n%s\n++++++++++++++\nMatch Result:\n %s", formattedName, formattedLevel, playerStats, formattedAmount, formattedResult),
                         color = 7995647,
                         fields = {
                             {
