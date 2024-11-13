@@ -529,8 +529,8 @@ local Tabs = {
 local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Farm")
 
 LeftGroupBox:AddDropdown('dropdownMethod', {
-    Values = {'None', 'Method 1', 'Method 2',},
-    Default = "None",
+    Values = {'Method 1', 'Method 2',},
+    Default = "Method 1",
     Multi = false,
 
     Text = 'Method To Join in Inf Castle',
