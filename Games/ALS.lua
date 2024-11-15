@@ -23,11 +23,6 @@ wait(1)
 warn('[TEMPEST HUB] Last Checking')
 wait(1)
 
-local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local GuiService = game:GetService("GuiService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
 local TweenService = game:GetService("TweenService")
 local speed = 1000
 
@@ -95,143 +90,37 @@ local function GetCFrame(obj, height, angle)
     return cframe
 end
 
-function securityMode()
-    local players = game:GetService("Players")
-    local ignorePlaceIds = {12886143095, 18583778121}
-
-    local function isPlaceIdIgnored(placeId)
-        for _, id in ipairs(ignorePlaceIds) do
-            if id == placeId then
-                return true
-            end
-        end
-        return false
-    end
-
-    if #players:GetPlayers() >= 2 then
-        local player1 = players:GetPlayers()[1]
-        local targetPlaceId = 12886143095
-
-        if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
-            game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
-        end
-    end
-end
-
 function joinInfCastle()
     while getgenv().joinInfCastle == true do 
-        if getgenv().autoRRSMethod == true then
-            if getgenv().joinMethod == 'Method 1' then
-                repeat task.wait() until game:IsLoaded()
-                wait(1)
+        if getgenv().joinMethod == 'Method 1' then
+            repeat task.wait() until game:IsLoaded()
+            wait(1)
+            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
+            wait(1)
+            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
+            wait(1)
+            game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 5, "True")
+            wait()
+            break
+        elseif getgenv().joinMethod == "Method 2" then
+            repeat task.wait() until game:IsLoaded()
+            wait(1)
+            local asta = workspace.Lobby.Npcs.Asta
+            if asta then
+                local TeleportCFrame = GetCFrame(asta)
+                local tween = tweenModel(game.Players.LocalPlayer.Character, TeleportCFrame)
+                tween:Play()
+                tween.Completed:Wait()
                 game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-                wait(1)
+                wait(.2)
                 game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-                wait(1)
+                wait(.3)
                 game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 5, "True")
                 wait()
                 break
-            elseif getgenv().joinMethod == "Method 2" then
-                repeat task.wait() until game:IsLoaded()
-                wait(1)
-                local asta = workspace.Lobby.Npcs.Asta
-                if asta then
-                    local TeleportCFrame = GetCFrame(asta)
-                    local tween = tweenModel(game.Players.LocalPlayer.Character, TeleportCFrame)
-                    tween:Play()
-                    tween.Completed:Wait()
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-                    wait(.1)
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-                    wait(.1)
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 5, "True")
-                    wait()
-                    break
-                else
-                    wait()
-                end
-            end
-        else
-            if getgenv().joinMethod == 'Method 1' then
-                repeat task.wait() until game:IsLoaded()
-                wait(1)
-                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-                wait(1)
-                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-                wait(1)
-                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", selectedRoomInfCastle, "True")
+            else
                 wait()
-                break
-            elseif getgenv().joinMethod == "Method 2" then
-                repeat task.wait() until game:IsLoaded()
-                wait(1)
-                local asta = workspace.Lobby.Npcs.Asta
-                if asta then
-                    local TeleportCFrame = GetCFrame(asta)
-                    local tween = tweenModel(game.Players.LocalPlayer.Character, TeleportCFrame)
-                    tween:Play()
-                    tween.Completed:Wait()
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-                    wait(.1)
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-                    wait(.1)
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", selectedRoomInfCastle, "True")
-                    wait()
-                    break
-                else
-                    wait()
-                end
             end
-        end
-        wait()
-    end
-end
-
-function autoNext()
-    while getgenv().autoRetry == true do
-        local uiEndGame = player:FindFirstChild("PlayerGui"):FindFirstChild("EndGameUI")
-        
-        if uiEndGame then
-            wait(1)
-            local button
-            local playerGui = player:WaitForChild("PlayerGui")
-            local endGameUI = playerGui:WaitForChild("EndGameUI")
-            local bg = endGameUI:WaitForChild("BG")
-            local buttons = bg:WaitForChild("Buttons")
-            button = buttons:WaitForChild("Next")
-            GuiService.SelectedObject = button
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-            break
-        end
-        wait()
-    end
-end
-
-function autoRetry()
-    local player = Players.LocalPlayer
-    
-    while getgenv().autoRetry == true do
-        local uiEndGame = player:FindFirstChild("PlayerGui"):FindFirstChild("EndGameUI")
-        
-        if uiEndGame then
-            wait(1)
-            local button
-            local playerGui = player:WaitForChild("PlayerGui")
-            local endGameUI = playerGui:WaitForChild("EndGameUI")
-            local bg = endGameUI:WaitForChild("BG")
-            local buttons = bg:WaitForChild("Buttons")
-            button = buttons:WaitForChild("Retry")
-            
-            while getgenv().autoRetry == true do
-                GuiService.SelectedObject = button
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-
-                wait(0.3)
-            end
-
-            break
         end
         wait()
     end
@@ -366,36 +255,6 @@ function upgradeUnit()
     end
 end
 
-function autoJoinRaid()
-    while getgenv().autoJoinRaid == true do
-        local door = workspace.TeleporterFolder.Raids.Teleporter.Door
-        if door then
-            local doorCFrame = GetCFrame(door)
-            local tween = tweenModel(game.Players.LocalPlayer.Character, doorCFrame)
-            tween:Play()
-            tween.Completed:Wait()
-            wait(.5)
-            local args = {
-                [1] = selectedRaidMap,
-                [2] = selectedFaseRaid,
-                [3] = "Nightmare",
-                [4] = false
-            }
-
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Raids"):WaitForChild("Select"):InvokeServer(unpack(args))
-            wait(.5)
-            local args = {
-                [1] = "Skip"
-            }
-
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Teleporter"):WaitForChild("Interact"):FireServer(unpack(args))
-            wait(10)
-        else
-            wait()
-        end
-    end
-end
-
 function autoGamespeed()
     while getgenv().autoGamespeed == true do
         local Remotes = game:GetService("ReplicatedStorage").Remotes
@@ -445,107 +304,35 @@ function extremeFpsBoost()
 end
 
 function HPI()
-    local player = game.Players.LocalPlayer
-    if player and player.Character and player.Character:FindFirstChild("Head") then
-        local overhead = player.Character.Head:FindFirstChild("Overhead")
-        if overhead then
-            overhead:Destroy()
+    local overhead = game.Players.LocalPlayer.Character.Head.Overhead
+    overhead:Destroy()
+end
+
+function deleteMap()
+    local objetos = workspace.Map.Map:GetChildren()
+
+    for _, objeto in ipairs(objetos) do
+        if string.find(string.lower(objeto.Name), "model") or string.find(string.lower(objeto.Name), "building%d") then
+            objeto:Destroy()
+            wait()
         end
     end
 end
 
 function deleteNotErro()
     while getgenv().deleteNotErro == true do
-        local player = game:GetService("Players").LocalPlayer
-        if player and player:FindFirstChild("PlayerGui") then
-            local erroNot = player.PlayerGui:FindFirstChild("MessageUI")
-            if erroNot and erroNot:FindFirstChild("ErrorHolder") then
-                erroNot.ErrorHolder:Destroy()
-                break
-            end
-        end
-        wait(0.5)
-    end
-end
-
-function deleteMap()
-    local map = workspace:FindFirstChild("Map")
-    if map and map:FindFirstChild("Map") then
-        local objetos = map.Map:GetChildren()
-        for _, objeto in ipairs(objetos) do
-            if string.find(string.lower(objeto.Name), "model") or string.find(string.lower(objeto.Name), "building%d") then
-                objeto:Destroy()
-                wait()
-            end
-        end
-    end
-end
-
-function autoJoinChallenge()
-    while getgenv().autoJoinChallenge == true do
-        local Teleporter = workspace.TeleporterFolder.Challenge.Teleporter.ChallengeInfo
-        local challenge = workspace.TeleporterFolder.Challenge.Teleporter.Door
-
-        if challenge then
-            local ignoreChallenge = false
-            for _, ignore in ipairs(selectedIgnoreChallenge) do
-                if Teleporter.Challenge.Value == ignore then
-                    ignoreChallenge = true
-                    break
-                end
-            end
-
-            if not ignoreChallenge and Teleporter.MapName.Value == selectedChallengeMap and Teleporter.MapNum.Value == selectActChallenge then
-                local challengeCFrame = GetCFrame(challenge)
-                local tween = tweenModel(game.Players.LocalPlayer.Character, challengeCFrame)
-                tween:Play()
-                tween.Completed:Wait()
-                break
-            end
+        local erroNot = game:GetService("Players").LocalPlayer.PlayerGui.MessageUI.ErrorHolder
+        if erroNot then
+            erroNot:Destroy()
+            break
+        else
+            wait(.5)
         end
         wait()
     end
 end
 
-function autoJoinStory()
-    while getgenv().autoJoinStory == true do
-        local Teleporter = workspace.TeleporterFolder.Story.Teleporter.StoryInfo
-        local story = workspace.TeleporterFolder.Story.Teleporter.Door
-
-        if story then
-            local args = {
-                [1] = selectedStoryMap,
-                [2] = selectedActStory,
-                [3] = selectedDifficultyStory,
-                [4] = false
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Story"):WaitForChild("Select"):InvokeServer(unpack(args))
-            
-        else
-            wait()
-        end
-    end
-end
-
-function autoJoinPortal()
-    while getgenv().autoJoinPortal == true do
-        Library:Notify("W.I.P", 5)
-        break
-    end
-end
-
-function autoGetBattlepass()
-    while getgenv().autoGetBattlepass == true do
-        wait(1)
-        local args = {
-            [1] = "All"
-        }
-        
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimBattlePass"):FireServer(unpack(args))
-        wait(1)
-    end
-end        
+local HttpService = game:GetService("HttpService")
 
 function webhook()
     while getgenv().webhook == true do
@@ -633,32 +420,19 @@ function webhook()
 
             local timeOnly = string.sub(elapsedTimeText, 13)
             local waveOnly = string.sub(Wave, 15)
-
-            local teleportData = game:GetService("ReplicatedStorage").Remotes.GetTeleportData:InvokeServer()
-
-            if teleportData.MapName then
-                teleportData.MapName = mapName
-            end
-
-            if teleportData.Difficulty then
-                teleportData.Difficulty = mapDifficulty
-            end
-
-            if teleportData.Type then
-                teleportData.Type = mapType
-            end
-
+            local mapName = workspace.Map.MapName.Value
+            local mapDifficulty = workspace.Map.MapDifficulty.Value
 
             local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
             local resultOnly = string.sub(result, 7)
 
-            if resultOnly == "cleared!" then
+            if resultOnly == "Cleared!" then
                 resultOnly = "Victory"
             else
                 resultOnly = "Defeat"
             end
 
-            local formattedResult = string.format("%s - Wave %s\n %s - %s[%s] = %s", timeOnly, waveOnly, mapType, mapName, mapDifficulty, resultOnly)
+            local formattedResult = string.format("%s - Wave %s\n %s[%s] - %s", timeOnly, waveOnly, mapName, mapDifficulty, resultOnly)
 
             local formattedAmount = ""
             local item = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Rewards.Holder
@@ -675,36 +449,23 @@ function webhook()
                 end
             end
 
-            local unitsID = game:GetService("Players").LocalPlayer.PlayerGui.Inventory.BG.Scroll
-
-            for i, v in pairs(unitsID:GetChildren()) do
-                if not blacklist[v.ClassName] then
-                    local unit = v:GetAttribute("Unit")
-                    local level = v:GetAttribute("Level")
-
-                    if unitID then
-                        local formattedUnits = string.format("[%s] - %s", level, unit)
-                    end
-                end
-            end
-
             local payload = {
                 content = pingContent,
                 embeds = {
                     {
-                        description = string.format("User: %s\nLevel: %s\n\nPlayer Stats:\n%s\n\n++++++++++++++\n\nRewards:\n%s\n++++++++++++++\nUnits:\n %s\nMatch Result:\n %s", formattedName, formattedLevel, playerStats, formattedAmount, formattedUnits, formattedResult),
+                        description = string.format("User: %s\nLevel: %s\n\nPlayer Stats:\n%s\n\n++++++++++++++\n\nRewards:\n%s\n++++++++++++++\nMatch Result: %s", formattedName, formattedLevel, playerStats, formattedAmount, formattedResult),
                         color = 7995647,
                         fields = {
                             {
                                 name = "Discord",
-                                value = "https://discord.gg/ey83AwMvAn"
+                                value = "https://discord.gg/tvQqnYKF7j"
                             }
                         },
                         author = {
                             name = "Anime Last Stand"
                         },
                         image = {
-                            url = "https://chat.google.com/u/4/api/get_attachment_url?url_type=FIFE_URL&content_type=image%2Fwebp&attachment_token=AOo0EEV8DVZ%2FbiHfWTX8ivM5jrUXQG0FVL3BEElW%2F%2BCwyFI%2BISbjPni7bSCtp8q%2FGoH4y87sv474SE4VqXomfqOED4j57GOdCvDvEJr4N7aOXXg9kRsKApiVI%2BaS3pd7ay%2BjTHhAKSPXFJWAeAw5Txd4Kb2rk1WGdcTekGbxPo5KIf1swO04EK5jsaw0WY8p15Vara6DFDUgPxokws8HgxkKkRzWB6Z6pKc%2FlrQwU8Jqw7qodrjI20hg3mxPRJtOuEsjCuCUlJCV%2F4UwyTVRiTJKJe7d2hEX%2FF72HSmUAkFZ5mJ7c6hzVj2EF7L7%2B6%2BVt%2BsYxEl6KWMZUgLVb3shm849QBxPmBiSdcuyMbW%2BqezGqaUZpUM9fu7eOdxGN%2FDM5y50Hf6dypW6tGo%2FC80cK%2F%2FklVbnCmyeB09%2BV8SpLNxrNgxIWgkofoTWMaIZ%2B%2BZGJL2DiN80YCcouq%2Fu%2F7O42jkrW%2BevcSwRYWYd78i6bwkux1%2Fvcx4GR%2B4lTD4Mn%2FlGATOAN%2FAlfYBZPDcAs8Uwy5JYyOWjkEivFuQyB1KuFB4aZ2U6mVjhuH%2Bh0%2B5tfv7HHrOuqRTU4CIOyBhZ3RXlbyx1IrMCEqt%2BhOitRAseL81tcWaJOjPmv3TXY%2BGvaQu2z%2BjLjApgRqCRKqJYz7z6MmNoDHs0ryd2rujviS2IWYLukMUzhF4Wplt5ZngifHU1q0bk3axI5UYfUU4yI8EQRCpFjOJ6MDrAPnfg0oLyAn16lgwYjGuYo7vNC%2BZzL%2BB%2BbcDABr5Jjx2xcaWNHw8ZGDqML3Qm5e1Dhb3nr5k7RHZwZCidcQ%3D%3D&sz=w512&authuser=4"
+                            url = "https://lh3.googleusercontent.com/chat_attachment/AP1Ws4sqkwvdiS1ntDZiWU29LbV0qpaERLtC3XIiJBrI5GMlm_UYjw_hul5vMUZnLyYQ75QoDdQKGPrJwsDKQqnoE1sD7xPhjIi0hyOHdLb6ItVq39L8Y8-IiEgvjBHVCT20pkY07yUoZxYsK2ZyPsU3aNU6824eZr_JvYwKED0fTUEFRzbsaY-0geqtAF21uDMZumkdYlWFYAI4NP_kmMQraOE932ry74SFzHknLLxTqnSoEo8eq6vkoek5dgNXOThoLAl6fpQiCJfJ9SdgZ0U7Blh-PlFEJXt8MthN06Uzvf2akgNT365deXl-HNBRMw8htGE=w512"
                         },
                         thumbnail = {
                             url = "https://tr.rbxcdn.com/180DAY-0c006580562aa816037e176633b7235c/256/256/Image/Webp/noFilter"
@@ -759,116 +520,74 @@ function webhook()
     end
 end
 
-local module2 = require(game:GetService("ReplicatedStorage").Modules.ChallengeInfo)
-
-local function challengeNamesByType(tbl, typeName)
-    local valuesChallenge = {}
-    
-    if type(tbl) == "table" then
-        for key, value in pairs(tbl) do
-            if type(value) == "table" then
-                table.insert(valuesChallenge, key)
-            end
-        end
-    end
-    
-    return valuesChallenge
-end
-
-local ValuesChallengeInfo = challengeNamesByType(module2, "challenge")
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local portals = ReplicatedStorage:WaitForChild("Portals")
-local ValuesPortalMap = {}
-local ValuesPortalTier = {}
-
-if portals and portals:IsA("Folder") then
-    for _, item in pairs(portals:GetChildren()) do
-        if item.Name ~= "PackageLink" and not item.Name:match("^Tier %d$") then
-            table.insert(ValuesPortalMap, item.Name)
-        end
-    end
-
-    for _, item2 in pairs(portals:GetChildren()) do
-        if item2.Name:match("^Tier %d$") then
-            table.insert(ValuesPortalTier, item2.Name)
-        end
-    end
-end
-
-local raidMaps = game:GetService("Players").LocalPlayer.PlayerGui.Raids.BG.Content.Left.Maps
-local blacklist = {UIGridLayout = true, UIListLayout = true, UIPadding = true, Padding = true}
-local ValuesRaidMap = {}
-
-if raidMaps then
-    for i, v in pairs(raidMaps:GetChildren()) do
-        if not blacklist[v.ClassName] and not blacklist[v.Name] and not v:FindFirstChildOfClass("UIPadding") then
-            table.insert(ValuesRaidMap, v.Name)
-        end
-    end
-end
-
-local storyMaps = game:GetService("Players").LocalPlayer.PlayerGui.Story.BG.Content.Left.Maps
-local ValuesStoryMap = {}
-
-if storyMaps then
-    for i, v in pairs(storyMaps:GetChildren()) do
-        if not blacklist[v.ClassName] and not blacklist[v.Name] and not v:FindFirstChildOfClass("UIPadding") then
-            table.insert(ValuesStoryMap, v.Name)
-        end
-    end
-end
-
 Library:Notify('Place the unit you will use in the first slot', 5)
 
 local Tabs = {
     Main = Window:AddTab('Main'),
 }
 
+local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Farm")
 
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Player")
+LeftGroupBox:AddDropdown('MyDropdown', {
+    Values = {'None', 'Method 1', 'Method 2',},
+    Default = "None",
+    Multi = false,
 
-LeftGroupBox:AddToggle("HPI", {
-	Text = "Hide Player Info",
+    Text = 'Method To Join in Inf Castle',
+
+    Callback = function(Value)
+        getgenv().joinMethod = Value
+    end
+})
+
+LeftGroupBox:AddToggle("AIC", {
+	Text = "Auto Inf Castle",
 	Default = false,
 	Callback = function(Value)
-		HPI()
+		getgenv().joinInfCastle = Value
+		joinInfCastle()
 	end,
 })
 
-LeftGroupBox:AddToggle("SM", {
-	Text = "Security Mode",
+LeftGroupBox:AddToggle("AL", {
+	Text = "Auto Leave",
 	Default = false,
 	Callback = function(Value)
-		getgenv().securityMode = Value
-        securityMode()
+		getgenv().autoLeave = Value
+		autoLeave()
 	end,
 })
 
-LeftGroupBox:AddToggle("DEN", {
-	Text = "Delete Error Notifications", 
+LeftGroupBox:AddDropdown('MyDropdown', {
+    Values = {'1', '2', '3', '4', '5', '6'},
+    Default = "None",
+    Multi = false,
+
+    Text = 'Select Max Slot To Put',
+
+    Callback = function(Value)
+        selectedMaxSlot = tonumber(Value)
+    end
+})
+
+LeftGroupBox:AddToggle("APU", {
+	Text = "Auto Place Unit",
 	Default = false,
 	Callback = function(Value)
-        getgenv().deleteNotErro = Value
-		deleteNotErro()
+		getgenv().placeUnits = Value
+		placeUnits()
 	end,
 })
 
-LeftGroupBox:AddToggle("FPSBoost", {
-	Text = "FPS Boost",
+LeftGroupBox:AddToggle("AUU", {
+	Text = "Auto Upgrade Unit",
 	Default = false,
 	Callback = function(Value)
-		extremeFpsBoost()
+		getgenv().upgradeUnit = Value
+		upgradeUnit()
 	end,
 })
 
-LeftGroupBox:AddToggle("DeleteMap", {
-	Text = "Delete Map",
-	Default = false,
-	Callback = function(Value)
-		deleteMap()
-	end,
-})
 
 LeftGroupBox:AddToggle("AIG", {
 	Text = "Auto Increase Gamespeed",
@@ -878,110 +597,6 @@ LeftGroupBox:AddToggle("AIG", {
 		autoGamespeed()
 	end,
 })
-
-local RightGroupbox = Tabs.Main:AddRightGroupbox("Others")
-
-RightGroupbox:AddToggle("AL", {
-	Text = "Auto Leave",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoLeave = Value
-		autoLeave()
-	end,
-})
-
-
-RightGroupbox:AddToggle("AR", {
-	Text = "Auto Retry",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoRetry = Value
-		autoRetry()
-	end,
-})
-
-RightGroupbox:AddToggle("AN", {
-	Text = "Auto Next",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoNext = Value
-		autoNext()
-	end,
-})
-
-RightGroupbox:AddToggle("AGB", {
-	Text = "Auto Get Battlepass",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoGetBattlepass = Value
-		autoGetBattlepass()
-	end,
-})
-
-local MyButton2 = RightGroupbox:AddButton({
-    Text = 'Reedem Codes',
-    Func = function()
-        local codes = {
-            "Thegrammyisbacky",
-            "ThrillerBark",
-            "100RRLIMITEDTIMECODE",
-            "Raffle",
-            "Nomoredelay",
-            "ThrillerNext",
-            "BugsFixed",
-            "BossStudio4Life",
-            "500MVISITS!",
-            "Spooky",
-            "Dracula",
-            "CLANWARS",
-            "TheFixesAreHere",
-            "Lagfixes",
-            "SorryForBugs",
-            "theGramALS",
-            "Bleach2",
-            "MakeYourClan",
-            "PodcastyCodeBois",
-            "NewGODLY",
-            "2xPOINTS",
-            "SorryForBugs2",
-            "300KLIKES!",
-            "JointheGram",
-            "10KAGAIN??",
-            "ZankaNoTachi",
-            "TheOne",
-            "ShinigamiVsQuincy",
-            "QOLpart2Next",
-            "TYBW",
-            "NewBUNDLES",
-            "BOBAKISBACK",
-            "Goodluck",
-            "Welcome",
-            "FollowDalG",
-            "10KFR!",
-            "OverHeaven",
-            "JOJOUpdate",
-            "HeavenUpdateHYPE",
-            "SLIME",
-            "SecretCodeFR",
-            "Event",
-            "TensuraSlime",
-            "UPDTIME",
-            "BPReset"
-        }        
-        
-        for _, code in ipairs(codes) do
-            local args = {
-                [1] = codes
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimCode"):InvokeServer(unpack(args))            
-            wait()
-        end               
-    end,
-    DoubleClick = false,
-})
-
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Webhook")
 
 LeftGroupBox:AddInput('WebhookURL', {
     Default = '',
@@ -1022,265 +637,44 @@ LeftGroupBox:AddToggle("pingUser", {
     end,
 })
 
-local Tabs = {
-    Farm = Window:AddTab('Farm'),
-}
+local RightGroupbox = Tabs.Main:AddRightGroupbox("Player")
 
-local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Portal")
-
-LeftGroupBox:AddDropdown('dropdownStoryMap', {
-    Values = ValuesPortalMap,
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Portal',
-
-    Callback = function(Value)
-        selectedPortalMap = Value
-    end
-})
-
-LeftGroupBox:AddDropdown('dropdownSelectDifficultyStory', {
-    Values = ValuesPortalTier,
-    Default = "None",
-    Multi = true,
-
-    Text = 'Select Tier',
-
-    Callback = function(Values)
-        selectedTierPortal = Values
-    end
-})
-
-LeftGroupBox:AddDropdown('dropdownSelectMapPortal', {
-    Values = {"W.I.P"},
-    Default = "None",
-    Multi = false,
-
-    Text = 'Ignore map',
-
-    Callback = function(Value)
-        selectedIgnoreMapPortal = Value
-    end
-})
-
-LeftGroupBox:AddToggle("AJS", {
-	Text = "Auto Join Story",
+RightGroupbox:AddToggle("HPI", {
+	Text = "Hide Player Info",
 	Default = false,
 	Callback = function(Value)
-		getgenv().autoJoinPortal = Value
-		autoJoinPortal()
+		HPI()
 	end,
 })
 
-local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Story")
-
-LeftGroupBox:AddDropdown('dropdownStoryMap', {
-    Values = ValuesStoryMap,
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Story Map',
-
-    Callback = function(Value)
-        selectedStoryMap = Value
-    end
-})
-
-LeftGroupBox:AddDropdown('dropdownSelectDifficultyStory', {
-    Values = {'Normal', "Nightmare", "Purgatory"},
-    Default = "None",
-    Multi = true,
-
-    Text = 'Select a Difficulty',
-
-    Callback = function(Values)
-        selectedDifficultyStory = Values
-    end
-})
-
-LeftGroupBox:AddDropdown('dropdownSelectActStory', {
-    Values = {'1', '2', '3', '4', '5', '6'},
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Act',
-
-    Callback = function(Value)
-        selectedActStory = Value
-    end
-})
-
-LeftGroupBox:AddToggle("AJS", {
-	Text = "Auto Join Story",
+RightGroupbox:AddToggle("DEN", {
+	Text = "Delete Error Notifications", 
 	Default = false,
 	Callback = function(Value)
-		getgenv().autoJoinStory = Value
-		autoJoinStory()
+        getgenv().deleteNotErro = Value
+		deleteNotErro()
 	end,
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Raid")
-
-RightGroupbox:AddDropdown('dropdownRaidMap', {
-    Values = ValuesRaidMap,
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Raid Map',
-
-    Callback = function(Value)
-        selectedRaidMap = Value
-    end
-})
-
-RightGroupbox:AddDropdown('dropdownSelectFaseRaid', {
-    Values = {'1', '2', '3', '4', '5', '6'},
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Act Raid',
-
-    Callback = function(Value)
-        selectedFaseRaid = Value
-    end
-})
-
-RightGroupbox:AddToggle("AJR", {
-	Text = "Auto Join Raid",
+RightGroupbox:AddToggle("FPSBoost", {
+	Text = "FPS Boost",
 	Default = false,
 	Callback = function(Value)
-		getgenv().autoJoinRaid = Value
-		autoJoinRaid()
+		extremeFpsBoost()
 	end,
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Challenges")
-
-RightGroupbox:AddDropdown('dropdownChallengeMap', {
-    Values = ValuesStoryMap,
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Challenge Map',
-
-    Callback = function(Value)
-        selectedChallengeMap = Value
-    end
-})
-
-RightGroupbox:AddDropdown('dropdownSelectChallengeInfo', {
-    Values = ValuesChallengeInfo,
-    Default = {},
-    Multi = true,
-
-    Text = 'Ignore Difficulty',
-
-    Callback = function(Values)
-        selectedIgnoreChallenge = Values
-    end
-})
-
-RightGroupbox:AddDropdown('dropdownSelectActChallenge', {
-    Values = {'1', '2', '3', '4', '5', '6'},
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Act',
-
-    Callback = function(Value)
-        selectActChallenge = Value
-    end
-})
-
-RightGroupbox:AddToggle("AJC", {
-	Text = "Auto Join Challenge",
+RightGroupbox:AddToggle("DeleteMap", {
+	Text = "Delete Map",
 	Default = false,
 	Callback = function(Value)
-		getgenv().autoJoinChallenge = Value
-		autoJoinChallenge()
+		deleteMap()
 	end,
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Inf Castle")
+local RightGroupbox = Tabs.Main:AddRightGroupbox("Max Upgrade")
 
-RightGroupbox:AddDropdown('dropdownMethod', {
-    Values = {'Method 1', 'Method 2',},
-    Default = "None",
-    Multi = false,
-
-    Text = 'Method To Join in Inf Castle',
-
-    Callback = function(Value)
-        getgenv().joinMethod = Value
-    end
-})
-
-RightGroupbox:AddInput('CICR', {
-    Default = '',
-    Text = "Choose Inf Castle Room",
-    Numeric = false,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        selectedRoomInfCastle = Value
-    end
-})
-
-RightGroupbox:AddToggle("AIC", {
-	Text = "Auto Join Inf Castle",
-	Default = false,
-	Callback = function(Value)
-		getgenv().joinInfCastle = Value
-		joinInfCastle()
-	end,
-})
-
-RightGroupbox:AddToggle("ARRSM", {
-	Text = "Auto RRS Method",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoRRSMethod = Value
-	end,
-})
-
-local Tabs = {
-    Units = Window:AddTab('Units'),
-}
-
-local LeftGroupBox = Tabs.Units:AddLeftGroupbox("Place & Upgrade")
-
-LeftGroupBox:AddDropdown('dropdownSlot', {
-    Values = {'1', '2', '3', '4', '5', '6'},
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Max Slot To Put',
-
-    Callback = function(Value)
-        selectedMaxSlot = tonumber(Value)
-    end
-})
-
-LeftGroupBox:AddToggle("APU", {
-	Text = "Auto Place Unit",
-	Default = false,
-	Callback = function(Value)
-		getgenv().placeUnits = Value
-		placeUnits()
-	end,
-})
-
-LeftGroupBox:AddToggle("AUU", {
-	Text = "Auto Upgrade Unit",
-	Default = false,
-	Callback = function(Value)
-		getgenv().upgradeUnit = Value
-		upgradeUnit()
-	end,
-})
-
-LeftGroupBox:AddSlider('Slot1', {
+RightGroupbox:AddSlider('Slot1', {
     Text = 'Slot 1',
     Default = 1,
     Min = 1,
@@ -1293,7 +687,7 @@ LeftGroupBox:AddSlider('Slot1', {
     end
 })
 
-LeftGroupBox:AddSlider('Slot2', {
+RightGroupbox:AddSlider('Slot2', {
     Text = 'Slot 2',
     Default = 1,
     Min = 1,
@@ -1306,7 +700,7 @@ LeftGroupBox:AddSlider('Slot2', {
     end
 })
 
-LeftGroupBox:AddSlider('Slot3', {
+RightGroupbox:AddSlider('Slot3', {
     Text = 'Slot 3',
     Default = 1,
     Min = 1,
@@ -1319,7 +713,7 @@ LeftGroupBox:AddSlider('Slot3', {
     end
 })
 
-LeftGroupBox:AddSlider('Slot4', {
+RightGroupbox:AddSlider('Slot4', {
     Text = 'Slot 4',
     Default = 1,
     Min = 1,
@@ -1332,7 +726,7 @@ LeftGroupBox:AddSlider('Slot4', {
     end
 })
 
-LeftGroupBox:AddSlider('Slot5', {
+RightGroupbox:AddSlider('Slot5', {
     Text = 'Slot 5',
     Default = 1,
     Min = 1,
@@ -1345,7 +739,7 @@ LeftGroupBox:AddSlider('Slot5', {
     end
 })
 
-LeftGroupBox:AddSlider('Slot6', {
+RightGroupbox:AddSlider('Slot6', {
     Text = 'Slot 6',
     Default = 1,
     Min = 1,
@@ -1358,19 +752,13 @@ LeftGroupBox:AddSlider('Slot6', {
     end
 })
 
-LeftGroupBox:AddToggle("MaxUpgrade", {
+RightGroupbox:AddToggle("MaxUpgrade", {
 	Text = "Max Upgrade",
 	Default = false,
 	Callback = function(Value)
 		getgenv().maxupgradeUnit = Value
 	end,
 })
-
-local RightGroupbox = Tabs.Units:AddRightGroupbox("Skills")
-
-local Tabs = {
-    Shop = Window:AddTab('Shop'),
-}
 
 Library:SetWatermarkVisibility(true)
 
@@ -1420,7 +808,7 @@ end
 
 local MenuGroup = TabsUI['UI Settings']:AddLeftGroupbox('Menu')
 
-MenuGroup:AddButton('Unload', function() Library:Unload() end)
+MenuGroup:AddButton('Unload', Unload)
 MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true, Text = 'Menu keybind' })
 
 Library.ToggleKeybind = Options.MenuKeybind
