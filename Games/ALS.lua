@@ -1177,15 +1177,6 @@ local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Portal")
 
 LeftGroupBox:AddLabel('W.I.P')
 
-LeftGroupBox:AddToggle("AJP", {
-	Text = "Auto Join Portal",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoJoinPortal = Value
-		autoJoinPortal()
-	end,
-})
-
 local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Story")
 
 LeftGroupBox:AddDropdown('dropdownStoryMap', {
