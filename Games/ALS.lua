@@ -792,7 +792,7 @@ function webhook()
                             name = "Anime Last Stand"
                         },
                         image = {
-                            url = "https://chat.google.com/u/4/api/get_attachment_url?url_type=FIFE_URL&content_type=image%2Fwebp&attachment_token=AOo0EEV8DVZ%2FbiHfWTX8ivM5jrUXQG0FVL3BEElW%2F%2BCwyFI%2BISbjPni7bSCtp8q%2FGoH4y87sv474SE4VqXomfqOED4j57GOdCvDvEJr4N7aOXXg9kRsKApiVI%2BaS3pd7ay%2BjTHhAKSPXFJWAeAw5Txd4Kb2rk1WGdcTekGbxPo5KIf1swO04EK5jsaw0WY8p15Vara6DFDUgPxokws8HgxkKkRzWB6Z6pKc%2FlrQwU8Jqw7qodrjI20hg3mxPRJtOuEsjCuCUlJCV%2F4UwyTVRiTJKJe7d2hEX%2FF72HSmUAkFZ5mJ7c6hzVj2EF7L7%2B6%2BVt%2BsYxEl6KWMZUgLVb3shm849QBxPmBiSdcuyMbW%2BqezGqaUZpUM9fu7eOdxGN%2FDM5y50Hf6dypW6tGo%2FC80cK%2F%2FklVbnCmyeB09%2BV8SpLNxrNgxIWgkofoTWMaIZ%2B%2BZGJL2DiN80YCcouq%2Fu%2F7O42jkrW%2BevcSwRYWYd78i6bwkux1%2Fvcx4GR%2B4lTD4Mn%2FlGATOAN%2FAlfYBZPDcAs8Uwy5JYyOWjkEivFuQyB1KuFB4aZ2U6mVjhuH%2Bh0%2B5tfv7HHrOuqRTU4CIOyBhZ3RXlbyx1IrMCEqt%2BhOitRAseL81tcWaJOjPmv3TXY%2BGvaQu2z%2BjLjApgRqCRKqJYz7z6MmNoDHs0ryd2rujviS2IWYLukMUzhF4Wplt5ZngifHU1q0bk3axI5UYfUU4yI8EQRCpFjOJ6MDrAPnfg0oLyAn16lgwYjGuYo7vNC%2BZzL%2BB%2BbcDABr5Jjx2xcaWNHw8ZGDqML3Qm5e1Dhb3nr5k7RHZwZCidcQ%3D%3D&sz=w512&authuser=4"
+                            url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png?ex=6739154c&is=6737c3cc&hm=7fba054f0cf178525c659c9b8ea22381f9dd38a84664e61a8e80cc1a2cd53d90&"
                         },
                         thumbnail = {
                             url = "https://tr.rbxcdn.com/180DAY-0c006580562aa816037e176633b7235c/256/256/Image/Webp/noFilter"
@@ -1135,7 +1135,7 @@ local TabBox = Tabs.Main:AddRightTabbox()
 
 local Tab1 = TabBox:AddTab('Passive')
 
-LeftGroupBox:AddLabel('W.I.P')
+Tab1:AddLabel('W.I.P')
 
 local Tab2 = TabBox:AddTab('Feed')
 
