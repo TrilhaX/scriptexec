@@ -1,6 +1,6 @@
 local Games = {
         ["ALS"] = {12886143095, 18583778121, 12900046592},
-        ["AnimeReborn"] = {17046374415}
+        ["AnimeReborn"] = {17046374415, 17895401292}
 }
 
 local function LoadGame(GameId)
