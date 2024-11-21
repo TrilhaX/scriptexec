@@ -15,7 +15,7 @@ local Window = Library:CreateWindow({
     MenuFadeTime = 0.2
 })
 
-Library:Notify('Loading Anime Last Stand Script', 5)
+Library:Notify('Loading Anime Reborn Script', 5)
 warn('[TEMPEST HUB] Loading Function')
 wait(1)
 warn('[TEMPEST HUB] Loading Toggles')
@@ -474,13 +474,13 @@ function placeUnits()
                     "Slot6",
                 }
     
-                local path6 = workspace:FindFirstChild("Path") and workspace.Path:FindFirstChild("6")
+                local path = workspace:FindFirstChild("Path") and workspace.Path:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
     
-                if not path6 or not path6:FindFirstChild("CornerStart") then
+                if not path or not path:FindFirstChild("CornerStart") then
                     warn("Path or CornerStart not found!")
                 end
     
-                local cornerStart = path6.CornerStart
+                local cornerStart = path.CornerStart
                 local basePosition = cornerStart.Position
                 local radius = 5
                 local numSlots = #slots
@@ -516,13 +516,13 @@ function placeUnits()
                 "Slot6",
             }
 
-            local path6 = workspace:FindFirstChild("Path") and workspace.Path:FindFirstChild("6")
+            local path = workspace:FindFirstChild("Path") and workspace.Path:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
 
-            if not path6 or not path6:FindFirstChild("CornerStart") then
+            if not path or not path:FindFirstChild("CornerStart") then
                 warn("Path or CornerStart not found!")
             end
 
-            local cornerStart = path6.CornerStart
+            local cornerStart = path.CornerStart
             local basePosition = cornerStart.Position
             local radius = 5
             local numSlots = #slots
@@ -1232,6 +1232,17 @@ else
     warn("CardModifiers não encontrado!")
 end
 
+local paths = workspace:FindFirstChild("Path")
+local ValuesWaypoints = {}
+
+if paths then
+    for i,v in pairs(paths:GetChildren())do
+        table.insert(ValuesWaypoints, v.Name)
+    end
+else
+    wait()
+end
+
 local Tabs = {
     Main = Window:AddTab('Main'),
 }
@@ -1647,6 +1658,16 @@ local Tabs = {
 }
 
 local LeftGroupBox = Tabs.Units:AddLeftGroupbox("Units")
+
+LeftGroupBox:AddDropdown('dropdownAutoPlaceWaypoint', {
+    Values = ValuesWaypoints,
+    Default = "None",
+    Multi = false,
+    Text = 'Select Waypoint to place units',
+    Callback = function(Value)
+        selectedWaypointToPlaceUnits = Value
+    end
+})
 
 LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
     Default = '',
