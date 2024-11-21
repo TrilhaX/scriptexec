@@ -29,7 +29,7 @@ local isRecording = false
 local recordingData = {}
 local Options = {}
 
-local macrosFolder = 'TempestHub/_Anime_Reborn_/Macros'
+local macrosFolder = 'Tempest Hub/_Anime_Reborn_/Macros'
 if not isfolder(macrosFolder) then
     makefolder(macrosFolder)
 end
