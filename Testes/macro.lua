@@ -1,7 +1,7 @@
 warn('[TEMPEST HUB] Loading Ui')
 wait(1)
 
-local repo = 'https://raw.githubusercontent.com/TrapstarKSSKSKSKKS/LinoriaLib/main/'
+local repo = 'https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
 local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
@@ -22,8 +22,11 @@ wait(3)
 local macros = {}
 local selectedMacro = nil
 local isRecording = false
+local isPlaying = false
 local recordingData = {}
 local Options = {}
+local selectedTypeOfRecord = "None"
+local startTime = tick()
 
 local macrosFolder = 'Tempest Hub/_Anime_Reborn_/Macros'
 if not isfolder(macrosFolder) then
@@ -63,35 +66,56 @@ function createJsonFile(fileName)
 end
 
 function toggleRecording()
-    if not selectedMacro or selectedMacro == "None" then
+    if (not selectedMacro or selectedMacro == "None") then
         Library:Notify("Please select a macro before recording", 3)
+        Toggles.RecordMacro:SetValue(false)
+        return
+    end
+
+    if (not selectedTypeOfRecord or selectedTypeOfRecord == "None") then
+        Library:Notify("Please select a type of record before recording", 3)
+        Toggles.RecordMacro:SetValue(false)
         return
     end
 
     isRecording = not isRecording
+    updateRecordingStatus()
 
     if isRecording then
-        recordingData = { steps = {} }
-        Library:Notify('Recording started for: ' .. selectedMacro, 3)
+        recordingData = { steps = {}, currentStepIndex = 0 }
     else
+        table.sort(recordingData.steps, function(a, b)
+            return a.index < b.index
+        end)
+
         local filePath = macrosFolder .. '/' .. selectedMacro .. '.json'
         writefile(filePath, game:GetService("HttpService"):JSONEncode(recordingData))
-        Library:Notify('Recording saved for: ' .. selectedMacro, 3)
     end
 end
 
 function collectRemoteInfo(remoteName, args)
-    local remoteData = { action = args[1], arguments = { [1] = args[1], [2] = {} } }
+    local remoteData = { 
+        action = args[1], 
+        arguments = { [1] = args[1], [2] = {} }, 
+        index = recordingData.currentStepIndex + 1
+    }
 
-    if args[2] and typeof(args[2]) == "table" then
-        remoteData.arguments[2] = {
-            position = tostring(args[2].position), -- Armazena como string
-            rot = math.deg(args[2].rot), -- Converte para graus antes de armazenar
-            slot = args[2].slot or "DefaultSlot"
-        }
-    else
-        warn("Invalid or missing args[2] for PlaceUnit")
-        return
+    recordingData.currentStepIndex = remoteData.index
+
+    if selectedTypeOfRecord == "Time" then
+        remoteData.time = tick() - startTime
+    end
+
+    if args[2] then
+        for key, value in pairs(args[2]) do
+            if typeof(value) == "CFrame" then
+                remoteData.arguments[2][key] = tostring(value)
+            elseif typeof(value) == "Instance" then
+                remoteData.arguments[2][key] = value.Name or tostring(value)
+            else
+                remoteData.arguments[2][key] = tostring(value)
+            end
+        end
     end
 
     table.insert(recordingData.steps, remoteData)
@@ -110,7 +134,7 @@ function handleUnitRemote(args)
         collectRemoteInfo("UpgradeUnit", args)
     elseif action == "Sell" then
         collectRemoteInfo("SellUnit", args)
-    elseif action == "Skill" then
+    elseif action == "Skill" and getgenv().recordSkill == true then
         collectRemoteInfo("SkillUse", args)
     else
         warn("Unknown action:", action)
@@ -118,7 +142,9 @@ function handleUnitRemote(args)
 end
 
 function playMacro(macroName)
-    if not macroName or macroName == "None" then
+    isPlaying = true
+    updateRecordingStatus()
+    if not selectedMacro or selectedMacro == "None" then
         Library:Notify("Please select a macro to play", 3)
         return
     end
@@ -135,32 +161,46 @@ function playMacro(macroName)
         return
     end
 
-    Library:Notify("Playing macro: " .. macroName, 3)
-
-    for _, step in ipairs(macroData.steps) do
+    for i, step in ipairs(macroData.steps) do
         local action = step.action
         local remote = game.ReplicatedStorage.Events:FindFirstChild("Unit")
         if not remote then
             warn("Remote not found: Unit")
+            return
         end
 
         local args = step.arguments
+        local currentStep = "Step " .. i .. ": " .. action
 
-        -- Convertendo valores armazenados de volta para os formatos esperados
         for key, value in pairs(args[2]) do
-            if key == "position" then
-                args[2][key] = loadstring("return " .. value)()
-            elseif key == "rot" then
-                args[2][key] = math.rad(value) -- Convertendo graus de volta para radianos
+            if typeof(value) == "string" then
+                if value:find("CFrame") then
+                    args[2][key] = loadstring("return " .. value)()
+                elseif value:find("Instance") then
+                    args[2][key] = game.Workspace:FindFirstChild(value) or game.ReplicatedStorage:FindFirstChild(value)
+                end
             end
         end
 
-        -- Chama o RemoteEvent com os argumentos convertidos
         remote:FireServer(unpack(args))
-        wait(0.5) -- Delay entre cada execução
+        wait(0.5)
     end
 
     Library:Notify("Macro execution completed: " .. macroName, 3)
+end
+
+function updateRecordingStatus()
+    if isRecording then
+        RecordingStatusLabel:SetText("Recording Status: Recording...")
+    elseif isPlaying then
+        RecordingStatusLabel:SetText("Playing Status: " .. selectedMacro)
+    else
+        RecordingStatusLabel:SetText("Recording Status: Not Recording or Playing")
+    end
+end
+
+function updateSlotStatus(selectedSlot, selectedUnit)
+    updateStatus("Selected Slot: " .. selectedSlot .. " | Unit: " .. selectedUnit)
 end
 
 local originalFireServer
@@ -179,7 +219,18 @@ local Tabs = {
     Main = Window:AddTab('Main'),
 }
 
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Farm")
+local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Macro")
+
+Options.SelectedMacro = LeftGroupBox:AddDropdown('SelectedMacro', {
+    Values = macros,
+    Default = "None",
+    Text = 'Select Macro',
+    Callback = function(Value)
+        selectedMacro = Value
+        SelectedMacroLabel:SetText("Selected Macro: " .. (selectedMacro or "None"))
+    end
+})
+
 
 LeftGroupBox:AddInput('MacroName', {
     Default = '',
@@ -189,21 +240,39 @@ LeftGroupBox:AddInput('MacroName', {
     Callback = createJsonFile
 })
 
-Options.SelectedMacro = LeftGroupBox:AddDropdown('SelectedMacro', {
-    Values = macros,
-    Default = "None",
-    Text = 'Select Macro',
-    Callback = function(Value)
-        selectedMacro = Value
+local MyButton = LeftGroupBox:AddButton({
+    Text = 'Delete Macro',
+    Func = function()
+        if selectedMacro and selectedMacro ~= "None" then
+            local filePath = macrosFolder .. '/' .. selectedMacro .. '.json'
+            if isfile(filePath) then
+                delfile(filePath)
+                updateDropdown()
+                Library:Notify('Macro deleted: ' .. selectedMacro, 3)
+            else
+                Library:Notify("Macro not found: " .. selectedMacro, 3)
+            end
+        else
+            Library:Notify("Please select a macro before deleting", 3)
+        end
     end
 })
 
 LeftGroupBox:AddToggle("RecordMacro", {
     Text = 'Record Macro',
-    Callback = toggleRecording
+    Callback = function(Value)
+        if Value then
+            if not isRecording then
+                toggleRecording()
+            end
+        else
+            if isRecording then
+                toggleRecording()
+            end
+        end
+    end
 })
 
--- Adiciona a opção de executar o macro no UI
 LeftGroupBox:AddToggle("PlayMacro",{
     Text = "Play Macro",
     Func = function()
@@ -215,51 +284,112 @@ LeftGroupBox:AddToggle("PlayMacro",{
     end
 })
 
+Options.SelectedRecordingMethod = LeftGroupBox:AddDropdown('SelectedRecordingMethod', {
+    Values = {"Time", "Money", "Hybrid"},
+    Default = "None",
+    Text = 'Select Type of Record',
+    Callback = function(Value)
+        selectedTypeOfRecord = Value
+        RecordingMethodLabel:SetText("Recording Method: " .. selectedTypeOfRecord)
+        if selectedTypeOfRecord == "Time" then
+            startTime = tick()
+        end
+    end
+})
+
+LeftGroupBox:AddToggle("RecordSkillMacro", {
+    Text = 'Record Skill in Macro',
+    Callback = function(Value)
+        getgenv().recordSkill = Value
+    end
+})
+
+LeftGroupBox:AddDivider()
+
+RecordingStatusLabel = LeftGroupBox:AddLabel('Recording Status: Not Recording', true)
+SelectedMacroLabel = LeftGroupBox:AddLabel('Selected Macro: None', true)
+RecordingMethodLabel = LeftGroupBox:AddLabel('Recording Method: None', true)
+
 updateDropdown() 
 
 Library:SetWatermarkVisibility(true)
 
-local WatermarkConnection = game:GetService('RunService').RenderStepped:Connect(function()
-    Library:SetWatermark(('Tempest Hub | %s fps | %s ms | %s'):format(
-        math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()),
-        math.floor(tick() % 60),
-        os.date("%X")
-    ))
-end)
+local FrameTimer = tick()
+local FrameCounter = 0
+local FPS = 60
+local StartTime = tick()
 
-local function Unload()
-    WatermarkConnection:Disconnect()
-    Library:Notify("Tempest Hub Unloaded", 3)
+local WatermarkConnection
+
+local function FormatTime(seconds)
+    local hours = math.floor(seconds / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    local seconds = math.floor(seconds % 60)
+    return string.format("%02d:%02d:%02d", hours, minutes, seconds)
 end
+
+local function UpdateWatermark()
+    FrameCounter = FrameCounter + 1
+
+    if (tick() - FrameTimer) >= 1 then
+        FPS = FrameCounter
+        FrameTimer = tick()
+        FrameCounter = 0
+    end
+
+    local activeTime = tick() - StartTime
+
+    Library:SetWatermark(('Tempest Hub | %s fps | %s ms | %s'):format(
+        math.floor(FPS),
+        math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()),
+        FormatTime(activeTime)
+    ))
+end
+
+WatermarkConnection = game:GetService('RunService').RenderStepped:Connect(UpdateWatermark)
 
 local TabsUI = {
     ['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
+local function Unload()
+    WatermarkConnection:Disconnect()
+    print('Unloaded!')
+    Library.Unloaded = true
+end
+
 local MenuGroup = TabsUI['UI Settings']:AddLeftGroupbox('Menu')
-MenuGroup:AddButton('Unload', Unload)
-MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'End', Text = 'Menu Keybind' })
+
+MenuGroup:AddButton('Unload', function() Library:Unload() end)
+MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true, Text = 'Menu keybind' })
 
 Library.ToggleKeybind = Options.MenuKeybind
 
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
-SaveManager:SetFolder('Tempest Hub/_Anime_Reborn_')
+
+ThemeManager:SetFolder('Tempest Hub')
+SaveManager:SetFolder('Tempest Hub/_MACRO_')
+
+SaveManager:BuildConfigSection(TabsUI['UI Settings'])
+
 ThemeManager:ApplyToTab(TabsUI['UI Settings'])
 
 SaveManager:LoadAutoloadConfig()
 
+local GameConfigName = '_MACRO_'
 local player = game.Players.LocalPlayer
-SaveManager:Load(player.Name .. "_Anime_Reborn_")
+SaveManager:Load(player.Name .. GameConfigName)
 spawn(function()
     while task.wait(1) do
-        if Library.Unloaded then break end
-        SaveManager:Save(player.Name .. "_Anime_Reborn_")
+        if Library.Unloaded then
+            break
+        end
+        SaveManager:Save(player.Name .. GameConfigName)
     end
 end)
 
-for _, conn in ipairs(getconnections(game.Players.LocalPlayer.Idled)) do
-    conn:Disable()
+for i,v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
+    v:Disable()
 end
-
 warn('[TEMPEST HUB] Loaded')

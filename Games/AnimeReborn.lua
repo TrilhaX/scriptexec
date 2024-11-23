@@ -1,6 +1,6 @@
 warn('[TEMPEST HUB] Loading Ui')
 wait(1)
-local repo = 'https://raw.githubusercontent.com/TrapstarKSSKSKSKKS/LinoriaLib/main/'
+local repo = 'https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/'
 
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
