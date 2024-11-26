@@ -29,6 +29,35 @@ local speed = 1000
 local selectedPassivesToRoll = nil
 local selectedUnitRoll = nil
 
+function hideUIExec()
+    if getgenv().hideUIExec then
+        local windowFrame = game:GetService("CoreGui").LinoriaGui.windowFrame
+        windowFrame.Visible = false
+        wait()
+    end
+end
+
+function aeuat()
+    if getgenv().aeuat == true then
+        local teleportQueued = false
+        game.Players.LocalPlayer.OnTeleport:Connect(function(State)
+            if (State == Enum.TeleportState.Started or State == Enum.TeleportState.InProgress) and not teleportQueued then
+                teleportQueued = true
+                
+                queue_on_teleport([[ 
+                    if getgenv().executed then return end    
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
+                ]])
+                
+                getgenv().executed = true
+                wait(10)
+                teleportQueued = false
+            end
+        end)
+        wait()
+    end
+end
+
 local function tweenModel(model, targetCFrame)
     if not model.PrimaryPart then
         warn("PrimaryPart is not set for the model")
@@ -1878,6 +1907,24 @@ local function Unload()
 end
 
 local MenuGroup = TabsUI['UI Settings']:AddLeftGroupbox('Menu')
+
+MenuGroup:AddToggle('huwe', {
+    Text = 'Hide UI When Execute',
+    Default = false,
+    Callback = function(Value)
+        getgenv().hideUIExec = Value
+		hideUIExec()
+    end
+})
+
+MenuGroup:AddToggle('aeuat', {
+    Text = 'Auto Execute UI After Teleport',
+    Default = false,
+    Callback = function(Value)
+        getgenv().aeuat = Value
+		aeuat()
+    end
+})
 
 MenuGroup:AddButton('Unload', function() Library:Unload() end)
 MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true, Text = 'Menu keybind' })

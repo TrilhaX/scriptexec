@@ -1,4 +1,4 @@
-warn('[TEMPEST HUB] Loading Ui')
+warn('[TEMPEST HUB] Loading UI')
 wait(1)
 
 local repo = 'https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/'
@@ -20,7 +20,7 @@ Library:Notify('Loading Anime Reborn Script', 5)
 wait(3)
 
 local macros = {}
-local selectedMacro = nil
+local selectedMacro
 local isRecording = false
 local isPlaying = false
 local recordingData = {}
@@ -66,13 +66,13 @@ function createJsonFile(fileName)
 end
 
 function toggleRecording()
-    if (not selectedMacro or selectedMacro == "None") then
+    if not selectedMacro or selectedMacro == "None" then
         Library:Notify("Please select a macro before recording", 3)
         Toggles.RecordMacro:SetValue(false)
         return
     end
 
-    if (not selectedTypeOfRecord or selectedTypeOfRecord == "None") then
+    if not selectedTypeOfRecord or selectedTypeOfRecord == "None" then
         Library:Notify("Please select a type of record before recording", 3)
         Toggles.RecordMacro:SetValue(false)
         return
@@ -102,14 +102,21 @@ function collectRemoteInfo(remoteName, args)
 
     recordingData.currentStepIndex = remoteData.index
 
-    if selectedTypeOfRecord == "Time" then
+    if selectedTypeOfRecord == "Time" or selectedTypeOfRecord == "Hybrid" then
         remoteData.time = tick() - startTime
+    end
+
+    if selectedTypeOfRecord == "Money" or selectedTypeOfRecord == "Hybrid" then
+        local money = game.Players.LocalPlayer.notSavable.money
+        if money then
+            remoteData.money = money.Value
+        end     
     end
 
     if args[2] then
         for key, value in pairs(args[2]) do
             if typeof(value) == "CFrame" then
-                remoteData.arguments[2][key] = tostring(value)
+                remoteData.arguments[2][key] = {X = value.X, Y = value.Y, Z = value.Z}            
             elseif typeof(value) == "Instance" then
                 remoteData.arguments[2][key] = value.Name or tostring(value)
             else
@@ -141,54 +148,6 @@ function handleUnitRemote(args)
     end
 end
 
-function playMacro(macroName)
-    isPlaying = true
-    updateRecordingStatus()
-    if not selectedMacro or selectedMacro == "None" then
-        Library:Notify("Please select a macro to play", 3)
-        return
-    end
-
-    local filePath = macrosFolder .. '/' .. macroName .. '.json'
-    if not isfile(filePath) then
-        Library:Notify("Macro not found: " .. macroName, 3)
-        return
-    end
-
-    local macroData = game:GetService("HttpService"):JSONDecode(readfile(filePath))
-    if not macroData.steps or #macroData.steps == 0 then
-        Library:Notify("No steps found in macro: " .. macroName, 3)
-        return
-    end
-
-    for i, step in ipairs(macroData.steps) do
-        local action = step.action
-        local remote = game.ReplicatedStorage.Events:FindFirstChild("Unit")
-        if not remote then
-            warn("Remote not found: Unit")
-            return
-        end
-
-        local args = step.arguments
-        local currentStep = "Step " .. i .. ": " .. action
-
-        for key, value in pairs(args[2]) do
-            if typeof(value) == "string" then
-                if value:find("CFrame") then
-                    args[2][key] = loadstring("return " .. value)()
-                elseif value:find("Instance") then
-                    args[2][key] = game.Workspace:FindFirstChild(value) or game.ReplicatedStorage:FindFirstChild(value)
-                end
-            end
-        end
-
-        remote:FireServer(unpack(args))
-        wait(0.5)
-    end
-
-    Library:Notify("Macro execution completed: " .. macroName, 3)
-end
-
 function updateRecordingStatus()
     if isRecording then
         RecordingStatusLabel:SetText("Recording Status: Recording...")
@@ -201,6 +160,88 @@ end
 
 function updateSlotStatus(selectedSlot, selectedUnit)
     updateStatus("Selected Slot: " .. selectedSlot .. " | Unit: " .. selectedUnit)
+end
+
+function playMacro(macroName)
+    local filePath = macrosFolder .. '/' .. macroName .. '.json'
+    print("Verificando o arquivo da macro:", filePath)
+    if not isfile(filePath) then
+        Library:Notify("Macro não encontrada: " .. macroName, 3)
+        print("Macro não encontrada: " .. macroName)
+        return
+    end
+    
+    local macroData = game:GetService("HttpService"):JSONDecode(readfile(filePath))
+    print("Macro carregada com sucesso:", macroName)
+    print("Número de etapas da macro:", #macroData.steps)
+    local currentStepIndex = 1
+
+    local function checkConditions(step)
+        print("Verificando condições da etapa:", currentStepIndex)
+        local conditionsMet = true
+
+        if step.time then
+            print("Condição de tempo detectada:", step.time)
+            if tick() - startTime < step.time then
+                conditionsMet = false
+            end
+        end
+
+        if step.money then
+            local money = game.Players.LocalPlayer.notSavable.money
+            print("Verificando dinheiro:", money.Value)
+            if money and money.Value < step.money then
+                conditionsMet = false
+            end
+        end
+
+        print("Condições atendidas para a etapa:", conditionsMet)
+        return conditionsMet
+    end
+
+    local function executeStep(step)
+        print("Executando a etapa:", step.action)  -- Imprime a ação da etapa
+        local remote = game.ReplicatedStorage.Events.Unit
+        if remote then
+            if type(step.arguments) == "table" then
+                print("Argumentos da etapa (tabela): ", unpack(step.arguments))
+                if step.arguments[2] and step.arguments[2].position then
+                    local pos = step.arguments[2].position
+                    if pos.X and pos.Y and pos.Z then
+                        remote:FireServer(step.action, {
+                            rot = step.arguments[2].rot,
+                            slot = step.arguments[2].slot,
+                            position = CFrame.new(pos.X, pos.Y, pos.Z)
+                        })
+                    else
+                        warn("Position data is incomplete!")
+                    end
+                else
+                    warn("Position is missing or nil!")
+                end                
+            else
+                print("Argumentos da etapa (não tabela):", step.arguments)
+                remote:FireServer(step.action, step.arguments)
+            end
+        else
+            warn("Remote não encontrado para a ação: " .. step.action)
+        end
+    end     
+
+    while currentStepIndex <= #macroData.steps do
+        local step = macroData.steps[currentStepIndex]
+        print("Processando a etapa:", currentStepIndex)
+
+        if checkConditions(step) then
+            executeStep(step)
+            currentStepIndex = currentStepIndex + 1
+        else
+            print("Condições não atendidas, esperando 1 segundo...")
+            wait(1)
+        end
+    end
+    Library:Notify("Macro " .. macroName .. " executada com sucesso!", 3)
+    print("Macro executada com sucesso:", macroName)
 end
 
 local originalFireServer
@@ -230,7 +271,6 @@ Options.SelectedMacro = LeftGroupBox:AddDropdown('SelectedMacro', {
         SelectedMacroLabel:SetText("Selected Macro: " .. (selectedMacro or "None"))
     end
 })
-
 
 LeftGroupBox:AddInput('MacroName', {
     Default = '',
@@ -276,13 +316,16 @@ LeftGroupBox:AddToggle("RecordMacro", {
 LeftGroupBox:AddToggle("PlayMacro",{
     Text = "Play Macro",
     Func = function()
+        print("Macro selecionada:", selectedMacro)
         if not selectedMacro or selectedMacro == "None" then
             Library:Notify("Please select a macro before playing", 3)
             return
         end
         playMacro(selectedMacro)
-    end
+    end    
 })
+
+playMacro("Sla")
 
 Options.SelectedRecordingMethod = LeftGroupBox:AddDropdown('SelectedRecordingMethod', {
     Values = {"Time", "Money", "Hybrid"},

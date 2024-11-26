@@ -23,6 +23,35 @@ wait(1)
 warn('[TEMPEST HUB] Last Checking')
 wait(1)
 
+function hideUIExec()
+    if getgenv().hideUIExec then
+        local windowFrame = game:GetService("CoreGui").LinoriaGui.windowFrame
+        windowFrame.Visible = false
+        wait()
+    end
+end
+
+function aeuat()
+    while getgenv().aeuat == true do
+        local teleportQueued = false
+        game.Players.LocalPlayer.OnTeleport:Connect(function(State)
+            if (State == Enum.TeleportState.Started or State == Enum.TeleportState.InProgress) and not teleportQueued then
+                teleportQueued = true
+                
+                queue_on_teleport([[ 
+                    if getgenv().executed then return end    
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
+                ]])
+                
+                getgenv().executed = true
+                wait(10)
+                teleportQueued = false
+            end
+        end)
+        wait()
+    end
+end
+
 local Tabs = {
     Main = Window:AddTab('Main'),
 }
@@ -35,6 +64,15 @@ LeftGroupBox:AddToggle('Auto Roll Technique', {
     Callback = function(Value)
         getgenv().hideUIExec = Value
 		hideUIExec()
+    end
+})
+
+LeftGroupBox:AddToggle('aeuat', {
+    Text = 'Auto Execute UI After Teleport',
+    Default = false,
+    Callback = function(Value)
+        getgenv().aeuat = Value
+		aeuat()
     end
 })
 
@@ -93,7 +131,7 @@ ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 
 ThemeManager:SetFolder('Tempest Hub')
-SaveManager:SetFolder('Tempest Hub/_Anime_Reborn_')
+SaveManager:SetFolder('Tempest Hub/_Teste_')
 
 SaveManager:BuildConfigSection(TabsUI['UI Settings'])
 
@@ -101,7 +139,7 @@ ThemeManager:ApplyToTab(TabsUI['UI Settings'])
 
 SaveManager:LoadAutoloadConfig()
 
-local GameConfigName = '_Anime_Reborn_'
+local GameConfigName = '_Teste_'
 local player = game.Players.LocalPlayer
 SaveManager:Load(player.Name .. GameConfigName)
 spawn(function()
