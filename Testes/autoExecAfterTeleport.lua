@@ -1,3 +1,19 @@
+local queue_on_teleport = queue_on_teleport or syn.queue_on_teleport or fluxus.queue_on_teleport or function(...)
+    return ...
+end
+
+local teleportQueued = false
+game.Players.LocalPlayer.OnTeleport:Connect(function(State)
+    if (State == Enum.TeleportState.Started or State == Enum.TeleportState.InProgress) and not teleportQueued then
+        teleportQueued = true
+        queue_on_teleport([[ 
+            if getgenv().executed then return end    
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
+        ]])
+        getgenv().executed = true
+    end
+end)
+
 local AllowedPlaceIds = { 12886143095, 17046374415 }
 local Games = {
 	["ALS"] = { 12886143095, 18583778121, 12900046592 },
