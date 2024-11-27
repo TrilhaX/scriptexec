@@ -1581,7 +1581,7 @@ MenuGroup:AddToggle('huwe', {
 })
 
 MenuGroup:AddToggle('aeuat', {
-    Text = 'Auto Execute UI After Teleport',
+    Text = 'Auto Execute',
     Default = false,
     Callback = function(Value)
         getgenv().aeuat = Value
