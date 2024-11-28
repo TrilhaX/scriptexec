@@ -273,16 +273,31 @@ function playMacro(macroName)
     end
 end
 
-local originalFireServer
-originalFireServer = hookmetamethod(game, "__namecall", function(self, ...)
+-- Hookmetamethod para capturar PlaceTower e Upgrade
+local originalNamecall
+originalNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
-    
-    if method == "FireServer" and self.Name == "Unit" and self.Parent == game.ReplicatedStorage.Events then
-        handleUnitRemote(args)
+
+    -- Captura o PlaceTower
+    if method == "FireServer" and self.Name == "PlaceTower" and self.Parent == game.ReplicatedStorage.Remotes then
+        -- Argumentos necessários para PlaceTower
+        local unitName = args[1]  -- Nome da unidade
+        local position = args[2] -- Posição como CFrame
+        print("[Hook] PlaceTower detectado!")
+        print("Unit Name:", unitName)
+        print("Position:", position)
     end
-    
-    return originalFireServer(self, ...)
+
+    -- Captura o Upgrade
+    if method == "InvokeServer" and self.Name == "Upgrade" and self.Parent == game.ReplicatedStorage.Remotes then
+        -- Argumentos necessários para Upgrade
+        local unit = args[1]  -- Unidade no workspace
+        print("[Hook] Upgrade detectado!")
+        print("Unit:", unit)
+    end
+
+    return originalNamecall(self, ...)
 end)
 
 local Tabs = {
