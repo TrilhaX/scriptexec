@@ -1527,7 +1527,7 @@ LeftGroupBox:AddInput('inputRadiusToAutoPlaceUnit', {
     end
 })
 
-LeftGroupBox:AddToggle("APU", {
+LeftGroupBox:AddToggle("APUUPAJFK", {
     Text = "Auto Place Unit",
     Default = false,
     Callback = function(Value)
