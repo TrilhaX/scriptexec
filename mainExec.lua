@@ -1,7 +1,8 @@
-local AllowedPlaceIds = { 12886143095, 17046374415 }
+local AllowedPlaceIds = { 12886143095, 17046374415, 16732694052 }
 local Games = {
 	["ALS"] = { 12886143095, 18583778121, 12900046592 },
 	["AnimeReborn"] = { 17046374415, 17895401292, 108408425375836, 114706988516358 },
+	["Fisch"] = { 16732694052 }
 }
 
 local function IsPlaceAllowed(PlaceId)

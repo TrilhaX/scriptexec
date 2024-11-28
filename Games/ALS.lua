@@ -282,55 +282,158 @@ end
 
 function placeUnits()
     while getgenv().placeUnits == true do
-        local player = game:GetService("Players").LocalPlayer
-        local slots = player:FindFirstChild("Slots")
-        local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-        local placeTower = remotes and remotes:FindFirstChild("PlaceTower")
+        local waveValue = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+        local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
 
-        if not placeTower then
-            warn("PlaceTower RemoteEvent não encontrado.")
-            return
-        end
-
-        local function placeUnit(unit, position)
-            local towers = workspace:FindFirstChild("Towers")
-            if not towers then
-                warn("Workspace 'Towers' não encontrado.")
+        if getgenv().onlyPlaceinwaveX == true then
+            if beforeSlash == selectedWaveXToPlace then
+                local path = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Waypoints") and workspace.Map.Waypoints:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
+                if not path then
+                    warn("Path ou CornerStart não encontrado!")
+                    return
+                end
+    
+                local cornerStart = path
+                local basePosition = cornerStart.Position
+                local radius = selectedRadius
+                local player = game:GetService("Players").LocalPlayer
+                local slots = player:FindFirstChild("Slots")
+                if not slots then
+                    wait()
+                    return
+                end
+    
+                local placeTower = game.ReplicatedStorage.Remotes.PlaceTower
+                if not placeTower then
+                    wait()
+                    return
+                end
+    
+                local function placeUnit(unitName, position)
+                    local towers = workspace:FindFirstChild("Towers")
+                    if not towers then
+                        wait()
+                        return
+                    end
+    
+                    local unitExists = false
+                    for _, child in ipairs(towers:GetChildren()) do
+                        if child.Name == unitName then
+                            unitExists = true
+                            break
+                        end
+                    end
+    
+                    if unitExists then
+                        wait()
+                    else
+                        placeTower:FireServer(tostring(unitName), CFrame.new(position))
+                        wait()
+                    end
+                end
+    
+                while not selectedMaxSlot do
+                    wait(0.1)
+                end
+    
+                for i = 1, selectedMaxSlot do
+                    local slot = slots and slots:FindFirstChild("Slot" .. i)
+                    if slot and slot.Value then
+    
+                        local angle = (i - 1) * (math.pi * 2 / selectedMaxSlot)
+                        local offsetX = math.cos(angle) * radius
+                        local offsetZ = math.sin(angle) * radius
+                        local newPosition = basePosition + Vector3.new(offsetX, 0, offsetZ)
+    
+                        placeUnit(slot.Value, newPosition)
+                    else
+                        wait()
+                    end
+                end
+            else
+                wait()
+            end
+        else
+            local path = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Waypoints") and workspace.Map.Waypoints:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
+            if not path then
+                warn("Path ou CornerStart não encontrado!")
                 return
             end
 
-            local unitExists = false
-            for _, child in ipairs(towers:GetChildren()) do
-                if child.Name == unit then
-                    unitExists = true
-                    break
+            local cornerStart = path
+            local basePosition = cornerStart.Position
+            local radius = selectedRadius
+            local player = game:GetService("Players").LocalPlayer
+            local slots = player:FindFirstChild("Slots")
+            if not slots then
+                wait()
+                return
+            end
+
+            local placeTower = game.ReplicatedStorage.Remotes.PlaceTower
+            if not placeTower then
+                wait()
+                return
+            end
+
+            local function placeUnit(unitName, position)
+                local towers = workspace:FindFirstChild("Towers")
+                if not towers then
+                    wait()
+                    return
+                end
+
+                local unitExists = false
+                for _, child in ipairs(towers:GetChildren()) do
+                    if child.Name == unitName then
+                        unitExists = true
+                        break
+                    end
+                end
+
+                if unitExists then
+                    wait()
+                else
+                    placeTower:FireServer(tostring(unitName), CFrame.new(position))
+                    wait()
                 end
             end
 
-            if not unitExists then
-                wait(.1) 
-                local args = { unit, position }
-                placeTower:FireServer(unpack(args))
-                wait(.5)
+            while not selectedMaxSlot do
+                wait(0.1)
+            end
+
+            for i = 1, selectedMaxSlot do
+                local slot = slots and slots:FindFirstChild("Slot" .. i)
+                if slot and slot.Value then
+
+                    local angle = (i - 1) * (math.pi * 2 / selectedMaxSlot)
+                    local offsetX = math.cos(angle) * radius
+                    local offsetZ = math.sin(angle) * radius
+                    local newPosition = basePosition + Vector3.new(offsetX, 0, offsetZ)
+
+                    placeUnit(slot.Value, newPosition)
+                else
+                    wait()
+                end
+            end
+        end
+        wait()
+    end
+end
+
+function sellUnit()
+    while getgenv().sellUnit == true do
+        if getgenv().onlysellinwaveX == true then
+            local waveValue = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+            local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
+            if beforeSlash == selectedWaveXToSell then
+                
             else
                 wait()
             end
-        end
-
-        local basePosition = CFrame.new(-164.9412384033203, 197.93942260742188, 15.210136413574219)
-
-        while not selectedMaxSlot do
-            wait(.1)
-        end
-
-        for i = 1, selectedMaxSlot do
-            local slot = slots and slots:FindFirstChild("Slot" .. i)
-            if slot and slot.Value then
-                local newPosition = basePosition + Vector3.new(i * 2, 0, 0)
-                placeUnit(slot.Value, newPosition)
-            else
-                wait()
-            end
+        else
+            
         end
         wait()
     end
@@ -338,33 +441,88 @@ end
 
 function upgradeUnit()
     while getgenv().upgradeUnit == true do
-        if getgenv().maxupgradeUnit then
-            local UpgradeUnitAtual = workspace.Towers
+        if getgenv().onlyupgradeinwaveX == true then
+            local waveValue = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+            local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
+    
+            if getgenv().onlyupgradeinwaveX == true then
+                if beforeSlash == selectedWaveXToUpgrade then
+                    if getgenv().maxupgradeUnit then
+                        local UpgradeUnitAtual = workspace.Towers
 
-            for i, v in pairs(UpgradeUnitAtual:GetChildren()) do
-                local unitUpgradeLevel = v:FindFirstChild("Upgrade").Value
-                local unitName = v.Name
+                        for i, v in pairs(UpgradeUnitAtual:GetChildren()) do
+                            local unitUpgradeLevel = v:FindFirstChild("Upgrade").Value
+                            local unitName = v.Name
 
-                for slot = 1, 6 do
-                    local sliderValue = _G["selectedSlot" .. slot]
+                            for slot = 1, 6 do
+                                local sliderValue = _G["selectedSlot" .. slot]
 
-                    while sliderValue == nil do
-                        wait(.1)
-                    end
+                                while sliderValue == nil do
+                                    wait(.1)
+                                end
 
-                    if unitName == "Slot" .. slot and unitUpgradeLevel < sliderValue then
-                        local Remotes = game:GetService("ReplicatedStorage").Remotes
-                        local UpgradeRemote = Remotes:FindFirstChild("Upgrade")
+                                if unitName == "Slot" .. slot and unitUpgradeLevel < sliderValue then
+                                    local Remotes = game:GetService("ReplicatedStorage").Remotes
+                                    local UpgradeRemote = Remotes:FindFirstChild("Upgrade")
 
-                        if UpgradeRemote then
-                            local args = { v }
-                            
-                            while unitUpgradeLevel < sliderValue do
-                                UpgradeRemote:InvokeServer(unpack(args))
-                                wait(.5)
-                                unitUpgradeLevel = v.Upgrade.Value
+                                    if UpgradeRemote then
+                                        local args = { v }
+                                        
+                                        while unitUpgradeLevel < sliderValue do
+                                            UpgradeRemote:InvokeServer(unpack(args))
+                                            wait(.5)
+                                            unitUpgradeLevel = v.Upgrade.Value
+                                        end
+                                    end
+                                end
                             end
                         end
+                    else
+                        while not selectedMaxSlot do
+                            wait(.1)
+                        end
+
+                        for slot = 1, selectedMaxSlot do
+                            local unit = game:GetService("Players")[game.Players.LocalPlayer.Name].Slots["Slot"..slot]
+                            local Remotes = game:GetService("ReplicatedStorage").Remotes
+                            if unit then
+                                local PlaceTower = Remotes.PlaceTower
+                                if PlaceTower then
+                                    local args = {
+                                        [1] = workspace:WaitForChild("Towers"):WaitForChild(unit.Value)
+                                    }
+                                    
+                                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Upgrade"):InvokeServer(unpack(args))                    
+                                    wait(.5)
+                                end
+                            else
+                                wait()
+                            end
+                        end
+                    end
+                else
+                    wait()
+                end
+            else
+                while not selectedMaxSlot do
+                    wait(.1)
+                end
+
+                for slot = 1, selectedMaxSlot do
+                    local unit = game:GetService("Players")[game.Players.LocalPlayer.Name].Slots["Slot"..slot]
+                    local Remotes = game:GetService("ReplicatedStorage").Remotes
+                    if unit then
+                        local PlaceTower = Remotes.PlaceTower
+                        if PlaceTower then
+                            local args = {
+                                [1] = workspace:WaitForChild("Towers"):WaitForChild(unit.Value)
+                            }
+                            
+                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Upgrade"):InvokeServer(unpack(args))                    
+                            wait(.5)
+                        end
+                    else
+                        wait()
                     end
                 end
             end
@@ -729,7 +887,6 @@ function webhook()
             local Wave = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.EndWave.Text
             local elapsedTimeText = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.ElapsedTime.Text
 
-            -- Tente dividir o texto com base no separador ":"
             local timeParts = string.split(elapsedTimeText, ":")
             
             local totalSeconds = 0
@@ -820,11 +977,8 @@ function webhook()
                         author = {
                             name = "Anime Last Stand"
                         },
-                        image = {
-                            url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png?ex=6739154c&is=6737c3cc&hm=7fba054f0cf178525c659c9b8ea22381f9dd38a84664e61a8e80cc1a2cd53d90&"
-                        },
                         thumbnail = {
-                            url = "https://tr.rbxcdn.com/180DAY-0c006580562aa816037e176633b7235c/256/256/Image/Webp/noFilter"
+                            url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png?ex=673e5b4c&is=673d09cc&hm=1d58485280f1d6a376e1bee009b21caa0ae5cad9624832dd3d921f1e3b2217ce&"
                         }
                     }
                 },
@@ -1383,6 +1537,16 @@ local Tabs = {
 
 local LeftGroupBox = Tabs.Units:AddLeftGroupbox("Place & Upgrade")
 
+LeftGroupBox:AddDropdown('dropdownAutoPlaceWaypoint', {
+    Values = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"},
+    Default = "None",
+    Multi = false,
+    Text = 'Select Waypoint to place units',
+    Callback = function(Value)
+        selectedWaypointToPlaceUnits = Value
+    end
+})
+
 LeftGroupBox:AddDropdown('dropdownSlot', {
     Values = {'1', '2', '3', '4', '5', '6'},
     Default = "None",
@@ -1392,6 +1556,28 @@ LeftGroupBox:AddDropdown('dropdownSlot', {
 
     Callback = function(Value)
         selectedMaxSlot = tonumber(Value)
+    end
+})
+
+LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
+    Default = '',
+    Text = "Start Place at x Wave",
+    Numeric = true,
+    Finished = true,
+    Placeholder = 'Press enter after paste',
+    Callback = function(Value)
+        selectedWaveXToPlace = Value
+    end
+})
+
+LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
+    Default = '',
+    Text = "Select Radius Of Auto Place",
+    Numeric = true,
+    Finished = true,
+    Placeholder = 'Press enter after paste',
+    Callback = function(Value)
+        selectedRadius = Value
     end
 })
 
@@ -1405,6 +1591,25 @@ LeftGroupBox:AddToggle("APU", {
 })
 
 LeftGroupBox:AddToggle("AUU", {
+	Text = "Only Place in Wave X",
+	Default = false,
+	Callback = function(Value)
+		getgenv().onlyPlaceinwaveX = Value
+	end,
+})
+
+LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
+    Default = '',
+    Text = "Start Upgrade at x Wave",
+    Numeric = true,
+    Finished = true,
+    Placeholder = 'Press enter after paste',
+    Callback = function(Value)
+        selectedWaveXToUpgrade = Value
+    end
+})
+
+LeftGroupBox:AddToggle("AUU", {
 	Text = "Auto Upgrade Unit",
 	Default = false,
 	Callback = function(Value)
@@ -1413,89 +1618,39 @@ LeftGroupBox:AddToggle("AUU", {
 	end,
 })
 
-LeftGroupBox:AddSlider('Slot1', {
-    Text = 'Slot 1',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot1 = Value
-    end
-})
-
-LeftGroupBox:AddSlider('Slot2', {
-    Text = 'Slot 2',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot2 = Value
-    end
-})
-
-LeftGroupBox:AddSlider('Slot3', {
-    Text = 'Slot 3',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot3 = Value
-    end
-})
-
-LeftGroupBox:AddSlider('Slot4', {
-    Text = 'Slot 4',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot4 = Value
-    end
-})
-
-LeftGroupBox:AddSlider('Slot5', {
-    Text = 'Slot 5',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot5 = Value
-    end
-})
-
-LeftGroupBox:AddSlider('Slot6', {
-    Text = 'Slot 6',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot6 = Value
-    end
-})
-
-LeftGroupBox:AddToggle("MaxUpgrade", {
-	Text = "Max Upgrade",
+LeftGroupBox:AddToggle("AUU", {
+	Text = "Only Upgrade in Wave X",
 	Default = false,
 	Callback = function(Value)
-		getgenv().maxupgradeUnit = Value
+		getgenv().onlyupgradeinwaveX = Value
+	end,
+})
+
+LeftGroupBox:AddInput('inputAutoSellWaveX', {
+    Default = '',
+    Text = "Start Sell at x Wave",
+    Numeric = true,
+    Finished = true,
+    Placeholder = 'Press enter after paste',
+    Callback = function(Value)
+        selectedWaveXToSell = Value
+    end
+})
+
+LeftGroupBox:AddToggle("AUU", {
+	Text = "Auto Sell Unit (W.I.P)",
+	Default = false,
+	Callback = function(Value)
+		getgenv().sellUnit = Value
+		sellUnit()
+	end,
+})
+
+LeftGroupBox:AddToggle("AUU", {
+	Text = "Only Sell in Wave X",
+	Default = false,
+	Callback = function(Value)
+		getgenv().onlysellinwaveX = Value
 	end,
 })
 
@@ -1518,6 +1673,91 @@ RightGroupbox:AddToggle("OUSIB", {
 	end,
 })
 
+RightGroupbox:AddSlider('Slot1', {
+    Text = 'Slot 1',
+    Default = 1,
+    Min = 1,
+    Max = 20,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(Value)
+        selectedSlot1 = Value
+    end
+})
+
+RightGroupbox:AddSlider('Slot2', {
+    Text = 'Slot 2',
+    Default = 1,
+    Min = 1,
+    Max = 20,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(Value)
+        selectedSlot2 = Value
+    end
+})
+
+RightGroupbox:AddSlider('Slot3', {
+    Text = 'Slot 3',
+    Default = 1,
+    Min = 1,
+    Max = 20,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(Value)
+        selectedSlot3 = Value
+    end
+})
+
+RightGroupbox:AddSlider('Slot4', {
+    Text = 'Slot 4',
+    Default = 1,
+    Min = 1,
+    Max = 20,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(Value)
+        selectedSlot4 = Value
+    end
+})
+
+RightGroupbox:AddSlider('Slot5', {
+    Text = 'Slot 5',
+    Default = 1,
+    Min = 1,
+    Max = 20,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(Value)
+        selectedSlot5 = Value
+    end
+})
+
+RightGroupbox:AddSlider('Slot6', {
+    Text = 'Slot 6',
+    Default = 1,
+    Min = 1,
+    Max = 20,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(Value)
+        selectedSlot6 = Value
+    end
+})
+
+RightGroupbox:AddToggle("MaxUpgrade", {
+	Text = "Max Upgrade",
+	Default = false,
+	Callback = function(Value)
+		getgenv().maxupgradeUnit = Value
+	end,
+})
 
 local Tabs = {
     Shop = Window:AddTab('Shop'),

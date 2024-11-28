@@ -104,65 +104,50 @@ function autoRoll()
             print("Selected passives: " .. table.concat(selectedtech, ", "))
             local slots = game:GetService("Players").LocalPlayer.Slots
 
-            for i, v in pairs(slots:GetChildren()) do
-                if v.Value == selectedUnitName then
-                    local args = {
-                        [1] = game.Players.LocalPlayer,
-                        [2] = v.Value
-                    }
+            for _, slot in pairs(slots:GetChildren()) do
+                if slot.Value == selectedUnitName then
+                    local unitPassive = slot:FindFirstChild("Passive") and slot.Passive.Value
+                    if unitPassive and table.find(selectedtech, unitPassive) then
+                        Library:Notify('You got the passive: ' .. unitPassive .. ' for ' .. selectedUnitName, 5)
+                        print("You got the passive: " .. unitPassive)
+                        return -- Finaliza o loop ao encontrar o resultado
+                    else
+                        local replicatedStorage = game:GetService("ReplicatedStorage")
+                        local quirksRemotes = replicatedStorage:FindFirstChild("Remotes"):FindFirstChild("Quirks")
+                        
+                        if quirksRemotes then
+                            -- Inicia o processo
+                            local quirksStartRemote = quirksRemotes:FindFirstChild("Start")
+                            if quirksStartRemote then
+                                quirksStartRemote:InvokeServer()
+                                wait(0.1)
+                            end
 
-                    -- Check if the remote exists before calling
-                    local specificPlayerDataRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):FindFirstChild("GetSpecificPlayerData")
-                    if specificPlayerDataRemote then
-                        local retorno = specificPlayerDataRemote:InvokeServer(unpack(args))
+                            -- Finaliza o processo
+                            local quirksFinishRemote = quirksRemotes:FindFirstChild("Finish")
+                            if quirksFinishRemote then
+                                quirksFinishRemote:FireServer(tostring(selectedUnitRoll))
+                            end
+                            
+                            wait(1)
 
-                        if type(retorno) == "table" then
-                            if retorno["Quirk"] then
-                                local unitPassive = retorno["Quirk"]
-                                if table.find(selectedtech, unitPassive) then
-                                    Library:Notify('You got the passive: ' .. unitPassive .. ' for ' .. selectedUnitName, 5)
-                                    print("You got the passive: " .. unitPassive)
-                                    break
-                                else
-                                    -- Check for the "Start" remote
-                                    local quirksStartRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):FindFirstChild("Quirks"):FindFirstChild("Start")
-                                    if quirksStartRemote then
-                                        quirksStartRemote:InvokeServer()
-                                        wait(0.1)
-
-                                        -- Check for the "Finish" remote
-                                        local quirksFinishRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):FindFirstChild("Quirks"):FindFirstChild("Finish")
-                                        if quirksFinishRemote then
-                                            local args = { [1] = tostring(selectedUnitRoll) }
-                                            quirksFinishRemote:FireServer(unpack(args))
-                                        end
-                                    end
-                                    wait(1)
-                                    -- Check if the "Roll" remote exists
-                                    local quirksRollRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):FindFirstChild("Quirks"):FindFirstChild("Roll")
-                                    if quirksRollRemote then
-                                        quirksRollRemote:InvokeServer()
-                                        print("Rolando novamente para buscar técnicas selecionadas.")
-                                    else
-                                        warn("Quirks:Roll remote not found.")
-                                    end
-                                    wait()
-                                end
+                            -- Rola novamente
+                            local quirksRollRemote = quirksRemotes:FindFirstChild("Roll")
+                            if quirksRollRemote then
+                                quirksRollRemote:InvokeServer()
+                                print("Rolando novamente para buscar técnicas selecionadas.")
                             else
-                                print("A chave 'Quirk' não está presente.")
+                                warn("Quirks:Roll remote not found.")
                             end
                         else
-                            print("O retorno não é uma tabela:", retorno)
+                            warn("Quirks remotes not found.")
                         end
-                    else
-                        warn("GetSpecificPlayerData remote not found.")
                     end
                 end
             end
         else
-            wait()
+            wait(0.5)
         end
-        wait()
     end
 end
 
@@ -175,7 +160,7 @@ end
 for i, v in pairs(slots:GetChildren()) do
     if v.Value ~= nil and v.Value ~= "" then
         local args = {
-            [1] = game:GetService("Players"):WaitForChild("TempestGpo2"),
+            [1] = game.Players.LocalPlayer,
             [2] = v.Value
         }
 
@@ -235,6 +220,8 @@ LeftGroupBox:AddDropdown('TechRollUnit', {
     Callback = function(value)
         selectedUnitName = value:match("^(.-) |")
         selectedUnitRoll = value:match(".* | .* | (.+)")
+        print(selectedUnitName)
+        print(selectedUnitRoll)
     end
 })
 
@@ -246,6 +233,7 @@ LeftGroupBox:AddDropdown('TechRoll', {
     Tooltip = '',
     Callback = function(values)
         selectedtech = values
+        print(selectedtech)
     end
 })
 
