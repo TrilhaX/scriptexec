@@ -280,42 +280,44 @@ function autoLeave()
     end
 end
 
-function placeUnits()
+function placeUnits()    
     while getgenv().placeUnits == true do
         local waveValue = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
         local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
 
         if getgenv().onlyPlaceinwaveX == true then
             if beforeSlash == selectedWaveXToPlace then
+                
                 local path = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Waypoints") and workspace.Map.Waypoints:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
                 if not path then
                     warn("Path ou CornerStart não encontrado!")
                     return
                 end
-    
+
                 local cornerStart = path
                 local basePosition = cornerStart.Position
                 local radius = selectedRadius
                 local player = game:GetService("Players").LocalPlayer
                 local slots = player:FindFirstChild("Slots")
+                
                 if not slots then
                     wait()
                     return
                 end
-    
+
                 local placeTower = game.ReplicatedStorage.Remotes.PlaceTower
                 if not placeTower then
                     wait()
                     return
                 end
-    
+
                 local function placeUnit(unitName, position)
                     local towers = workspace:FindFirstChild("Towers")
                     if not towers then
                         wait()
                         return
                     end
-    
+                    
                     local unitExists = false
                     for _, child in ipairs(towers:GetChildren()) do
                         if child.Name == unitName then
@@ -323,7 +325,7 @@ function placeUnits()
                             break
                         end
                     end
-    
+
                     if unitExists then
                         wait()
                     else
@@ -331,20 +333,20 @@ function placeUnits()
                         wait()
                     end
                 end
-    
+
                 while not selectedMaxSlot do
                     wait(0.1)
                 end
-    
+
                 for i = 1, selectedMaxSlot do
                     local slot = slots and slots:FindFirstChild("Slot" .. i)
                     if slot and slot.Value then
-    
+
                         local angle = (i - 1) * (math.pi * 2 / selectedMaxSlot)
                         local offsetX = math.cos(angle) * radius
                         local offsetZ = math.sin(angle) * radius
                         local newPosition = basePosition + Vector3.new(offsetX, 0, offsetZ)
-    
+
                         placeUnit(slot.Value, newPosition)
                     else
                         wait()
@@ -354,6 +356,7 @@ function placeUnits()
                 wait()
             end
         else
+            
             local path = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Waypoints") and workspace.Map.Waypoints:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
             if not path then
                 warn("Path ou CornerStart não encontrado!")
@@ -362,9 +365,10 @@ function placeUnits()
 
             local cornerStart = path
             local basePosition = cornerStart.Position
-            local radius = selectedRadius
+            local radius = tonumber(selectedRadius)
             local player = game:GetService("Players").LocalPlayer
             local slots = player:FindFirstChild("Slots")
+            
             if not slots then
                 wait()
                 return
@@ -1570,14 +1574,14 @@ LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
     end
 })
 
-LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
+LeftGroupBox:AddInput('inputRadiusToAutoPlaceUnit', {
     Default = '',
-    Text = "Select Radius Of Auto Place",
+    Text = "Put Radius Of Auto Place",
     Numeric = true,
     Finished = true,
     Placeholder = 'Press enter after paste',
     Callback = function(Value)
-        selectedRadius = Value
+        selectedRadius = tonumber(Value)
     end
 })
 
