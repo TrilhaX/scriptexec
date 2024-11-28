@@ -280,148 +280,90 @@ function autoLeave()
     end
 end
 
-function placeUnits()    
-    while getgenv().placeUnits == true do
+function placeUnits()
+    while getgenv().placeUnits do
         local waveValue = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+        print("Wave atual:", waveValue)
         local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
+        print("Wave antes da barra:", beforeSlash)
 
-        if getgenv().onlyPlaceinwaveX == true then
-            if beforeSlash == selectedWaveXToPlace then
+        if getgenv().onlyPlaceinwaveX and beforeSlash ~= selectedWaveXToPlace then
+            print("Esperando pela wave", selectedWaveXToPlace)
+            wait()
+        end
+
+        local path = workspace:FindFirstChild("Map") 
+            and workspace.Map:FindFirstChild("Waypoints") 
+            and workspace.Map.Waypoints:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
+        
+        if not path then
+            warn("Path ou CornerStart não encontrado!")
+            wait(1)
+        else
+            print("Path encontrado:", path.Name)
+        end
+
+        local cornerStart = path
+        local basePosition = cornerStart.Position
+        print("Posição inicial:", basePosition)
+        
+        local radius = tonumber(selectedRadius)
+        print("Raio selecionado:", radius)
+        
+        local player = game:GetService("Players").LocalPlayer
+        local slots = player:FindFirstChild("Slots")
+        
+        if not slots then
+            warn("Slots não encontrados!")
+            wait(1)
+        else
+            print("Slots encontrados.")
+        end
+
+        local placeTower = game.ReplicatedStorage.Remotes.PlaceTower
+        if not placeTower then
+            warn("Remote PlaceTower não encontrado!")
+            wait(1)
+        else
+            print("Remote PlaceTower encontrado.")
+        end
+
+        for i = 1, selectedMaxSlot do
+            print("Verificando Slot", i)
+            local slot = slots:FindFirstChild("Slot" .. i)
+            if slot and slot.Value then
+                print("Slot válido:", slot.Name, "Unidade:", slot.Value)
                 
-                local path = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Waypoints") and workspace.Map.Waypoints:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
-                if not path then
-                    warn("Path ou CornerStart não encontrado!")
-                    return
-                end
+                local angle = (i - 1) * (math.pi * 2 / selectedMaxSlot)
+                local offsetX = math.cos(angle) * radius
+                local offsetZ = math.sin(angle) * radius
+                local newPosition = basePosition + Vector3.new(offsetX, 0, offsetZ)
+                print("Nova posição calculada:", newPosition)
 
-                local cornerStart = path
-                local basePosition = cornerStart.Position
-                local radius = selectedRadius
-                local player = game:GetService("Players").LocalPlayer
-                local slots = player:FindFirstChild("Slots")
-                
-                if not slots then
-                    wait()
-                    return
-                end
-
-                local placeTower = game.ReplicatedStorage.Remotes.PlaceTower
-                if not placeTower then
-                    wait()
-                    return
-                end
-
-                local function placeUnit(unitName, position)
-                    local towers = workspace:FindFirstChild("Towers")
-                    if not towers then
-                        wait()
-                        return
-                    end
-                    
-                    local unitExists = false
+                local towers = workspace:FindFirstChild("Towers")
+                local unitExists = false
+                if towers then
+                    print("Towers encontrados.")
                     for _, child in ipairs(towers:GetChildren()) do
-                        if child.Name == unitName then
+                        if child.Name == slot.Value then
+                            print("Unidade já existe:", child.Name)
                             unitExists = true
                             break
                         end
                     end
-
-                    if unitExists then
-                        wait()
-                    else
-                        placeTower:FireServer(tostring(unitName), CFrame.new(position))
-                        wait()
-                    end
                 end
 
-                while not selectedMaxSlot do
-                    wait(0.1)
+                if not unitExists then
+                    print("Colocando unidade:", slot.Value, "na posição:", newPosition)
+                    placeTower:FireServer(slot.Value, CFrame.new(newPosition))
                 end
-
-                for i = 1, selectedMaxSlot do
-                    local slot = slots and slots:FindFirstChild("Slot" .. i)
-                    if slot and slot.Value then
-
-                        local angle = (i - 1) * (math.pi * 2 / selectedMaxSlot)
-                        local offsetX = math.cos(angle) * radius
-                        local offsetZ = math.sin(angle) * radius
-                        local newPosition = basePosition + Vector3.new(offsetX, 0, offsetZ)
-
-                        placeUnit(slot.Value, newPosition)
-                    else
-                        wait()
-                    end
-                end
+                wait(0.5)
             else
-                wait()
-            end
-        else
-            
-            local path = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Waypoints") and workspace.Map.Waypoints:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
-            if not path then
-                warn("Path ou CornerStart não encontrado!")
-                return
-            end
-
-            local cornerStart = path
-            local basePosition = cornerStart.Position
-            local radius = tonumber(selectedRadius)
-            local player = game:GetService("Players").LocalPlayer
-            local slots = player:FindFirstChild("Slots")
-            
-            if not slots then
-                wait()
-                return
-            end
-
-            local placeTower = game.ReplicatedStorage.Remotes.PlaceTower
-            if not placeTower then
-                wait()
-                return
-            end
-
-            local function placeUnit(unitName, position)
-                local towers = workspace:FindFirstChild("Towers")
-                if not towers then
-                    wait()
-                    return
-                end
-
-                local unitExists = false
-                for _, child in ipairs(towers:GetChildren()) do
-                    if child.Name == unitName then
-                        unitExists = true
-                        break
-                    end
-                end
-
-                if unitExists then
-                    wait()
-                else
-                    placeTower:FireServer(tostring(unitName), CFrame.new(position))
-                    wait()
-                end
-            end
-
-            while not selectedMaxSlot do
-                wait(0.1)
-            end
-
-            for i = 1, selectedMaxSlot do
-                local slot = slots and slots:FindFirstChild("Slot" .. i)
-                if slot and slot.Value then
-
-                    local angle = (i - 1) * (math.pi * 2 / selectedMaxSlot)
-                    local offsetX = math.cos(angle) * radius
-                    local offsetZ = math.sin(angle) * radius
-                    local newPosition = basePosition + Vector3.new(offsetX, 0, offsetZ)
-
-                    placeUnit(slot.Value, newPosition)
-                else
-                    wait()
-                end
+                print("Slot inválido ou vazio:", "Slot" .. i)
             end
         end
+
+        print("Loop de colocação de unidades completo. Aguardando...")
         wait()
     end
 end
@@ -1563,7 +1505,7 @@ LeftGroupBox:AddDropdown('dropdownSlot', {
     end
 })
 
-LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
+LeftGroupBox:AddInput('inputAutoPlaceWaveX', {
     Default = '',
     Text = "Start Place at x Wave",
     Numeric = true,
@@ -1581,20 +1523,21 @@ LeftGroupBox:AddInput('inputRadiusToAutoPlaceUnit', {
     Finished = true,
     Placeholder = 'Press enter after paste',
     Callback = function(Value)
-        selectedRadius = tonumber(Value)
+        selectedRadius = Value
     end
 })
 
 LeftGroupBox:AddToggle("APU", {
-	Text = "Auto Place Unit",
-	Default = false,
-	Callback = function(Value)
-		getgenv().placeUnits = Value
-		placeUnits()
-	end,
+    Text = "Auto Place Unit",
+    Default = false,
+    Callback = function(Value)
+        getgenv().placeUnits = Value
+        getgenv().placeUnits = true
+        placeUnits()
+    end,
 })
 
-LeftGroupBox:AddToggle("AUU", {
+LeftGroupBox:AddToggle("OPU", {
 	Text = "Only Place in Wave X",
 	Default = false,
 	Callback = function(Value)
@@ -1622,7 +1565,7 @@ LeftGroupBox:AddToggle("AUU", {
 	end,
 })
 
-LeftGroupBox:AddToggle("AUU", {
+LeftGroupBox:AddToggle("OUU", {
 	Text = "Only Upgrade in Wave X",
 	Default = false,
 	Callback = function(Value)
@@ -1641,7 +1584,7 @@ LeftGroupBox:AddInput('inputAutoSellWaveX', {
     end
 })
 
-LeftGroupBox:AddToggle("AUU", {
+LeftGroupBox:AddToggle("ASU", {
 	Text = "Auto Sell Unit (W.I.P)",
 	Default = false,
 	Callback = function(Value)
@@ -1650,7 +1593,7 @@ LeftGroupBox:AddToggle("AUU", {
 	end,
 })
 
-LeftGroupBox:AddToggle("AUU", {
+LeftGroupBox:AddToggle("OSU", {
 	Text = "Only Sell in Wave X",
 	Default = false,
 	Callback = function(Value)
