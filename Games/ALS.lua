@@ -141,85 +141,73 @@ function securityMode()
         return false
     end
 
-    if #players:GetPlayers() >= 2 then
-        local player1 = players:GetPlayers()[1]
-        local targetPlaceId = 12886143095
+    while getgenv().securityMode do
+        if #players:GetPlayers() >= 2 then
+            local player1 = players:GetPlayers()[1]
+            local targetPlaceId = 12886143095
 
-        if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
-            game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
-        end
-    end
-end
-
-function joinInfCastle()
-    while getgenv().joinInfCastle do
-        if getgenv().autoRRSMethod then
-            if getgenv().joinMethod == 'Method 1' then
-                repeat task.wait() until game:IsLoaded()
-                wait(1)
-                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-                wait(1)
-                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-                wait(1)
-                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 5, "True")
-                wait(.5)
-            elseif getgenv().joinMethod == "Method 2" then
-                repeat task.wait() until game:IsLoaded()
-                wait(1)
-                local asta = workspace.Lobby.Npcs.Asta
-                if asta then
-                    local TeleportCFrame = GetCFrame(asta)
-                    local tween = tweenModel(game.Players.LocalPlayer.Character, TeleportCFrame)
-                    tween:Play()
-                    tween.Completed:Wait()
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-                    wait(.1)
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-                    wait(.1)
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", 5, "True")
-                    wait(.5)
-                else
-                    wait(.5)
-                end
-            end
-        else
-            if getgenv().joinMethod == 'Method 1' then
-                repeat task.wait() until game:IsLoaded()
-                wait(1)
-                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-                wait(.1)
-                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-                wait(.1)
-                game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", tonumber(selectedRoomInfCastle), "True")
-                wait(.5)
-            elseif getgenv().joinMethod == "Method 2" then
-                repeat task.wait() until game:IsLoaded()
-                wait(1)
-                local asta = workspace.Lobby.Npcs.Asta
-                if asta then
-                    local TeleportCFrame = GetCFrame(asta)
-                    local tween = tweenModel(game.Players.LocalPlayer.Character, TeleportCFrame)
-                    tween:Play()
-                    tween.Completed:Wait()
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetGlobalData")
-                    wait(.1)
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("GetData")
-                    wait(.1)
-                    game:GetService("ReplicatedStorage").Remotes.InfiniteCastleManager:FireServer("Play", tonumber(selectedRoomInfCastle), "True")
-                    wait(.5)
-                else
-                    wait(.5)
-                end
+            if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
+                game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
             end
         end
         wait(1)
     end
 end
 
+function joinInfCastle()
+    while getgenv().joinInfCastle do
+        repeat task.wait() until game:IsLoaded()
+        wait(1)
+
+        local function fireCastleRequests(room)
+            local replicatedStorage = game:GetService("ReplicatedStorage")
+            local manager = replicatedStorage.Remotes.InfiniteCastleManager
+
+            manager:FireServer("GetGlobalData")
+            wait(0.1)
+            manager:FireServer("GetData")
+            wait(0.1)
+            manager:FireServer("Play", tonumber(room), "True")
+        end
+
+        local function teleportToNPC(npcName)
+            local npc = workspace.Lobby.Npcs:FindFirstChild(npcName)
+            if npc then
+                local teleportCFrame = GetCFrame(npc)
+                local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
+                tween:Play()
+                tween.Completed:Wait()
+            else
+                warn("NPC " .. npcName .. " não encontrado!")
+            end
+        end
+
+        if getgenv().autoRRSMethod then
+            if getgenv().joinMethod == 'Method 1' then
+                fireCastleRequests(5)
+            elseif getgenv().joinMethod == "Method 2" then
+                teleportToNPC("Asta")
+                fireCastleRequests(5)
+            end
+        else
+            if getgenv().joinMethod == 'Method 1' then
+                fireCastleRequests(selectedRoomInfCastle)
+            elseif getgenv().joinMethod == "Method 2" then
+                teleportToNPC("Asta")
+                fireCastleRequests(selectedRoomInfCastle)
+            end
+        end
+
+        wait(1)
+    end
+end
+
 function autoNext()
-    while getgenv().autoRetry == true do
+    local player = game.Players.LocalPlayer
+
+    while getgenv().autoRetry do
         local uiEndGame = player:FindFirstChild("PlayerGui"):FindFirstChild("EndGameUI")
-        
+
         if uiEndGame then
             wait(1)
             local button
@@ -227,126 +215,116 @@ function autoNext()
             local endGameUI = playerGui:WaitForChild("EndGameUI")
             local bg = endGameUI:WaitForChild("BG")
             local buttons = bg:WaitForChild("Buttons")
-            button = buttons:WaitForChild("Next")
-            GuiService.SelectedObject = button
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-            break
+            button = buttons:FindFirstChild("Next")
+
+            if button then
+                GuiService.SelectedObject = button
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+                break
+            else
+                warn("Botão 'Next' não encontrado!")
+            end
+        else
+            warn("UI EndGame não encontrada!")
         end
-        wait()
+
+        wait(.5)
     end
 end
 
 function autoRetry()
-    local player = Players.LocalPlayer
-    
-    while getgenv().autoRetry == true do
+    local player = game.Players.LocalPlayer
+    while getgenv().autoRetry do
         local uiEndGame = player:FindFirstChild("PlayerGui"):FindFirstChild("EndGameUI")
-        
         if uiEndGame then
             wait(1)
-            local button
-            local playerGui = player:WaitForChild("PlayerGui")
-            local endGameUI = playerGui:WaitForChild("EndGameUI")
-            local bg = endGameUI:WaitForChild("BG")
-            local buttons = bg:WaitForChild("Buttons")
-            button = buttons:WaitForChild("Retry")
-            
-            while getgenv().autoRetry == true do
-                GuiService.SelectedObject = button
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-
-                wait(0.3)
+            local button = uiEndGame.BG.Buttons:FindFirstChild("Retry")
+            if button then
+                while getgenv().autoRetry do
+                    GuiService.SelectedObject = button
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+                    wait(.5)
+                end
             end
-
-            break
         end
-        wait()
+        wait(.5)
     end
 end
 
 function autoLeave()
-    while getgenv().autoLeave == true do
-        local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
+    while getgenv().autoLeave do
+        local uiEndGame = game.Players.LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
         if uiEndGame then
             wait(1)
-            game:GetService("ReplicatedStorage").Remotes.TeleportBack:FireServer()
+            game.ReplicatedStorage.Remotes.TeleportBack:FireServer()
             break
-        else
-            wait(.5)
         end
-        wait()
+        wait(.5)
     end
 end
 
 function placeUnits()
     while getgenv().placeUnits do
-        local waveValue = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
-        print("Wave atual:", waveValue)
-        local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
-        print("Wave antes da barra:", beforeSlash)
-
-        if getgenv().onlyPlaceinwaveX and beforeSlash ~= selectedWaveXToPlace then
-            print("Esperando pela wave", selectedWaveXToPlace)
-            wait()
+        local player = game.Players.LocalPlayer
+        local waveGui = player:FindFirstChild("PlayerGui")
+            and player.PlayerGui:FindFirstChild("MainUI")
+            and player.PlayerGui.MainUI:FindFirstChild("Top")
+            and player.PlayerGui.MainUI.Top:FindFirstChild("Wave")
+        
+        local waveValue = waveGui and waveGui.Value.Layered.Text or nil
+        local beforeSlash = waveValue and string.match(waveValue, "^(.-)/") or waveValue
+        
+        if not waveValue then
+            warn("Wave não encontrado!")
+            wait(1)
         end
 
-        local path = workspace:FindFirstChild("Map") 
-            and workspace.Map:FindFirstChild("Waypoints") 
+        if getgenv().onlyPlaceinwaveX and beforeSlash ~= tostring(selectedWaveXToPlace) then
+            print("Aguardando wave específica:", selectedWaveXToPlace)
+            wait(1)
+        end
+
+        local path = workspace:FindFirstChild("Map")
+            and workspace.Map:FindFirstChild("Waypoints")
             and workspace.Map.Waypoints:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
-        
+
         if not path then
             warn("Path ou CornerStart não encontrado!")
             wait(1)
-        else
-            print("Path encontrado:", path.Name)
         end
 
-        local cornerStart = path
-        local basePosition = cornerStart.Position
-        print("Posição inicial:", basePosition)
-        
-        local radius = tonumber(selectedRadius)
-        print("Raio selecionado:", radius)
-        
-        local player = game:GetService("Players").LocalPlayer
+        local basePosition = path.Position
+        local radius = tonumber(selectedRadius) or 10
         local slots = player:FindFirstChild("Slots")
-        
+
         if not slots then
             warn("Slots não encontrados!")
             wait(1)
-        else
-            print("Slots encontrados.")
         end
 
-        local placeTower = game.ReplicatedStorage.Remotes.PlaceTower
+        local placeTower = game.ReplicatedStorage:FindFirstChild("Remotes")
+            and game.ReplicatedStorage.Remotes:FindFirstChild("PlaceTower")
+        
         if not placeTower then
             warn("Remote PlaceTower não encontrado!")
             wait(1)
-        else
-            print("Remote PlaceTower encontrado.")
         end
 
         for i = 1, selectedMaxSlot do
-            print("Verificando Slot", i)
             local slot = slots:FindFirstChild("Slot" .. i)
             if slot and slot.Value then
-                print("Slot válido:", slot.Name, "Unidade:", slot.Value)
-                
                 local angle = (i - 1) * (math.pi * 2 / selectedMaxSlot)
                 local offsetX = math.cos(angle) * radius
                 local offsetZ = math.sin(angle) * radius
                 local newPosition = basePosition + Vector3.new(offsetX, 0, offsetZ)
-                print("Nova posição calculada:", newPosition)
 
                 local towers = workspace:FindFirstChild("Towers")
                 local unitExists = false
                 if towers then
-                    print("Towers encontrados.")
                     for _, child in ipairs(towers:GetChildren()) do
                         if child.Name == slot.Value then
-                            print("Unidade já existe:", child.Name)
                             unitExists = true
                             break
                         end
@@ -354,176 +332,89 @@ function placeUnits()
                 end
 
                 if not unitExists then
-                    print("Colocando unidade:", slot.Value, "na posição:", newPosition)
                     placeTower:FireServer(slot.Value, CFrame.new(newPosition))
+                    wait(0.5)
                 end
-                wait(0.5)
-            else
-                print("Slot inválido ou vazio:", "Slot" .. i)
             end
         end
-
-        print("Loop de colocação de unidades completo. Aguardando...")
-        wait()
+        wait(1)
     end
 end
 
 function sellUnit()
-    while getgenv().sellUnit == true do
-        if getgenv().onlysellinwaveX == true then
-            local waveValue = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
-            local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
-            if beforeSlash == selectedWaveXToSell then
-                
-            else
-                wait()
-            end
-        else
-            
+    while getgenv().sellUnit do
+        local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+        local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
+
+        if getgenv().onlysellinwaveX and beforeSlash ~= selectedWaveXToSell then
+            wait(1)
         end
-        wait()
+
+        print("Vendendo unidades na wave", beforeSlash)
+        wait(1)
     end
 end
 
 function upgradeUnit()
-    while getgenv().upgradeUnit == true do
-        if getgenv().onlyupgradeinwaveX == true then
-            local waveValue = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
-            local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
-    
-            if getgenv().onlyupgradeinwaveX == true then
-                if beforeSlash == selectedWaveXToUpgrade then
-                    if getgenv().maxupgradeUnit then
-                        local UpgradeUnitAtual = workspace.Towers
+    while getgenv().upgradeUnit do
+        local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+        local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
 
-                        for i, v in pairs(UpgradeUnitAtual:GetChildren()) do
-                            local unitUpgradeLevel = v:FindFirstChild("Upgrade").Value
-                            local unitName = v.Name
+        if getgenv().onlyupgradeinwaveX and beforeSlash ~= selectedWaveXToUpgrade then
+            wait(1)
+        end
 
-                            for slot = 1, 6 do
-                                local sliderValue = _G["selectedSlot" .. slot]
-
-                                while sliderValue == nil do
-                                    wait(.1)
-                                end
-
-                                if unitName == "Slot" .. slot and unitUpgradeLevel < sliderValue then
-                                    local Remotes = game:GetService("ReplicatedStorage").Remotes
-                                    local UpgradeRemote = Remotes:FindFirstChild("Upgrade")
-
-                                    if UpgradeRemote then
-                                        local args = { v }
-                                        
-                                        while unitUpgradeLevel < sliderValue do
-                                            UpgradeRemote:InvokeServer(unpack(args))
-                                            wait(.5)
-                                            unitUpgradeLevel = v.Upgrade.Value
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    else
-                        while not selectedMaxSlot do
-                            wait(.1)
-                        end
-
-                        for slot = 1, selectedMaxSlot do
-                            local unit = game:GetService("Players")[game.Players.LocalPlayer.Name].Slots["Slot"..slot]
-                            local Remotes = game:GetService("ReplicatedStorage").Remotes
-                            if unit then
-                                local PlaceTower = Remotes.PlaceTower
-                                if PlaceTower then
-                                    local args = {
-                                        [1] = workspace:WaitForChild("Towers"):WaitForChild(unit.Value)
-                                    }
-                                    
-                                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Upgrade"):InvokeServer(unpack(args))                    
-                                    wait(.5)
-                                end
-                            else
-                                wait()
-                            end
-                        end
-                    end
-                else
-                    wait()
-                end
-            else
-                while not selectedMaxSlot do
-                    wait(.1)
-                end
-
-                for slot = 1, selectedMaxSlot do
-                    local unit = game:GetService("Players")[game.Players.LocalPlayer.Name].Slots["Slot"..slot]
-                    local Remotes = game:GetService("ReplicatedStorage").Remotes
-                    if unit then
-                        local PlaceTower = Remotes.PlaceTower
-                        if PlaceTower then
-                            local args = {
-                                [1] = workspace:WaitForChild("Towers"):WaitForChild(unit.Value)
-                            }
-                            
-                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Upgrade"):InvokeServer(unpack(args))                    
-                            wait(.5)
-                        end
-                    else
-                        wait()
-                    end
-                end
-            end
-        else
-            while not selectedMaxSlot do
-                wait(.1)
-            end
-
-            for slot = 1, selectedMaxSlot do
-                local unit = game:GetService("Players")[game.Players.LocalPlayer.Name].Slots["Slot"..slot]
-                local Remotes = game:GetService("ReplicatedStorage").Remotes
-                if unit then
-                    local PlaceTower = Remotes.PlaceTower
-                    if PlaceTower then
-                        local args = {
-                            [1] = workspace:WaitForChild("Towers"):WaitForChild(unit.Value)
-                        }
-                        
-                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Upgrade"):InvokeServer(unpack(args))                    
+        local towers = workspace:FindFirstChild("Towers")
+        if towers then
+            for _, unit in ipairs(towers:GetChildren()) do
+                local upgradeLevel = unit:FindFirstChild("Upgrade") and unit.Upgrade.Value or 0
+                local upgradeRemote = game.ReplicatedStorage.Remotes:FindFirstChild("Upgrade")
+                if upgradeRemote then
+                    while upgradeLevel < maxUpgradeLevel do
+                        upgradeRemote:InvokeServer(unit)
                         wait(.5)
+                        upgradeLevel = unit:FindFirstChild("Upgrade") and unit.Upgrade.Value or upgradeLevel
                     end
-                else
-                    wait()
                 end
             end
         end
-        wait()
+        wait(1)
     end
 end
 
 function autoJoinRaid()
     while getgenv().autoJoinRaid == true do
-        local door = workspace.TeleporterFolder.Raids.Teleporter.Door
-        if door then
-            local doorCFrame = GetCFrame(door)
-            local tween = tweenModel(game.Players.LocalPlayer.Character, doorCFrame)
-            tween:Play()
-            tween.Completed:Wait()
-            wait(1)
-            local args = {
-                [1] = selectedRaidMap,
-                [2] = selectedFaseRaid,
-                [3] = "Nightmare",
-                [4] = false
-            }
+        local raidFolder = workspace:FindFirstChild("TeleporterFolder")
+        if raidFolder and raidFolder:FindFirstChild("Raids") then
+            local door = raidFolder.Raids.Teleporter:FindFirstChild("Door")
+            if door then
+                local doorCFrame = GetCFrame(door)
+                local tween = tweenModel(game.Players.LocalPlayer.Character, doorCFrame)
+                tween:Play()
+                tween.Completed:Wait()
 
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Raids"):WaitForChild("Select"):InvokeServer(unpack(args))
-            wait(.5)
-            local args = {
-                [1] = "Skip"
-            }
+                wait(1)
+                local argsRaid = {
+                    [1] = selectedRaidMap,
+                    [2] = selectedFaseRaid,
+                    [3] = "Nightmare",
+                    [4] = false
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Raids"):WaitForChild("Select"):InvokeServer(unpack(argsRaid))
 
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Teleporter"):WaitForChild("Interact"):FireServer(unpack(args))
-            wait(10)
+                wait(.5)
+                local argsTeleporter = {
+                    [1] = "Skip"
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Teleporter"):WaitForChild("Interact"):FireServer(unpack(argsTeleporter))
+
+                wait(10)
+            else
+                warn("Porta do raid não encontrada!")
+                wait()
+            end
         else
+            warn("TeleporterFolder ou Raids não encontrado!")
             wait()
         end
     end
@@ -531,17 +422,21 @@ end
 
 function autoGamespeed()
     while getgenv().autoGamespeed == true do
-        local Remotes = game:GetService("ReplicatedStorage").Remotes
-        if Remotes then
-            local VoteChangeTimeScale = Remotes.VoteChangeTimeScale
-            if VoteChangeTimeScale then
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("VoteChangeTimeScale"):FireServer(true)
+        local success, remotes = pcall(function()
+            return game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+        end)
+
+        if success and remotes then
+            local voteChange = remotes:FindFirstChild("VoteChangeTimeScale")
+            if voteChange then
+                voteChange:FireServer(true)
                 break
             end
         else
-            wait(1)
+            warn("Remotes not found!")
         end
-        wait()
+
+        wait(1)
     end
 end
 
@@ -555,26 +450,20 @@ function extremeFpsBoost()
         for _, obj in pairs(workspace:GetDescendants()) do
             if obj:IsA("Part") or obj:IsA("MeshPart") or obj:IsA("UnionOperation") then
                 obj.Material = Enum.Material.SmoothPlastic
-                obj.Color = Color3.new(0.5, 0.5, 0.5)
+                obj.Color = Color3.new(.5, .5, .5)
                 obj.Transparency = 0
                 obj.CanCollide = true
-            elseif obj:IsA("Mesh") or obj:IsA("SpecialMesh") then
-                obj:Destroy()
-            elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            elseif obj:IsA("Mesh") or obj:IsA("SpecialMesh") or obj:IsA("Decal") or obj:IsA("Texture") then
                 obj:Destroy()
             elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
                 obj.Enabled = false
             end
-
-            wait(.1)
         end
 
         for _, effect in pairs(game.Lighting:GetChildren()) do
             if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") then
                 effect.Enabled = false
             end
-
-            wait(.1)
         end
     end
 end
@@ -587,21 +476,28 @@ function HPI()
             if overhead then
                 overhead:Destroy()
             end
+        else
+            warn("Player or Head not found!")
         end
     end
 end
 
 function deleteNotErro()
     while getgenv().deleteNotErro == true do
-        local player = game:GetService("Players").LocalPlayer
-        if player and player:FindFirstChild("PlayerGui") then
-            local erroNot = player.PlayerGui:FindFirstChild("MessageUI")
-            if erroNot and erroNot:FindFirstChild("ErrorHolder") then
-                erroNot.ErrorHolder:Destroy()
-                break
+        local player = game.Players.LocalPlayer
+        if player then
+            local gui = player:FindFirstChild("PlayerGui")
+            if gui then
+                local erroNot = gui:FindFirstChild("MessageUI")
+                if erroNot and erroNot:FindFirstChild("ErrorHolder") then
+                    erroNot.ErrorHolder:Destroy()
+                    break
+                end
             end
+        else
+            warn("Player not found!")
         end
-        wait(0.5)
+        wait(.5)
     end
 end
 
@@ -609,13 +505,13 @@ function deleteMap()
     if getgenv().deleteMap == true then
         local map = workspace:FindFirstChild("Map")
         if map and map:FindFirstChild("Map") then
-            local objetos = map.Map:GetChildren()
-            for _, objeto in ipairs(objetos) do
-                if string.find(string.lower(objeto.Name), "model") or string.find(string.lower(objeto.Name), "building%d") then
-                    objeto:Destroy()
-                    wait()
+            for _, obj in ipairs(map.Map:GetChildren()) do
+                if obj.Name:lower():find("model") or obj.Name:lower():find("building%d") then
+                    obj:Destroy()
                 end
             end
+        else
+            warn("Map or nested Map not found!")
         end
     end
 end
@@ -969,10 +865,10 @@ function webhook()
                 print("Synchronization not supported on this device.")
             end
         else
-            wait(.3)
+            wait()
         end
 
-        wait(.2)
+        wait(1)
     end
 end
 
@@ -982,7 +878,6 @@ local module2 = require(game:GetService("ReplicatedStorage").Modules.ChallengeIn
 
 local valuesChallenge = {}
 local function challengeNamesByType(tbl, typeName)
-    
     if type(tbl) == "table" then
         for key, value in pairs(tbl) do
             if type(value) == "table" then
@@ -990,7 +885,6 @@ local function challengeNamesByType(tbl, typeName)
             end
         end
     end
-    
     return valuesChallenge
 end
 
@@ -1003,55 +897,62 @@ local ValuesPortalTier = {}
 
 if portals and portals:IsA("Folder") then
     for _, item in pairs(portals:GetChildren()) do
-        if item.Name ~= "PackageLink" and not item.Name:match("^Tier %d$") then
+        if item:IsA("Instance") and item.Name ~= "PackageLink" and not item.Name:match("^Tier %d$") then
             table.insert(ValuesPortalMap, item.Name)
         end
     end
 
     for _, item2 in pairs(portals:GetChildren()) do
-        if item2.Name:match("^Tier %d$") then
+        if item2:IsA("Instance") and item2.Name:match("^Tier %d$") then
             table.insert(ValuesPortalTier, item2.Name)
         end
     end
 end
 
-local mapDataModule = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("MapData")
-local mapData = require(mapDataModule)
+local mapDataModule = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("MapData")
 local ValuesMaps = {}
+if mapDataModule and mapDataModule:IsA("ModuleScript") then
+    local mapData = require(mapDataModule)
+    if type(mapData) == "table" then
+        for key, value in pairs(mapData) do
+            if type(value) == "table" then
+                table.insert(ValuesMaps, key)
+            end
+        end
+    else
+        warn("mapData is not a valid table!")
+    end
+else
+    warn("MapData module is missing or invalid!")
+end
 
-if type(mapData) == "table" then
-    for key, value in pairs(mapData) do
-        if type(value) == "table" then
-            table.insert(ValuesMaps, key)
+local player = game:GetService("Players").LocalPlayer
+local scroll = player.PlayerGui:FindFirstChild("Inventory") and player.PlayerGui.Inventory:FindFirstChild("BG") and player.PlayerGui.Inventory.BG:FindFirstChild("Scroll")
+local ValuesUnitId = {}
+if scroll then
+    for _, child in ipairs(scroll:GetChildren()) do
+        if child:IsA("Instance") then
+            local unitName = child:FindFirstChild("UnitName")
+            local level = child:FindFirstChild("Level")
+            if unitName and level and unitName:IsA("TextLabel") and level:IsA("TextLabel") then
+                table.insert(ValuesUnitId, unitName.Text .. " | " .. level.Text .. " | " .. child.Name)
+            end
         end
     end
 else
-    warn("mapData is not a valid table!")
-end
-
-local scroll = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Inventory") and game:GetService("Players").LocalPlayer.PlayerGui.Inventory.BG.Scroll
-local ValuesUnitId = {}
-if scroll then
-    local children = scroll:GetChildren()
-    for i, child in ipairs(children) do
-        local blacklist1 = {
-            ["UIGridLayout"] = true,
-            ["UIPadding"] = true,
-        }
-        if not blacklist1[child.Name] then
-            table.insert(ValuesUnitId, child.UnitName.Text .. " | " .. child.Level.Text .. " | " .. child.Name)
-        end
-    end
+    warn("Scroll GUI not found!")
 end
 
 local ValuesItemsToFeed = {}
-local selection = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Feed")
+local selection = player.PlayerGui:FindFirstChild("Feed") and player.PlayerGui.Feed:FindFirstChild("BG") and player.PlayerGui.Feed.BG:FindFirstChild("Content") and player.PlayerGui.Feed.BG.Content:FindFirstChild("Items") and player.PlayerGui.Feed.BG.Content.Items:FindFirstChild("Selection")
 if selection then
-    for _, child in ipairs(selection.BG.Content.Items.Selection:GetChildren()) do
+    for _, child in ipairs(selection:GetChildren()) do
         if not (child:IsA("UIListLayout") or child:IsA("UIPadding") or child.Name == "Padding") then
             table.insert(ValuesItemsToFeed, child.Name)
         end
     end
+else
+    warn("Feed selection GUI not found!")
 end
 
 Library:Notify('Place the unit you will use in the first slot', 5)
