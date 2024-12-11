@@ -57,7 +57,9 @@ function aeuat()
             if (State == Enum.TeleportState.Started or State == Enum.TeleportState.InProgress) and not teleportQueued then
                 teleportQueued = true
                 
-                queue_on_teleport([[ 
+                queue_on_teleport([[         
+                    repeat task.wait() until game:IsLoaded()
+                    wait(1)
                     if getgenv().executed then return end    
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
                 ]])
