@@ -52,6 +52,7 @@ function aeuat()
                 
                 queue_on_teleport([[         
                     repeat task.wait() until game:IsLoaded()
+                    wait(1)
                     if getgenv().executed then return end    
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
                 ]])
@@ -267,78 +268,58 @@ function autoLeave()
 end
 
 function placeUnits()
-    while getgenv().placeUnits do
-        local player = game.Players.LocalPlayer
-        local waveGui = player:FindFirstChild("PlayerGui")
-            and player.PlayerGui:FindFirstChild("MainUI")
-            and player.PlayerGui.MainUI:FindFirstChild("Top")
-            and player.PlayerGui.MainUI.Top:FindFirstChild("Wave")
-        
-        local waveValue = waveGui and waveGui.Value.Layered.Text or nil
-        local beforeSlash = waveValue and string.match(waveValue, "^(.-)/") or waveValue
-        
-        if not waveValue then
-            warn("Wave não encontrado!")
-            wait(1)
-        end
-
-        if getgenv().onlyPlaceinwaveX and beforeSlash ~= tostring(selectedWaveXToPlace) then
-            print("Aguardando wave específica:", selectedWaveXToPlace)
-            wait(1)
-        end
-
-        local path = workspace:FindFirstChild("Map")
-            and workspace.Map:FindFirstChild("Waypoints")
-            and workspace.Map.Waypoints:FindFirstChild(tostring(selectedWaypointToPlaceUnits))
-
-        if not path then
-            warn("Path ou CornerStart não encontrado!")
-            wait(1)
-        end
-
-        local basePosition = path.Position
-        local radius = tonumber(selectedRadius) or 10
+    while getgenv().placeUnits == true do
+        local player = game:GetService("Players").LocalPlayer
         local slots = player:FindFirstChild("Slots")
+        local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+        local placeTower = remotes and remotes:FindFirstChild("PlaceTower")
 
-        if not slots then
-            warn("Slots não encontrados!")
-            wait(1)
+        if not placeTower then
+            warn("PlaceTower RemoteEvent não encontrado.")
+            return
         end
 
-        local placeTower = game.ReplicatedStorage:FindFirstChild("Remotes")
-            and game.ReplicatedStorage.Remotes:FindFirstChild("PlaceTower")
-        
-        if not placeTower then
-            warn("Remote PlaceTower não encontrado!")
-            wait(1)
+        local function placeUnit(unit, position)
+            local towers = workspace:FindFirstChild("Towers")
+            if not towers then
+                warn("Workspace 'Towers' não encontrado.")
+                return
+            end
+
+            local unitExists = false
+            for _, child in ipairs(towers:GetChildren()) do
+                if child.Name == unit then
+                    unitExists = true
+                    break
+                end
+            end
+
+            if not unitExists then
+                wait(.1) 
+                local args = { unit, position }
+                placeTower:FireServer(unpack(args))
+                wait(.5)
+            else
+                wait()
+            end
+        end
+
+        local basePosition = CFrame.new(-164.9412384033203, 197.93942260742188, 15.210136413574219)
+
+        while not selectedMaxSlot do
+            wait(.1)
         end
 
         for i = 1, selectedMaxSlot do
-            local slot = slots:FindFirstChild("Slot" .. i)
+            local slot = slots and slots:FindFirstChild("Slot" .. i)
             if slot and slot.Value then
-                local angle = (i - 1) * (math.pi * 2 / selectedMaxSlot)
-                local offsetX = math.cos(angle) * radius
-                local offsetZ = math.sin(angle) * radius
-                local newPosition = basePosition + Vector3.new(offsetX, 0, offsetZ)
-
-                local towers = workspace:FindFirstChild("Towers")
-                local unitExists = false
-                if towers then
-                    for _, child in ipairs(towers:GetChildren()) do
-                        if child.Name == slot.Value then
-                            unitExists = true
-                            break
-                        end
-                    end
-                end
-
-                if not unitExists then
-                    placeTower:FireServer(slot.Value, CFrame.new(newPosition))
-                    wait(0.5)
-                end
+                local newPosition = basePosition + Vector3.new(i * 2, 0, 0)
+                placeUnit(slot.Value, newPosition)
+            else
+                wait()
             end
         end
-        wait(1)
+        wait()
     end
 end
 
@@ -1385,16 +1366,6 @@ local Tabs = {
 
 local LeftGroupBox = Tabs.Units:AddLeftGroupbox("Place & Upgrade")
 
-LeftGroupBox:AddDropdown('dropdownAutoPlaceWaypoint', {
-    Values = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"},
-    Default = "None",
-    Multi = false,
-    Text = 'Select Waypoint to place units',
-    Callback = function(Value)
-        selectedWaypointToPlaceUnits = Value
-    end
-})
-
 LeftGroupBox:AddDropdown('dropdownSlot', {
     Values = {'1', '2', '3', '4', '5', '6'},
     Default = "None",
@@ -1415,17 +1386,6 @@ LeftGroupBox:AddInput('inputAutoPlaceWaveX', {
     Placeholder = 'Press enter after paste',
     Callback = function(Value)
         selectedWaveXToPlace = Value
-    end
-})
-
-LeftGroupBox:AddInput('inputRadiusToAutoPlaceUnit', {
-    Default = '',
-    Text = "Put Radius Of Auto Place",
-    Numeric = true,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        selectedRadius = Value
     end
 })
 
@@ -1668,7 +1628,7 @@ MenuGroup:AddToggle('huwe', {
     end
 })
 
-MenuGroup:AddToggle('aeuat', {
+MenuGroup:AddToggle('AUTOEXECUTE', {
     Text = 'Auto Execute',
     Default = false,
     Callback = function(Value)

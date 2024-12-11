@@ -78,23 +78,15 @@ end
 
 function retry()
     while getgenv().retry == true do
-        local ResultsUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
-        if ResultsUI then
-            local finished = ResultsUI:FindFirstChild("Finished")
-            if finished.Visible then
-                local player = game:GetService("Players").LocalPlayer
-                local button = player.PlayerGui:WaitForChild("ResultsUI"):WaitForChild("Finished"):WaitForChild("NextRetry")
+        local result = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
 
-                if button then
-                    local GuiService = game:GetService("GuiService")
-                    local VirtualInputManager = game:GetService("VirtualInputManager")
-                    GuiService.SelectedObject = button
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-                    task.wait(0.5)
-                else
-                    warn("Botão 'Next' não encontrado.")
-                end
+        if result and result:IsA("ScreenGui") then
+            if result.Enabled == true then
+                local args = {
+                    [1] = "replay"
+                }
+                
+                game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("set_game_finished_vote"):InvokeServer(unpack(args))
             end
         end
         wait(1)
@@ -113,47 +105,42 @@ end
 
 function autoLeave()
     while getgenv().autoLeave == true do
-        local ResultsUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
-        if ResultsUI then
-            local players = game:GetService("Players")
-            local ignorePlaceIds = {84188796720288}
+        local players = game:GetService("Players")
+        local ignorePlaceIds = {84188796720288}
         
-            local function isPlaceIdIgnored(placeId)
-                for _, id in ipairs(ignorePlaceIds) do
-                    if id == placeId then
-                        return true
+        local function isPlaceIdIgnored(placeId)
+            for _, id in ipairs(ignorePlaceIds) do
+                if id == placeId then
+                    return true
+                end
+            end
+            return false
+        end
+        if getgenv().leaveAtSelectedWave then
+            local wave = workspace:FindFirstChild("_wave_num")
+            if wave then
+                if selectedWaveXToLeave == wave.Value then
+                    local targetPlaceId = 84188796720288
+
+                    if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
+                        game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
                     end
                 end
-                return false
             end
-            if getgenv().leaveAtSelectedWave then
-                local wave = workspace:FindFirstChild("_wave_num")
-                if wave then
-                    if selectedWaveXToLeave == wave.Value then
-                        local targetPlaceId = 84188796720288
+        else
+            local result = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
 
-                        if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
-                            game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
-                        end
+            if result and result:IsA("ScreenGui") then
+                if result.Enabled == true then
+                    local finished = ResultsUI:FindFirstChild("Finished")
+                    if finished.Visible then
+                        game:GetService("ReplicatedStorage").endpoints.client_to_server.teleport_back_to_lobby:InvokeServer()
                     end
+                else
+                    print("PQP")
                 end
             else
-                local finished = ResultsUI:FindFirstChild("Finished")
-                if finished.Visible then
-                    local player = game:GetService("Players").LocalPlayer
-                    local button = player.PlayerGui:WaitForChild("ResultsUI"):WaitForChild("Finished"):WaitForChild("Next")
-
-                    if button then
-                        local GuiService = game:GetService("GuiService")
-                        local VirtualInputManager = game:GetService("VirtualInputManager")
-                        GuiService.SelectedObject = button
-                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-                        task.wait(0.5)
-                    else
-                        warn("Botão 'Next' não encontrado.")
-                    end
-                end
+                print("ResultsUI não foi encontrado ou não é uma ScreenGui")
             end
         end
         wait(1)
