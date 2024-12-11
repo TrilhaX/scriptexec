@@ -113,31 +113,31 @@ end
 
 function autoLeave()
     while getgenv().autoLeave == true do
-        local players = game:GetService("Players")
-        local ignorePlaceIds = {84188796720288}
-    
-        local function isPlaceIdIgnored(placeId)
-            for _, id in ipairs(ignorePlaceIds) do
-                if id == placeId then
-                    return true
-                end
-            end
-            return false
-        end
-        if getgenv().leaveAtSelectedWave then
-            local wave = workspace:FindFirstChild("_wave_num")
-            if wave then
-                if selectedWaveXToLeave == wave.Value then
-                    local targetPlaceId = 84188796720288
-
-                    if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
-                        game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
+        local ResultsUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
+        if ResultsUI then
+            local players = game:GetService("Players")
+            local ignorePlaceIds = {84188796720288}
+        
+            local function isPlaceIdIgnored(placeId)
+                for _, id in ipairs(ignorePlaceIds) do
+                    if id == placeId then
+                        return true
                     end
                 end
+                return false
             end
-        else
-            local ResultsUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
-            if ResultsUI then
+            if getgenv().leaveAtSelectedWave then
+                local wave = workspace:FindFirstChild("_wave_num")
+                if wave then
+                    if selectedWaveXToLeave == wave.Value then
+                        local targetPlaceId = 84188796720288
+
+                        if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
+                            game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
+                        end
+                    end
+                end
+            else
                 local finished = ResultsUI:FindFirstChild("Finished")
                 if finished.Visible then
                     local player = game:GetService("Players").LocalPlayer
@@ -160,20 +160,6 @@ function autoLeave()
     end
 end
 
-function autoSell()
-    while getgenv().autoSell == true do
-
-        wait()
-    end
-end
-
-function placeUnit()
-    while getgenv().placeUnit == true do
-
-        wait()
-    end
-end
-
 function deleteMap()
     while getgenv().deleteMap == true do
         local assets = workspace:FindFirstChild("_map")
@@ -186,7 +172,7 @@ end
 
 function securityMode()
     local players = game:GetService("Players")
-    local ignorePlaceIds = {12886143095, 18583778121}
+    local ignorePlaceIds = {84188796720288}
 
     local function isPlaceIdIgnored(placeId)
         for _, id in ipairs(ignorePlaceIds) do
@@ -200,13 +186,41 @@ function securityMode()
     while getgenv().securityMode do
         if #players:GetPlayers() >= 2 then
             local player1 = players:GetPlayers()[1]
-            local targetPlaceId = 12886143095
+            local targetPlaceId = 84188796720288
 
             if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
                 game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
             end
         end
         wait(1)
+    end
+end
+
+function extremeFpsBoost()
+    if getgenv().extremeFpsBoost == true then
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+        game.Lighting.GlobalShadows = false
+        game.Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Part") or obj:IsA("MeshPart") or obj:IsA("UnionOperation") then
+                obj.Material = Enum.Material.SmoothPlastic
+                obj.Color = Color3.new(.5, .5, .5)
+                obj.Transparency = 0
+                obj.CanCollide = true
+            elseif obj:IsA("Mesh") or obj:IsA("SpecialMesh") or obj:IsA("Decal") or obj:IsA("Texture") then
+                obj:Destroy()
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+                obj.Enabled = false
+            end
+        end
+
+        for _, effect in pairs(game.Lighting:GetChildren()) do
+            if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") then
+                effect.Enabled = false
+            end
+        end
     end
 end
 
@@ -272,7 +286,7 @@ LeftGroupBox:AddToggle("AT", {
 })
 
 LeftGroupBox:AddToggle("ISW", {
-	Text = "Insta Skip Wave",
+	Text = "Instant Skip Wave",
 	Default = false,
 	Callback = function(Value)
         getgenv().instantSkipWave = Value
@@ -295,6 +309,15 @@ LeftGroupBox:AddToggle("RE", {
 	Callback = function(Value)
         getgenv().removeEnemies = Value
         removeEnemies()
+	end,
+})
+
+LeftGroupBox:AddToggle("FPSB", {
+	Text = "FPS Boost",
+	Default = false,
+	Callback = function(Value)
+        getgenv().extremeFpsBoost = Value
+		extremeFpsBoost()
 	end,
 })
 

@@ -32,7 +32,7 @@ local function LoadDirectScript(GameId)
 	if GameName then
 		local success, result = pcall(function()
 			return loadstring(
-				game:HttpGet("https://raw.githubusercontent.com/TrilhaX/scriptexec/main/Games/" .. GameName .. ".lua")
+				game:HttpGet("https://raw.githubusercontent.com/TrilhaX/scriptexec/develop/Games/" .. GameName .. ".lua")
 			)()
 		end)
 
@@ -164,7 +164,7 @@ local function LoadGame(GameId)
 		textLoader.Text = "Loading Script"
 		local success, result = pcall(function()
 			return loadstring(
-				game:HttpGet("https://raw.githubusercontent.com/TrilhaX/scriptexec/main/Games/" .. GameName .. ".lua")
+				game:HttpGet("https://raw.githubusercontent.com/TrilhaX/scriptexec/develop/Games/" .. GameName .. ".lua")
 			)()
 		end)
 
