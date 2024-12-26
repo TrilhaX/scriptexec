@@ -2,11 +2,13 @@ warn("[TEMPEST HUB] Loading Ui")
 wait()
 local repo = "https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/"
 
+--Loading UI Library
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
 local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 Library:Notify("Welcome to Tempest Hub", 5)
 
+--Configuring UI Library
 local Window = Library:CreateWindow({
 	Title = "Tempest Hub | Anime Adventures",
 	Center = true,
@@ -31,6 +33,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local TweenService = game:GetService("TweenService")
 local speed = 1000
 
+--START OF FUNCTIONS
 function hideUIExec()
 	if getgenv().hideUIExec then
 		local windowFrame = game:GetService("CoreGui").LinoriaGui.windowFrame
@@ -276,7 +279,7 @@ function autoEnter()
 			local args = {
 				[1] = "_lobbytemplategreen1",
 				[2] = selectedMap .. "_infinite",
-				[3] = false,
+				[3] = selectedFriendsOnly,
 				[4] = selectedDifficulty,
 			}
 
@@ -315,7 +318,7 @@ function autoEnterRaid()
 		local args = {
 			[1] = "_lobbytemplate214",
 			[2] = selectedMapRaid,
-			[3] = false,
+			[3] = selectedFriendsOnly,
 			[4] = "Hard",
 		}
 
@@ -339,10 +342,9 @@ function autoEnterRaid()
 end
 
 function autoEnterChallenge()
-    while getgenv().autoEnterChallenge == true do
-
-        wait()
-    end
+	while getgenv().autoEnterChallenge == true do
+		wait()
+	end
 end
 
 function CheckErwinCount(erwin1)
@@ -381,12 +383,12 @@ function UseActiveAttackE()
 				print("Ativando ataque para Erwin: ", erwin)
 
 				use_active_attack:InvokeServer(erwin)
-				wait(15.4)
+				wait(15.7)
 			end
 		else
 			print("Número insuficiente de 'Erwins' para ativar o ataque.")
 		end
-		wait(3)
+		wait(2)
 	end
 end
 
@@ -395,53 +397,52 @@ function CheckWendyCount(wendyTable)
 end
 
 function UseActiveAttackW()
-    local player = game.Players.LocalPlayer
-    print("Iniciando a função UseActiveAttackW para", player.Name) -- Imprime o nome do jogador.
+	local player = game.Players.LocalPlayer
+	print("Iniciando a função UseActiveAttackW para", player.Name) -- Imprime o nome do jogador.
 
-    while toggle2 do
-        print("Verificando a presença do jogador e seu personagem...") -- Verificação do jogador e personagem.
-        repeat
-            wait(1)
-        until player and player.Character
-        print("Jogador e personagem encontrados:", player.Name)
+	while toggle2 do
+		print("Verificando a presença do jogador e seu personagem...") -- Verificação do jogador e personagem.
+		repeat
+			wait(1)
+		until player and player.Character
+		print("Jogador e personagem encontrados:", player.Name)
 
-        local wendy1 = {}
-        print("Filtrando unidades Wendy...")
+		local wendy1 = {}
+		print("Filtrando unidades Wendy...")
 
-        for _, unit in pairs(game:GetService("Workspace")._UNITS:GetChildren()) do
-            if (unit.Name == "wendy" or unit.Name == "wendy_halloween") and unit._stats.player.Value == player then
-                table.insert(wendy1, unit)
-                print("Unidade Wendy ou Wendy Halloween encontrada:", unit.Name)
-            end
-        end
+		for _, unit in pairs(game:GetService("Workspace")._UNITS:GetChildren()) do
+			if (unit.Name == "wendy" or unit.Name == "wendy_halloween") and unit._stats.player.Value == player then
+				table.insert(wendy1, unit)
+				print("Unidade Wendy ou Wendy Halloween encontrada:", unit.Name)
+			end
+		end
 
-        print("Número de unidades Wendy ou Wendy Halloween controladas pelo jogador:", #wendy1)
+		print("Número de unidades Wendy ou Wendy Halloween controladas pelo jogador:", #wendy1)
 
-        if CheckWendyCount(wendy1) then
-            print("Número correto de unidades Wendy (4) encontrado, iniciando ataque ativo...")
+		if CheckWendyCount(wendy1) then
+			print("Número correto de unidades Wendy (4) encontrado, iniciando ataque ativo...")
 
-            if not toggle2 then
-                print("A execução do buff foi interrompida, toggle desativado.")
-                break
-            end
-            for _, wendyUnit in ipairs(wendy1) do
-                print("Ativando o ataque para a Wendy:", wendyUnit.Name)
-                game:GetService("ReplicatedStorage")
-                    :WaitForChild("endpoints")
-                    :WaitForChild("client_to_server")
-                    :WaitForChild("use_active_attack")
-                    :InvokeServer(wendyUnit)
-                print("Ataque ativo invocado para a Wendy:", wendyUnit.Name)
-                wait(15.5)
-            end
-        else
-            print("Número incorreto de unidades Wendy, não aplicando buff.")
-        end
+			if not toggle2 then
+				print("A execução do buff foi interrompida, toggle desativado.")
+				break
+			end
+			for _, wendyUnit in ipairs(wendy1) do
+				print("Ativando o ataque para a Wendy:", wendyUnit.Name)
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("endpoints")
+					:WaitForChild("client_to_server")
+					:WaitForChild("use_active_attack")
+					:InvokeServer(wendyUnit)
+				print("Ataque ativo invocado para a Wendy:", wendyUnit.Name)
+				wait(15.8)
+			end
+		else
+			print("Número incorreto de unidades Wendy, não aplicando buff.")
+		end
+		wait(1)
+	end
 
-        wait(3)
-    end
-
-    print("Função UseActiveAttackW finalizada.")
+	print("Função UseActiveAttackW finalizada.")
 end
 
 function CheckLeafyCount(leafy1)
@@ -480,29 +481,179 @@ function UseActiveAttackL()
 				print("Ativando ataque para leafy: ", leafy)
 
 				use_active_attack:InvokeServer(leafy)
-				wait(15.4)
+				wait(15.7)
 			end
 		else
 			print("Número insuficiente de 'leafy' para ativar o ataque.")
 		end
-		wait(3)
+		wait(1)
 	end
 end
 
+function autoGetBattlepass()
+	while getgenv().autoGetBattlepass == true do
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("claim_battlepass_rewards")
+			:InvokeServer()
+		wait(10)
+	end
+end
+
+function autoJoinHolidayEvent()
+	if getgenv().autoJoinHolidayEvent == true then
+		local args = {
+			[1] = "_lobbytemplate_event3",
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("request_join_lobby")
+			:InvokeServer(unpack(args))
+		wait()
+	end
+end
+
+function autoJoinHalloweenEvent()
+	if getgenv().autoJoinHalloweenEvent == true then
+		local args = {
+			[1] = "_lobbytemplate_event4",
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("request_join_lobby")
+			:InvokeServer(unpack(args))
+		wait()
+	end
+end
+
+function autoJoinCursedWomb()
+	if getgenv().autoJoinCursedWomb == true then
+		local args = {
+			[1] = "Items",
+			[2] = 0,
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("save_notifications_state")
+			:InvokeServer(unpack(args))
+		wait(1)
+		local args = {
+			[1] = "_lobbytemplate_event222",
+			[2] = {
+				["selected_key"] = "key_jjk_finger",
+			},
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("request_join_lobby")
+			:InvokeServer(unpack(args))
+		wait()
+	end
+end
+
+function autoBuy()
+	while getgenv().autoBuy == true do
+		local args = {
+			[1] = selectedItemToBuy,
+			[2] = "1",
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("buy_travelling_merchant_item")
+			:InvokeServer(unpack(args))
+		local args = {
+			[1] = "Items",
+			[2] = 1,
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("save_notifications_state")
+			:InvokeServer(unpack(args))
+		wait()
+	end
+end
+
+function autoOpenCapsule()
+	while getgenv().autoOpenCapsule == true do
+		local args = {
+			[1] = selectedCapsule,
+			[2] = {
+				["use10"] = false,
+			},
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("use_item")
+			:InvokeServer(unpack(args))
+		wait()
+	end
+end
+
+function autoFeed()
+	while getgenv().autoFeed == true do
+		local args = {
+			[1] = selectedUnitToFeed,
+			[2] = {
+				[selectedFeed] = 1,
+			},
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("level_up_feed")
+			:InvokeServer(unpack(args))
+		local args = {
+			[1] = "Inventory",
+			[2] = 0,
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("save_notifications_state")
+			:InvokeServer(unpack(args))
+		wait()
+	end
+end
+
+function disableNotifications()
+	local notifications = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("NotificationWindows")
+	if notifications then
+		notifications.Enabled = false
+	end
+end
+
+-- Get Informations for Dropdown or other things
+
 function printChallenges(module)
-    local challengesKeys = {}  -- Table to store keys
-    if module.challenges then
-        for key, value in pairs(module.challenges) do
-            table.insert(challengesKeys, key)  -- Add each key to the table
-        end
-        return challengesKeys  -- Return the table with all keys
-    else
-        print("O módulo não contém 'challenges'.")
-    end
+	local challengesKeys = {}
+	if module.challenges then
+		for key, value in pairs(module.challenges) do
+			table.insert(challengesKeys, key)
+		end
+		return challengesKeys
+	else
+		print("O módulo não contém 'challenges'.")
+	end
 end
 
 local module = require(game:GetService("ReplicatedStorage").src.Data.ChallengeAndRewards)
-
 local challengeValues = printChallenges(module)
 
 local Module2 = require(game:GetService("ReplicatedStorage").src.Data.Maps)
@@ -524,12 +675,67 @@ end
 
 local storyMapValues = getStoryMapValues(Module2)
 
-local portals = game:GetService("ReplicatedStorage").LOBBY_ASSETS._portal_templates
+local portals = game:GetService("ReplicatedStorage").LOBBY_ASSETS:FindFirstChild("_portal_templates")
 local ValuesPortalsMaps = {}
-for i, v in pairs(portals:GetChildren()) do
-    local nameWithoutUnderscore = string.sub(v.Name, 2)
-    table.insert(ValuesPortalsMaps, nameWithoutUnderscore)
+if portals then
+	for i, v in pairs(portals:GetChildren()) do
+		local nameWithoutUnderscore = string.sub(v.Name, 2)
+		table.insert(ValuesPortalsMaps, nameWithoutUnderscore)
+	end
 end
+
+local capsules = game:GetService("ReplicatedStorage").packages.assets:FindFirstChild("ItemModels")
+local ValuesCapsules = {}
+if capsules then
+	for i, v in pairs(capsules:GetChildren()) do
+		if string.find(v.Name:lower(), "capsule") then
+			table.insert(ValuesCapsules, v.Name)
+		end
+	end
+end
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ShopItemsModule = ReplicatedStorage.src.Data:FindFirstChild("ShopItems")
+local ValuesItemShop = {}
+if ShopItemsModule then
+	local ShopItems = require(ShopItemsModule) -- Carrega o módulo
+
+	for key, value in pairs(ShopItems) do
+		if
+			not string.find(key, "bundle")
+			and not string.find(key, "gift")
+			and not string.find(tostring(value), "bundle")
+			and not string.find(tostring(value), "gift")
+		then
+			table.insert(ValuesItemShop, key.Name)
+		end
+	end
+else
+	warn("Módulo ShopItems não encontrado.")
+end
+
+local itemModels = game:GetService("ReplicatedStorage"):WaitForChild("packages"):WaitForChild("assets"):FindFirstChild("ItemModels")
+local ValuesItemsToFeed = {}
+if itemModels then
+    for i, v in pairs(itemModels:GetChildren()) do
+        table.insert(ValuesItemsToFeed, v.Name)
+    end
+else
+    warn("ItemModels not found!")
+end
+
+local fxCache = game:GetService("ReplicatedStorage"):FindFirstChild("_FX_CACHE")
+local ValuesUnitId = {}
+if fxCache then
+    for _, v in pairs(fxCache:GetChildren()) do
+        if v.Name == "CollectionUnitFrame" then  -- Ensure "CollectionUnitFrame" is treated as a string here
+            local collectionUnitFrame = v  -- Correctly reference the object as 'collectionUnitFrame'
+            table.insert(ValuesUnitId,collectionUnitFrame.name.Text .. " | Level: " .. collectionUnitFrame.Main.Level.Text .. " | " .. collectionUnitFrame._uuid.Value)
+        end
+    end
+end
+
+--Start of UI
 
 local Tabs = {
 	Main = Window:AddTab("Main"),
@@ -609,6 +815,122 @@ LeftGroupBox:AddToggle("ASW", {
 	end,
 })
 
+local TabBox2 = Tabs.Main:AddRightTabbox()
+
+local Tab1 = TabBox2:AddTab("Extra")
+
+Tab1:AddToggle("AGB", {
+	Text = "Auto Get Battlepass",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoGetBattlepass = Value
+		autoGetBattlepass()
+	end,
+})
+
+Tab1:AddToggle("DN", {
+	Text = "Disable Notifications",
+	Default = false,
+	Callback = function(Value)
+		getgenv().disableNotifications = Value
+		disableNotifications()
+	end,
+})
+
+Tab1:AddToggle("FO", {
+	Text = "Friends Only",
+	Default = false,
+	Callback = function(Value)
+		selectedFriendsOnly = Value
+	end,
+})
+
+Tab1:AddDropdown("dropdownSelectCapsule", {
+	Values = ValuesCapsules,
+	Default = "None",
+	Multi = false,
+	Text = "Select Unit to Feed",
+	Callback = function(Value)
+		selectedCapsule = Value
+	end,
+})
+
+Tab1:AddToggle("AOC", {
+	Text = "Auto Open Capsule",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoOpenCapsule = Value
+		autoOpenCapsule()
+	end,
+})
+
+local Tab2 = TabBox2:AddTab("Event")
+
+Tab2:AddToggle("AJCW", {
+	Text = "Auto Join Cursed Womb",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoJoinCursedWomb = Value
+		autoJoinCursedWomb()
+	end,
+})
+
+Tab2:AddToggle("AJHE", {
+	Text = "Auto Join Halloween Event",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoJoinHalloweenEvent = Value
+		autoJoinHalloweenEvent()
+	end,
+})
+
+Tab2:AddToggle("AJHOE", {
+	Text = "Auto Join Holiday Event",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoJoinHolidayEvent = Value
+		autoJoinHolidayEvent()
+	end,
+})
+
+local TabBox = Tabs.Main:AddRightTabbox()
+
+local Tab1 = TabBox:AddTab("Passive")
+
+Tab1:AddLabel("W.I.P")
+
+local Tab2 = TabBox:AddTab("Feed")
+
+Tab2:AddDropdown("FeedUnit", {
+	Values = ValuesUnitId,
+	Default = "None",
+	Multi = false,
+	Text = "Select Unit",
+
+	Callback = function(value)
+		selectedUnitToFeed = value:match(".* | .* | (.+)")
+	end,
+})
+
+Tab2:AddDropdown("dropdownSelectItemsToFeed", {
+	Values = ValuesItemsToFeed,
+	Default = "None",
+	Multi = false,
+	Text = "Select Unit to Feed",
+	Callback = function(Value)
+		selectedFeed = Value
+	end,
+})
+
+Tab2:AddToggle("AFEED", {
+	Text = "Auto Feed",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoFeed = Value
+		autoFeed()
+	end,
+})
+
 local Tabs = {
 	Farm = Window:AddTab("Farm"),
 }
@@ -662,7 +984,7 @@ LeftGroupBox:AddToggle("AES", {
 
 local RightGroupbox = Tabs.Farm:AddRightGroupbox("Challenge")
 
-RightGroupbox:AddDropdown("dropdownSelectDifficultyStory", {
+RightGroupbox:AddDropdown("dropdownChallengeMap", {
 	Values = storyMapValues,
 	Default = "None",
 	Multi = false,
@@ -674,7 +996,7 @@ RightGroupbox:AddDropdown("dropdownSelectDifficultyStory", {
 	end,
 })
 
-RightGroupbox:AddDropdown("dropdownSelectActStory", {
+RightGroupbox:AddDropdown("dropdownSelectChallenge", {
 	Values = challengeValues,
 	Default = "None",
 	Multi = false,
@@ -686,7 +1008,7 @@ RightGroupbox:AddDropdown("dropdownSelectActStory", {
 	end,
 })
 
-RightGroupbox:AddToggle("AES", {
+RightGroupbox:AddToggle("AENTER", {
 	Text = "Auto Enter",
 	Default = false,
 	Callback = function(Value)
@@ -738,6 +1060,35 @@ LeftGroupBox:AddToggle("Auto Buff Leafy", {
 	end,
 })
 
+local Tabs = {
+	Shop = Window:AddTab("Shop"),
+}
+
+local LeftGroupBox = Tabs.Shop:AddLeftGroupbox("Shop")
+
+LeftGroupBox:AddDropdown("dropdownSelectItemToBuy", {
+	Values = ValuesItemsToFeed,
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Item",
+
+	Callback = function(Value)
+		selectedItemToBuy = Value
+	end,
+})
+
+LeftGroupBox:AddToggle("ABS", {
+	Text = "Auto Buy",
+	Default = false,
+
+	Callback = function(Value)
+		getgenv().autoBuy = Value
+		autoBuy()
+	end,
+})
+
+--UI IMPORTANT THINGS
 Library:SetWatermarkVisibility(true)
 
 local FrameTimer = tick()
@@ -816,8 +1167,9 @@ Library.ToggleKeybind = Options.MenuKeybind
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 
+--Save Settings
 ThemeManager:SetFolder("Tempest Hub")
-SaveManager:SetFolder("Tempest Hub/_ALS_")
+SaveManager:SetFolder("Tempest Hub/_AA_")
 
 SaveManager:BuildConfigSection(TabsUI["UI Settings"])
 
@@ -825,7 +1177,7 @@ ThemeManager:ApplyToTab(TabsUI["UI Settings"])
 
 SaveManager:LoadAutoloadConfig()
 
-local GameConfigName = "_ALS_"
+local GameConfigName = "_AA_"
 local player = game.Players.LocalPlayer
 SaveManager:Load(player.Name .. GameConfigName)
 spawn(function()
@@ -837,6 +1189,7 @@ spawn(function()
 	end
 end)
 
+--Anti AFK
 for i, v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
 	v:Disable()
 end
