@@ -1,9 +1,11 @@
-local AllowedPlaceIds = { 12886143095, 17046374415, 16732694052, 84188796720288 }
+local AllowedPlaceIds = { 12886143095, 17046374415, 16732694052, 84188796720288, 8304191830, 10450270085 }
 local Games = {
 	["ALS"] = { 12886143095, 18583778121, 12900046592 },
 	["AnimeReborn"] = { 17046374415, 17895401292, 108408425375836, 114706988516358 },
 	["Fisch"] = { 16732694052 },
-	["AnimeRealms"] = { 84188796720288, 100222912269336 }
+	["AnimeRealms"] = { 84188796720288, 100222912269336 },
+	["AA"] = { 8304191830, 8349889591, 14229762361 },
+	["JJI"] = { 10450270085 }
 }
 
 local function IsPlaceAllowed(PlaceId)
@@ -32,7 +34,7 @@ local function LoadDirectScript(GameId)
 	if GameName then
 		local success, result = pcall(function()
 			return loadstring(
-				game:HttpGet("https://raw.githubusercontent.com/TrilhaX/scriptexec/main/Games/" .. GameName .. ".lua")
+				game:HttpGet("https://raw.githubusercontent.com/TrilhaX/scriptexec/develop/Games/" .. GameName .. ".lua")
 			)()
 		end)
 
@@ -164,7 +166,7 @@ local function LoadGame(GameId)
 		textLoader.Text = "Loading Script"
 		local success, result = pcall(function()
 			return loadstring(
-				game:HttpGet("https://raw.githubusercontent.com/TrilhaX/scriptexec/main/Games/" .. GameName .. ".lua")
+				game:HttpGet("https://raw.githubusercontent.com/TrilhaX/scriptexec/develop/Games/" .. GameName .. ".lua")
 			)()
 		end)
 
