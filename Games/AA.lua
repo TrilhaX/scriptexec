@@ -159,6 +159,8 @@ end
 
 function deletemap()
 	if getgenv().deletemap == true then
+		repeat task.wait() until game:IsLoaded()
+		wait(5)
 		local map = workspace:FindFirstChild("_map")
 		local bases = workspace:FindFirstChild("_BASES")
 		local waterBlocks = workspace:FindFirstChild("_water_blocks")
@@ -221,32 +223,44 @@ end
 
 function autoreplay()
 	while getgenv().autoreplay == true do
-		local args = {
-			[1] = "replay",
-		}
+		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
+		if resultUI and resultUI.Enabled then
+			local args = {
+				[1] = "replay",
+			}
 
-		game:GetService("ReplicatedStorage")
-			:WaitForChild("endpoints")
-			:WaitForChild("client_to_server")
-			:WaitForChild("set_game_finished_vote")
-			:InvokeServer(unpack(args))
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("endpoints")
+				:WaitForChild("client_to_server")
+				:WaitForChild("set_game_finished_vote")
+				:InvokeServer(unpack(args))
+		end
+		wait()
 	end
 end
 
 function autoleave()
 	while getgenv().autoleave == true do
-		game:GetService("ReplicatedStorage").endpoints.client_to_server.teleport_back_to_lobby:InvokeServer("leave")
+		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
+		if resultUI and resultUI.Enabled then
+			game:GetService("ReplicatedStorage").endpoints.client_to_server.teleport_back_to_lobby:InvokeServer("leave")
+		end
+		wait()
 	end
 end
 
 function autonext()
 	while getgenv().autonext == true do
-		local args = {
-			[1] = "next_story",
-		}
+		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
+		if resultUI and resultUI.Enabled then
+			local args = {
+				[1] = "next_story",
+			}
 
-		game:GetService("ReplicatedStorage").endpoints.client_to_server.set_game_finished_vote
-			:InvokeServer(unpack(args))
+			game:GetService("ReplicatedStorage").endpoints.client_to_server.set_game_finished_vote
+				:InvokeServer(unpack(args))
+		end
+		wait()
 	end
 end
 
