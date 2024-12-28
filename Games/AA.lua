@@ -697,7 +697,7 @@ function autoPlace()
 				local function getRandomWaypoint(existingPositions)
 					local lane = nil
 					while not lane do
-						lane = workspace._BASES.player.LANES["1"]
+						lane = workspace._BASES.player.LANES:FindFirstChild("1")
 						wait(1)
 					end
 		
@@ -1298,22 +1298,6 @@ if fxCache then
         end
     end
 end
-
-local function printLaneContents()
-    local lane = nil
-    while not lane do
-        lane = workspace._BASES.player.LANES["1"]
-        wait(1)
-    end
-
-    for _, child in pairs(lane:GetChildren()) do
-        if child.Name ~= "_formation" then
-            return child.Name
-        end
-    end
-end
-
-local WaypointsValue = printLaneContents()
 
 --Start of UI
 
