@@ -993,7 +993,7 @@ end
 
 function webhook()
     while getgenv().webhook == true do
-        local discordWebhookUrl = "https://discord.com/api/webhooks/1303406324452687935/ou5GoCcOkvH-iRy9hhPoGJnJBs1B8edcin3QNq6UcU--wIhyDltFGmt7j7g-wg9wfE0E"
+        local discordWebhookUrl = urlwebhook
         local resultUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
 
         if resultUI and resultUI.Enabled == true then
