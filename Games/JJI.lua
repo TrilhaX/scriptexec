@@ -134,26 +134,46 @@ end
 function autoRetry()
 	while getgenv().autoRetry == true do
 		local ReadyScreen = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ReadyScreen")
-		if ReadyScreen.Enabled == true then
-			local Drops = workspace.Objects:FindFirstChild("Drops")
-			local chest = Drops:FindFirstChild("Chest")
-			wait(2)
-			if getgenv().autoChest then
-				if chest then
-					wait()
+		if ReadyScreen and ReadyScreen.Enabled == true then
+			local buttonRetry = ReadyScreen.Frame.Replay
+			if buttonRetry and buttonRetry.Visible == true then
+				local Drops = workspace.Objects:FindFirstChild("Drops")
+				local chest = Drops and Drops:FindFirstChild("Chest")
+				local loot = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Loot")
+				wait(2)
+				if getgenv().autoChest then
+					wait(2)
+					local dropsChildren = Drops:GetChildren()
+					if #dropsChildren ~= 0 or loot.Enabled == true then
+						for i, v in pairs(Drops:GetChildren()) do
+							if v:FindFirstChild("PlayerOwned") and v.PlayerOwned.Value == game.Players.LocalPlayer then
+								wait()
+							elseif loot.Enabled == true then
+								wait()
+							else
+								local GuiService = game:GetService("GuiService")
+								local VirtualInputManager = game:GetService("VirtualInputManager")
+								GuiService.SelectedObject = buttonRetry
+								VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+								VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+								break
+							end
+						end
+					else
+						local GuiService = game:GetService("GuiService")
+						local VirtualInputManager = game:GetService("VirtualInputManager")
+						GuiService.SelectedObject = game:GetService("Players").LocalPlayer.PlayerGui.ReadyScreen.Frame.Replay
+						VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+						VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+					end
 				else
 					local GuiService = game:GetService("GuiService")
 					local VirtualInputManager = game:GetService("VirtualInputManager")
-					GuiService.SelectedObject = ReadyScreen.Frame.Replay
+					GuiService.SelectedObject = game:GetService("Players").LocalPlayer.PlayerGui.ReadyScreen.Frame.Replay
 					VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
 					VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+					break
 				end
-			else
-				local GuiService = game:GetService("GuiService")
-				local VirtualInputManager = game:GetService("VirtualInputManager")
-				GuiService.SelectedObject = ReadyScreen.Frame.Replay
-				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
 			end
 		end
 		wait()
@@ -168,17 +188,25 @@ function autoLeave()
 		if ReadyScreen.Enabled == true then
 			local Drops = workspace.Objects:FindFirstChild("Drops")
 			local chest = Drops:FindFirstChild("Chest")
-			wait(2)
+			local loot = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Loot")
+			wait(1)
 			if getgenv().autoChest then
-				if chest then
-					wait()
-				else
-					GuiService.SelectedObject = ReadyScreen.Frame.Replay
-					VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-					VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+				for i, v in pairs(Drops:GetChildren()) do
+					if v:FindFirstChild("PlayerOwned") and v.PlayerOwned.Value == game.Players.LocalPlayer then
+						wait()
+					elseif loot.Enabled == true then
+						wait()
+						GuiService.SelectedObject = game:GetService("Players").LocalPlayer.PlayerGui.ReadyScreen.Frame.Teleport
+						VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+						VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+					else
+						GuiService.SelectedObject = game:GetService("Players").LocalPlayer.PlayerGui.ReadyScreen.Frame.Teleport
+						VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+						VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+					end
 				end
 			else
-				GuiService.SelectedObject = ReadyScreen.Frame.Teleport
+				GuiService.SelectedObject = game:GetService("Players").LocalPlayer.PlayerGui.ReadyScreen.Frame.Teleport
 				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
 				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
 			end
@@ -189,27 +217,40 @@ end
 
 function autoChest()
     while getgenv().autoChest == true do
-		local GuiService = game:GetService("GuiService")
-		local VirtualInputManager = game:GetService("VirtualInputManager")
-		local Drops = workspace.Objects:FindFirstChild("Drops")
-		local loot = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Loot")
-		
-		for i, v in pairs(Drops:GetChildren()) do
-			if v:FindFirstChild("PlayerOwned") and v.PlayerOwned.Value == game.Players.LocalPlayer then
-				game:GetService('VirtualInputManager'):SendKeyEvent(true, 'E', false, game)
-				game:GetService('VirtualInputManager'):SendKeyEvent(false, 'E', false, game)
-			else
-				if loot and loot.Enabled then
-					GuiService.SelectedObject = loot.Frame.Flip
-					VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-					VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-				end
-			end
-		end		
+        local GuiService = game:GetService("GuiService")
+        local VirtualInputManager = game:GetService("VirtualInputManager")
+        local Drops = workspace.Objects:FindFirstChild("Drops")
+        local loot = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Loot")
+
+        for i, v in pairs(Drops:GetChildren()) do
+            if v:FindFirstChild("PlayerOwned") and v.PlayerOwned.Value == game.Players.LocalPlayer then
+                game:GetService('VirtualInputManager'):SendKeyEvent(true, 'E', false, game)
+                game:GetService('VirtualInputManager'):SendKeyEvent(false, 'E', false, game)
+                wait(.5)
+                if loot.Enabled == true then
+					while loot.Enabled == true do
+						GuiService.SelectedObject = loot.Frame.Flip
+						VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+						VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+						wait()
+					end
+                else
+                    print("Loot is disabled, skipping interaction.")
+                end
+            else
+                
+                if loot.Enabled == true then
+                    GuiService.SelectedObject = loot.Frame.Flip
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+                else
+                    print("Loot is disabled, skipping interaction.")
+                end
+            end
+        end        
         wait()
     end
 end
-
 
 function HitKill()
 	while getgenv().HitKill == true do
