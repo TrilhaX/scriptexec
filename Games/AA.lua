@@ -53,7 +53,7 @@ function aeuat()
 
 				queue_on_teleport([[         
                     repeat task.wait() until game:IsLoaded()
-                    wait(1)
+                    wait(3)
                     if getgenv().executed then return end    
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
                 ]])
@@ -220,6 +220,7 @@ function autoreplay()
 	while getgenv().autoreplay == true do
 		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
 		if resultUI and resultUI.Enabled == true then
+			wait(3)
 			local args = {
 				[1] = "replay",
 			}
@@ -238,6 +239,7 @@ function autoleave()
 	while getgenv().autoleave == true do
 		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
 		if resultUI and resultUI.Enabled == true then
+			wait(3)
 			game:GetService("ReplicatedStorage").endpoints.client_to_server.teleport_back_to_lobby:InvokeServer("leave")
 		end
 		wait()
@@ -248,6 +250,7 @@ function autonext()
 	while getgenv().autonext == true do
 		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
 		if resultUI and resultUI.Enabled == true then
+			wait(3)
 			local args = {
 				[1] = "next_story",
 			}

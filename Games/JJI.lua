@@ -131,29 +131,156 @@ local function GetCFrame(obj, height, angle)
 	return cframe
 end
 
-function HitKill()
-	while getgenv().HitKill == true do
-		local mobs = workspace.Objects:FindFirstChild("Mobs")
-
-		if mobs then
-			for i, v in pairs(mobs:GetChildren()) do
-				local health = v.Humanoid
-				health.Health = 0
+function autoRetry()
+	while getgenv().autoRetry == true do
+		local ReadyScreen = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ReadyScreen")
+		if ReadyScreen.Enabled == true then
+			local Drops = workspace.Objects:FindFirstChild("Drops")
+			local chest = Drops:FindFirstChild("Chest")
+			wait(2)
+			if getgenv().autoChest then
+				if chest then
+					wait()
+				else
+					local GuiService = game:GetService("GuiService")
+					local VirtualInputManager = game:GetService("VirtualInputManager")
+					GuiService.SelectedObject = ReadyScreen.Frame.Replay
+					VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+					VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+				end
+			else
+				local GuiService = game:GetService("GuiService")
+				local VirtualInputManager = game:GetService("VirtualInputManager")
+				GuiService.SelectedObject = ReadyScreen.Frame.Replay
+				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
 			end
 		end
 		wait()
 	end
 end
 
+function autoLeave()
+	while getgenv().autoLeave == true do
+		local ReadyScreen = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ReadyScreen")
+		if ReadyScreen.Enabled == true then
+			local Drops = workspace.Objects:FindFirstChild("Drops")
+			local chest = Drops:FindFirstChild("Chest")
+			
+			if getgenv().autoChest == true then
+				if not chest then
+					local GuiService = game:GetService("GuiService")
+					local VirtualInputManager = game:GetService("VirtualInputManager")
+					GuiService.SelectedObject = ReadyScreen.Frame.Replay
+					VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+					VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+				end
+			else
+				local GuiService = game:GetService("GuiService")
+				local VirtualInputManager = game:GetService("VirtualInputManager")
+				GuiService.SelectedObject = ReadyScreen.Frame.Teleport
+				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+			end
+		end
+		wait()
+	end
+end
+
+function autoChest()
+	while getgenv().autoChest == true do
+		local GuiService = game:GetService("GuiService")
+		local VirtualInputManager = game:GetService("VirtualInputManager")
+		local Drops = workspace.Objects:FindFirstChild("Drops")
+		local chest = Drops:FindFirstChild("Chest")
+		local loot = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Loot")
+		
+		if chest then
+			game:GetService('VirtualInputManager'):SendKeyEvent(true,'E',false,game)
+		else
+			if loot and loot.Enabled then
+				GuiService.SelectedObject = loot.Frame.Flip
+				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+			end
+		end
+		wait()
+	end
+end
+
+function HitKill()
+	while getgenv().HitKill == true do
+		local mobs = workspace.Objects:FindFirstChild("Mobs")
+
+		if mobs then
+			for i, v in pairs(mobs:GetChildren()) do
+				local humanoid = v:FindFirstChild("Humanoid")
+				if humanoid then
+					local health = v.Humanoid
+					health.Health = 0
+				end
+			end
+		end
+		wait()
+	end
+end
+
+function HitKillBoss()
+    while getgenv().HitKillBoss == true do
+        local mobs = workspace.Objects:FindFirstChild("Mobs")
+
+        if mobs then
+            local bossSpawn = workspace.Objects.Spawns:FindFirstChild("BossSpawn")
+            if bossSpawn then
+                local targetCFrame = GetCFrame(bossSpawn)
+                local tween = tweenModel(game.Players.LocalPlayer.Character, targetCFrame)
+                tween:Play()
+                tween.Completed:Wait()
+				wait(.5)
+				local args = {
+					[1] = "Fists"
+				}
+				
+				game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("ChangeWeapon"):FireServer(unpack(args))
+				wait(.3)
+				local args = {
+					[1] = 1,
+					[2] = {}
+				}
+				
+				game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("M1"):FireServer(unpack(args))
+				for _, mob in pairs(mobs:GetChildren()) do
+					local humanoid = mob:FindFirstChild("Humanoid")
+	
+					if humanoid then
+						if not mob:FindFirstChild("BossSpawn") then
+							humanoid.Health = 0
+						end
+					end
+				end
+            end
+
+            for _, mob in pairs(mobs:GetChildren()) do
+                local humanoid = mob:FindFirstChild("Humanoid")
+
+                if humanoid then
+                    if not mob:FindFirstChild("BossSpawn") then
+                        humanoid.Health = 0
+                    end
+                end
+            end
+        end
+        wait()
+    end
+end
+
+
 function getSkill()
 	local keybinds = game:GetService("Players").LocalPlayer.ReplicatedData.techniques.innates
 
 	for i, v in pairs(keybinds:GetChildren()) do
 		if selectedKeybind == v.Name then
-			print(selectedKeybind)
-			print(selectedInate)
 			v.Value = selectedInate
-			print(v.Value)
 		end
 	end
 	wait()
@@ -174,6 +301,33 @@ function tpToItem()
 			tween.Completed:Wait()
 			break
 		end
+	end
+end
+
+function autoSelectBoss()
+	if getgenv().autoSelectBoss == true then
+		local args = {
+			[1] = "Boss",
+			[2] = selectedBoss,
+			[3] = selectedDifficulty,
+		}
+		
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Raids"):WaitForChild("QuickStart"):InvokeServer(unpack(args))			
+		wait()
+	end
+end
+
+function unlockAllAbiliti()
+	while getgenv().unlockAllAbiliti == true do
+		local maestrias = game:GetService("Players").LocalPlayer.ReplicatedData:FindFirstChild("masteries")
+
+		if maestrias then
+			for i, v in pairs(maestrias:GetChildren())do
+				v.level.Value = 1000
+				v.exp.Value = 999999999999999999
+			end
+		end
+		wait()
 	end
 end
 
@@ -210,6 +364,18 @@ for _, v in pairs(drops:GetChildren()) do
     end
 end
 
+local RaidInfo = game:GetService("ReplicatedStorage").Dependencies.RaidInfo
+
+local ValuesBoss = {}
+if RaidInfo:IsA("ModuleScript") then
+    local raidData = require(RaidInfo)
+    for k, _ in pairs(raidData) do
+        table.insert(ValuesBoss, k)
+    end
+else
+    print("RaidInfo não é um módulo script. Tipo:", RaidInfo.ClassName)
+end
+
 local Tabs = {
 	Main = Window:AddTab("Main"),
 }
@@ -225,7 +391,52 @@ LeftGroupBox:AddToggle("HK", {
 	end,
 })
 
-LeftGroupBox:AddDropdown("FeedUnit", {
+LeftGroupBox:AddToggle("HKIB", {
+	Text = "Hit Kill In Boss",
+	Default = false,
+	Callback = function(Value)
+		getgenv().HitKillBoss = Value
+		HitKillBoss()
+	end,
+})
+
+LeftGroupBox:AddToggle("AR", {
+	Text = "Auto Retry",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoRetry = Value
+		autoRetry()
+	end,
+})
+
+LeftGroupBox:AddToggle("AL", {
+	Text = "Auto Leave",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoLeave = Value
+		autoLeave()
+	end,
+})
+
+LeftGroupBox:AddToggle("UAB", {
+	Text = "Unlock All Abilities",
+	Default = false,
+	Callback = function(Value)
+		getgenv().unlockAllAbiliti = Value
+		unlockAllAbiliti()
+	end,
+})
+
+LeftGroupBox:AddToggle("AGC", {
+	Text = "Auto Get Chest",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoChest = Value
+		autoChest()
+	end,
+})
+
+LeftGroupBox:AddDropdown("Keybinds", {
 	Values = ValuesKeybinds,
 	Default = "None",
 	Multi = false,
@@ -236,7 +447,7 @@ LeftGroupBox:AddDropdown("FeedUnit", {
 	end,
 })
 
-LeftGroupBox:AddDropdown("dropdownSelectItemsToFeed", {
+LeftGroupBox:AddDropdown("InatesDropdown", {
 	Values = ValuesInates,
 	Default = "None",
 	Multi = false,
@@ -254,7 +465,7 @@ local MyButton = LeftGroupBox:AddButton({
 	DoubleClick = false,
 })
 
-LeftGroupBox:AddDropdown("dropdownSelectItemsToFeed", {
+LeftGroupBox:AddDropdown("dropdownDropsItem", {
 	Values = ValuesDrops,
 	Default = "None",
 	Multi = false,
@@ -278,6 +489,53 @@ local MyButton = LeftGroupBox:AddButton({
 		Options.dropdownSelectItemsToFeed:SetValue(ValuesDrops)
 	end,
 	DoubleClick = false,
+})
+
+local RightGroupbox = Tabs.Main:AddRightGroupbox("Farm")
+
+RightGroupbox:AddDropdown("dropdownType", {
+    Values = {"Boss", "Investigation"},
+    Default = "None",
+    Multi = false,
+
+    Text = "Select Type",
+
+    Callback = function(Value)
+        selectedType = Value
+    end,
+})
+
+RightGroupbox:AddDropdown("drodpownBosses", {
+    Values = ValuesBoss,
+    Default = "None",
+    Multi = false,
+
+    Text = "Select Boss",
+
+    Callback = function(Value)
+        selectedBoss = Value
+    end,
+})
+
+RightGroupbox:AddDropdown("dropdownDifficultyBosses", {
+    Values = {"easy", "medium", "hard", "nightmare"},
+    Default = "None",
+    Multi = false,
+
+    Text = "Select Difficulty",
+
+    Callback = function(Value)
+        selectedDifficulty = Value
+    end,
+})
+
+RightGroupbox:AddToggle("AB", {
+    Text = "Auto Boss",
+    Default = false,
+    Callback = function(Value)
+        getgenv().autoSelectBoss = Value
+        autoSelectBoss()
+    end,
 })
 
 --UI IMPORTANT THINGS
