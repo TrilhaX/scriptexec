@@ -582,7 +582,11 @@ end
 
 local ValuesInates = {}
 local ValuesKeybinds = {}
-local keybinds = game:GetService("Players").LocalPlayer.ReplicatedData.techniques.innates
+local keybinds = game:GetService("Players").LocalPlayer:FindFirstChild("ReplicatedData")
+
+if ReplicatedData then
+	local keybinds = ReplicatedData.techniques.innates
+end
 
 for i, v in pairs(keybinds:GetChildren()) do
 	table.insert(ValuesKeybinds, v.Name)
