@@ -1,3 +1,5 @@
+repeat task.wait() until game:IsLoaded()
+wait(10)
 warn("[TEMPEST HUB] Loading Ui")
 wait()
 local repo = "https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/"
@@ -162,21 +164,21 @@ function autoRetry()
 					else
 						local GuiService = game:GetService("GuiService")
 						local VirtualInputManager = game:GetService("VirtualInputManager")
-						GuiService.SelectedObject = game:GetService("Players").LocalPlayer.PlayerGui.ReadyScreen.Frame.Replay
+						GuiService.SelectedObject = buttonRetry
 						VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
 						VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
 					end
 				else
 					local GuiService = game:GetService("GuiService")
 					local VirtualInputManager = game:GetService("VirtualInputManager")
-					GuiService.SelectedObject = game:GetService("Players").LocalPlayer.PlayerGui.ReadyScreen.Frame.Replay
+					GuiService.SelectedObject = buttonRetry
 					VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
 					VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
 					break
 				end
 			end
 		end
-		wait(1)
+		wait()
 	end
 end
 
@@ -184,8 +186,8 @@ function autoLeave()
 	while getgenv().autoLeave == true do
 		local ReadyScreen = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ReadyScreen")
 		if ReadyScreen and ReadyScreen.Enabled == true then
-			local buttonRetry = ReadyScreen.Frame.Teleport
-			if buttonRetry and buttonRetry.Visible == true then
+			local buttonLeave = ReadyScreen.Frame.Teleport
+			if buttonLeave and buttonLeave.Visible == true then
 				local Drops = workspace.Objects:FindFirstChild("Drops")
 				local chest = Drops and Drops:FindFirstChild("Chest")
 				local loot = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Loot")
@@ -199,7 +201,7 @@ function autoLeave()
 							elseif loot.Enabled == true then
 								wait()
 							else
-								GuiService.SelectedObject = buttonRetry
+								GuiService.SelectedObject = buttonLeave
 								VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
 								VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
 							end
@@ -207,7 +209,7 @@ function autoLeave()
 					end
 				end
 			else
-				GuiService.SelectedObject = buttonRetry
+				GuiService.SelectedObject = buttonLeave
 				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
 				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
 			end
@@ -582,52 +584,71 @@ end
 
 local ValuesInates = {}
 local ValuesKeybinds = {}
-local keybinds = game:GetService("Players").LocalPlayer:FindFirstChild("ReplicatedData")
+local ValuesDrops = {}
+local ValuesBoss = {}
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedData = LocalPlayer:FindFirstChild("ReplicatedData")
 
 if ReplicatedData then
-    local keybinds = ReplicatedData.techniques.innates
-    if keybinds and #keybinds:GetChildren() > 0 then
-        for i, v in pairs(keybinds:GetChildren()) do
-            table.insert(ValuesKeybinds, v.Name)
+    local techniques = ReplicatedData:FindFirstChild("techniques")
+    if techniques then
+        local innates = techniques:FindFirstChild("innates")
+        if innates and innates:IsA("Folder") and #innates:GetChildren() > 0 then
+            for _, v in ipairs(innates:GetChildren()) do
+                table.insert(ValuesKeybinds, v.Name)
+            end
         end
     end
 end
 
-local skills = game:GetService("ReplicatedStorage").Skills
-
-for i, v in pairs(skills:GetChildren()) do
-	table.insert(ValuesInates, v.Name)
+local skills = ReplicatedStorage:FindFirstChild("Skills")
+if skills and skills:IsA("Folder") then
+    for _, v in ipairs(skills:GetChildren()) do
+        table.insert(ValuesInates, v.Name)
+    end
 end
 
-local drops = workspace.Objects.Drops
-local ValuesDrops = {}
+local drops = workspace:FindFirstChild("Objects")
+if drops and drops:IsA("Folder") then
+    local dropsFolder = drops:FindFirstChild("Drops")
+    if dropsFolder and dropsFolder:IsA("Folder") then
+        local function contains(table, value)
+            for _, v in pairs(table) do
+                if v == value then
+                    return true
+                end
+            end
+            return false
+        end
 
-local function contains(table, value)
-    for _, v in pairs(table) do
-        if v == value then
-            return true
+        for _, v in ipairs(dropsFolder:GetChildren()) do
+            if not contains(ValuesDrops, v.Name) then
+                table.insert(ValuesDrops, v.Name)
+            end
         end
     end
-    return false
 end
 
-for _, v in pairs(drops:GetChildren()) do
-
-    if not contains(ValuesDrops, v.Name) then
-        table.insert(ValuesDrops, v.Name)
-    end
-end
-
-local RaidInfo = game:GetService("ReplicatedStorage").Dependencies.RaidInfo
-
-local ValuesBoss = {}
-if RaidInfo:IsA("ModuleScript") then
-    local raidData = require(RaidInfo)
-    for k, _ in pairs(raidData) do
-        table.insert(ValuesBoss, k)
+local RaidInfo = ReplicatedStorage:FindFirstChild("Dependencies")
+if RaidInfo and RaidInfo:IsA("Folder") then
+    local raidInfoScript = RaidInfo:FindFirstChild("RaidInfo")
+    if raidInfoScript and raidInfoScript:IsA("ModuleScript") then
+        local success, raidData = pcall(require, raidInfoScript)
+        if success and typeof(raidData) == "table" then
+            for k, _ in pairs(raidData) do
+                table.insert(ValuesBoss, k)
+            end
+        else
+            warn("Erro ao carregar o módulo RaidInfo:", raidData)
+        end
+    else
+        warn("RaidInfo não é um ModuleScript ou não existe.")
     end
 else
-    print("RaidInfo não é um módulo script. Tipo:", RaidInfo.ClassName)
+    warn("Dependencies ou RaidInfo não encontrados no ReplicatedStorage.")
 end
 
 local Tabs = {
