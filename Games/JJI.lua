@@ -585,11 +585,12 @@ local ValuesKeybinds = {}
 local keybinds = game:GetService("Players").LocalPlayer:FindFirstChild("ReplicatedData")
 
 if ReplicatedData then
-	local keybinds = ReplicatedData.techniques.innates
-end
-
-for i, v in pairs(keybinds:GetChildren()) do
-	table.insert(ValuesKeybinds, v.Name)
+    local keybinds = ReplicatedData.techniques.innates
+    if keybinds and #keybinds:GetChildren() > 0 then
+        for i, v in pairs(keybinds:GetChildren()) do
+            table.insert(ValuesKeybinds, v.Name)
+        end
+    end
 end
 
 local skills = game:GetService("ReplicatedStorage").Skills
