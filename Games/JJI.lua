@@ -321,7 +321,10 @@ end
 
 
 function getSkill()
-	local keybinds = game:GetService("Players").LocalPlayer.ReplicatedData.techniques.innates
+	local ReplicatedData = game:GetService("Players").LocalPlayer:FindFirstChild("ReplicatedData")
+	if ReplicatedData then
+		local keybinds = ReplicatedData.techniques.innates
+	end
 
 	for i, v in pairs(keybinds:GetChildren()) do
 		if selectedKeybind == v.Name then
