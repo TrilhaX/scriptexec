@@ -53,7 +53,7 @@ function aeuat()
 
 				queue_on_teleport([[         
                     repeat task.wait() until game:IsLoaded()
-                    wait(1)
+                    wait(3)
                     if getgenv().executed then return end    
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
                 ]])
