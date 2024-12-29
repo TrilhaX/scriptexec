@@ -582,6 +582,55 @@ function webhook()
     end
 end
 
+function autoQuest()
+	while getgenv().autoQuest == true do
+		local player = game.Players.LocalPlayer
+			local character = player.Character or player.CharacterAdded:Wait()
+			local questFrame = player:WaitForChild("PlayerGui"):WaitForChild("StorylineDialogue"):WaitForChild("Frame"):FindFirstChild("QuestFrame")
+			local targetCFrame = CFrame.new(-514.074402, 4470.24658, -15614.0771, 0.695504665, -2.04219823e-08, 0.718521595, 4.03495043e-10, 1, 2.80316552e-08, -0.718521595, -1.92062277e-08, 0.695504665)
+		if questFrame and not questFrame.Visible then
+			local tween = tweenModel(character, targetCFrame)
+			tween:Play()
+			tween.Completed:Wait()
+			wait(1)
+
+			local args = {
+				[1] = {
+					type = "Capture",
+					set = "Shijo Town Set",
+					rewards = {
+						essence = 10,
+						cash = 6870,
+						exp = 767376,
+						chestMeter = 55,
+					},
+					rewardsText = "$6870 | 767376 EXP | 10 Mission Essence",
+					difficulty = 2,
+					title = "Capture",
+					level = 292,
+					subtitle = "a point",
+					grade = "Grade 1",
+				},
+			}
+
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Data"):WaitForChild("TakeQuest"):InvokeServer(unpack(args))
+		else
+			local missionItems = workspace:FindFirstChild("Objects"):FindFirstChild("MissionItems")
+			if missionItems then
+				for _, item in ipairs(missionItems:GetChildren()) do
+					if item.Name == player.Name then
+						local tween = tweenModel(character, item.CFrame)
+						tween:Play()
+						tween.Completed:Wait()
+						wait()
+					end
+				end
+			end
+		end
+		wait()
+	end
+end
+
 local ValuesInates = {}
 local ValuesKeybinds = {}
 local ValuesDrops = {}
@@ -840,6 +889,14 @@ RightGroupbox:AddToggle("AB", {
     end,
 })
 
+RightGroupbox:AddToggle("AB", {
+    Text = "Auto Quest",
+    Default = false,
+    Callback = function(Value)
+        getgenv().autoQuest = Value
+        autoQuest()
+    end,
+})
 
 local RightGroupbox = Tabs.Main:AddRightGroupbox("Webhook")
 
