@@ -176,7 +176,7 @@ function autoRetry()
 				end
 			end
 		end
-		wait()
+		wait(1)
 	end
 end
 
@@ -223,31 +223,36 @@ function autoChest()
         local Drops = workspace.Objects:FindFirstChild("Drops")
         local loot = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Loot")
 
-        for i, v in pairs(Drops:GetChildren()) do
-            if v:FindFirstChild("PlayerOwned") and v.PlayerOwned.Value == game.Players.LocalPlayer then
-                game:GetService('VirtualInputManager'):SendKeyEvent(true, 'E', false, game)
-                game:GetService('VirtualInputManager'):SendKeyEvent(false, 'E', false, game)
-                wait(.5)
-                if loot.Enabled == true then
-					while loot.Enabled == true do
+		local dropsChildren = Drops:GetChildren()
+		if #dropsChildren ~= 0 or loot.Enabled == true then
+			for i, v in pairs(Drops:GetChildren()) do
+				if v:FindFirstChild("PlayerOwned") and v.PlayerOwned.Value == game.Players.LocalPlayer then
+					game:GetService('VirtualInputManager'):SendKeyEvent(true, 'E', false, game)
+					game:GetService('VirtualInputManager'):SendKeyEvent(false, 'E', false, game)
+					wait(.5)
+					if loot.Enabled == true then
+						while loot.Enabled == true do
+							GuiService.SelectedObject = loot.Frame.Flip
+							VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+							VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+							wait(.5)
+						end
+					end
+				else
+					
+					if loot.Enabled == true then
 						GuiService.SelectedObject = loot.Frame.Flip
 						VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
 						VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-						wait()
 					end
-                else
-                    print("Loot is disabled, skipping interaction.")
-                end
-            else
-                
-                if loot.Enabled == true then
-                    GuiService.SelectedObject = loot.Frame.Flip
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-                else
-                    print("Loot is disabled, skipping interaction.")
-                end
-            end
+				end
+			end
+			while loot.Enabled == true do
+				GuiService.SelectedObject = loot.Frame.Flip
+				VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+				VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+				wait(.5)
+			end
         end        
         wait()
     end
@@ -268,6 +273,40 @@ function HitKill()
 		end
 		wait()
 	end
+end
+
+function HitKillInvestigation()
+    while getgenv().HitKillInvestigation == true do
+        local mobs = workspace.Objects:FindFirstChild("Mobs")
+
+        if mobs then
+            local mobList = mobs:GetChildren() -- Obtenha todos os mobs
+            
+            for _, mob in pairs(mobList) do
+                local humanoid = mob:FindFirstChild("Humanoid")
+                if humanoid then
+                    local targetCFrame = GetCFrame(mob)
+                    local tween = tweenModel(game.Players.LocalPlayer.Character, targetCFrame)
+                    tween:Play()
+                    tween.Completed:Wait()
+                    local changeWeaponArgs = {
+                        [1] = "Fists"
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("ChangeWeapon"):FireServer(unpack(changeWeaponArgs))
+					wait(.3)
+                    local attackArgs = {
+                        [1] = 1,
+                        [2] = {}
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("M1"):FireServer(unpack(attackArgs))
+                    wait(.3)
+                    humanoid.Health = 0
+                end
+                wait(1)
+            end
+        end
+        wait()
+    end
 end
 
 function HitKillBoss()
@@ -319,6 +358,44 @@ function HitKillBoss()
     end
 end
 
+function autoInvestigation()
+	while getgenv().autoInvestigation == true do
+		local missionItems = workspace.Objects:FindFirstChild("MissionItems")
+	
+		if missionItems then
+			local items = missionItems:GetChildren()
+	
+			for _, v in pairs(items) do
+				if v.Name == "Civilian" then
+					local HumanoidRootPart = v:FindFirstChild("HumanoidRootPart")
+					if HumanoidRootPart then
+						local teleportCFrame = HumanoidRootPart.CFrame
+						local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
+						tween:Play()
+						tween.Completed:Wait()
+						game:GetService('VirtualInputManager'):SendKeyEvent(true, 'E', false, game)
+						wait(.5)
+						game:GetService('VirtualInputManager'):SendKeyEvent(false, 'E', false, game)
+						local teleportCFrame2 = workspace.Map.Parts.SpawnLocation.CFrame
+						local tween2 = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame2)
+						tween2:Play()
+						tween2.Completed:Wait()
+					end
+				else
+					local teleportCFrame = v.CFrame
+					local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
+					tween:Play()
+					tween.Completed:Wait()
+					game:GetService('VirtualInputManager'):SendKeyEvent(true, 'E', false, game)
+					wait(.2)
+					game:GetService('VirtualInputManager'):SendKeyEvent(false, 'E', false, game)
+				end
+				wait(1)
+			end
+		end
+		wait()
+	end
+end	
 
 function getSkill()
 	local ReplicatedData = game:GetService("Players").LocalPlayer:FindFirstChild("ReplicatedData")
@@ -349,10 +426,10 @@ function tpToItem()
 	end
 end
 
-function autoSelectBoss()
-	if getgenv().autoSelectBoss == true then
+function autoJoin()
+	if getgenv().autoJoin == true then
 		local args = {
-			[1] = "Boss",
+			[1] = selectedType,
 			[2] = selectedBoss,
 			[3] = selectedDifficulty,
 		}
@@ -374,6 +451,133 @@ function unlockAllAbiliti()
 		end
 		wait()
 	end
+end
+
+function autoSkipDialogue()
+	while getgenv().autoSkipDialogue == true do
+		local skipButton = game:GetService("Players").LocalPlayer.PlayerGui.StorylineDialogue.Frame.Dialogue:FindFirstChild("Skip")
+
+		if skipButton and skipButton.Visible == true then
+			if skipButton.TextLabel.Text == "Skip (0/1)" then
+				game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Client"):WaitForChild("StorylineDialogueSkip"):FireServer()
+			end
+		end
+		wait(1)
+	end
+end
+
+function webhook()
+    while getgenv().webhook == true do
+        local discordWebhookUrl = urlwebhook
+        local resultUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Results")
+
+        local numberAndAfter = {}
+        local statsString = {}
+        local mapConfigString = {}
+        
+        if resultUI and resultUI.Enabled == true then
+            local name = game:GetService("Players").LocalPlayer.Name
+            local formattedName = "||" .. name .. "||"
+
+            local player = game:GetService("Players").LocalPlayer
+            local levelPlayer = player.PlayerGui.Main.Frame.BottomLeft.Menu:FindFirstChild("TextLabel")
+            
+            if levelPlayer then
+                table.insert(numberAndAfter, levelPlayer.Text)
+            end
+
+            local grade = game:GetService("Players").LocalPlayer.ReplicatedData:FindFirstChild("grade")
+            local cash = game:GetService("Players").LocalPlayer.ReplicatedData:FindFirstChild("cash")
+
+            if grade and cash then
+                table.insert(statsString, grade.Value .. "\n" .. "Cash: $" .. cash.Value)
+            end
+
+            local frame = game:GetService("Players").LocalPlayer.PlayerGui.Results.Frame:FindFirstChild("Stats")
+
+            if frame then
+                local deaths = frame:FindFirstChild("Deaths") and frame.Deaths.Value or 0
+                local kills = frame:FindFirstChild("Kills") and frame.Kills.Value or 0
+                local playerCount = frame:FindFirstChild("PlayerCount") and frame.PlayerCount.Value or 0
+                local score = frame:FindFirstChild("Score") and frame.Score.Value or 0
+                local timeSpent = frame:FindFirstChild("TimeSpent") and frame.TimeSpent.Value or 0
+
+                local output = string.format(
+                    "\nDeaths: %s\nKills: %s\nPlayerCount: %s\nScore: %s\nTimeSpent: %s",
+                    tostring(deaths.Text), tostring(kills.Text), tostring(playerCount.Text), tostring(score.Text), tostring(timeSpent.Text)
+                )
+                table.insert(mapConfigString, output)
+            end
+
+            local payload = {
+                content = pingContent,
+                embeds = {
+                    {
+                        description = string.format(
+                            "User: %s\nLevel: %s\n\nPlayer Stats:\n%s\n\nMatch Result%s", 
+                            formattedName, 
+                            table.concat(numberAndAfter, ", "),
+                            table.concat(statsString, "\n"),
+                            table.concat(mapConfigString, "\n")
+                        ),
+                        color = color,
+                        fields = {
+                            {
+                                name = "Discord",
+                                value = "https://discord.gg/ey83AwMvAn"
+                            }
+                        },
+                        author = {
+                            name = "Jujutsu Infinite"
+                        },
+                        thumbnail = {
+                            url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png?ex=673e5b4c&is=673d09cc&hm=1d58485280f1d6a376e1bee009b21caa0ae5cad9624832dd3d921f1e3b2217ce&"
+                        }
+                    }
+                },
+                attachments = {}
+            }            
+
+            local payloadJson = HttpService:JSONEncode(payload)
+
+            if syn and syn.request then
+                local response = syn.request({
+                    Url = discordWebhookUrl,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = payloadJson
+                })
+
+                if response.Success then
+                    print("Webhook sent successfully")
+                    break
+                else
+                    warn("Error sending message to Discord with syn.request:", response.StatusCode, response.Body)
+                end
+            elseif http_request then
+                local response = http_request({
+                    Url = discordWebhookUrl,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = payloadJson
+                })
+
+                if response.Success then
+                    print("Webhook sent successfully")
+                    break
+                else
+                    warn("Error sending message to Discord with http_request:", response.StatusCode, response.Body)
+                end
+            else
+                print("Synchronization not supported on this device.")
+            end
+        end
+        wait(1)
+    end
 end
 
 local ValuesInates = {}
@@ -442,6 +646,24 @@ LeftGroupBox:AddToggle("HKIB", {
 	Callback = function(Value)
 		getgenv().HitKillBoss = Value
 		HitKillBoss()
+	end,
+})
+
+LeftGroupBox:AddToggle("HKII", {
+	Text = "Hit Kill In Investigation",
+	Default = false,
+	Callback = function(Value)
+		getgenv().HitKillInvestigation = Value
+		HitKillInvestigation()
+	end,
+})
+
+LeftGroupBox:AddToggle("ASD", {
+	Text = "Auto Skip Dialogue",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoSkipDialogue = Value
+		autoSkipDialogue()
 	end,
 })
 
@@ -555,7 +777,7 @@ RightGroupbox:AddDropdown("drodpownBosses", {
     Default = "None",
     Multi = false,
 
-    Text = "Select Boss",
+    Text = "Select Boss or Act",
 
     Callback = function(Value)
         selectedBoss = Value
@@ -574,12 +796,63 @@ RightGroupbox:AddDropdown("dropdownDifficultyBosses", {
     end,
 })
 
-RightGroupbox:AddToggle("AB", {
-    Text = "Auto Boss",
+RightGroupbox:AddToggle("AJ", {
+    Text = "Auto Join",
     Default = false,
     Callback = function(Value)
-        getgenv().autoSelectBoss = Value
-        autoSelectBoss()
+        getgenv().autoJoin = Value
+        autoJoin()
+    end,
+})
+
+RightGroupbox:AddToggle("AB", {
+    Text = "Auto Investigation",
+    Default = false,
+    Callback = function(Value)
+        getgenv().autoInvestigation = Value
+        autoInvestigation()
+    end,
+})
+
+
+local RightGroupbox = Tabs.Main:AddRightGroupbox("Webhook")
+
+RightGroupbox:AddInput('WebhookURL', {
+    Default = '',
+    Text = "Webhook URL",
+    Numeric = false,
+    Finished = false,
+    Placeholder = 'Press enter after paste',
+    Callback = function(Value)
+        urlwebhook = Value
+    end
+})
+
+RightGroupbox:AddInput('pingUser@', {
+    Default = '',
+    Text = "User ID",
+    Numeric = false,
+    Finished = false,
+    Placeholder = 'Press enter after paste',
+    Callback = function(Value)
+        getgenv().pingUserId = Value
+    end
+})
+
+RightGroupbox:AddToggle("WebhookFG", {
+    Text = "Send Webhook when finish investigation",
+    Default = false,
+    Callback = function(Value)
+        getgenv().webhook = Value
+        webhook()
+    end,
+})
+
+RightGroupbox:AddToggle("pingUser", {
+    Text = "Ping user",
+    Default = false,
+    Callback = function(Value)
+        getgenv().pingUser = Value
     end,
 })
 

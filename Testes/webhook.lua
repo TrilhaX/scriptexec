@@ -2,160 +2,58 @@ local HttpService = game:GetService("HttpService")
 
 function webhook()
     while getgenv().webhook == true do
-        local discordWebhookUrl = "https://discord.com/api/webhooks/1303406324452687935/ou5GoCcOkvH-iRy9hhPoGJnJBs1B8edcin3QNq6UcU--wIhyDltFGmt7j7g-wg9wfE0E"
-        local resultUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
+        local discordWebhookUrl = urlwebhook
+        local resultUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Results")
 
+        local numberAndAfter = {}
+        local statsString = {}
+        local mapConfigString = {}
+        
         if resultUI and resultUI.Enabled == true then
-            local ValuesRewards = {}
-            local ValuesStatPlayer = {}        
             local name = game:GetService("Players").LocalPlayer.Name
             local formattedName = "||" .. name .. "||"
 
-            local levelText = game:GetService("Players").LocalPlayer.PlayerGui.spawn_units.Lives.Main.Desc.Level.Text
-            local numberAndAfter = levelText:sub(7)
-
             local player = game:GetService("Players").LocalPlayer
-            local scrollingFrame = player.PlayerGui.ResultsUI.Holder.LevelRewards.ScrollingFrame
-
-            local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-            local upvalues = debug.getupvalues(Loader.init)
-            local Modules = {
-                ["CORE_CLASS"] = upvalues[6],
-                ["CORE_SERVICE"] = upvalues[7],
-                ["SERVER_CLASS"] = upvalues[8],
-                ["SERVER_SERVICE"] = upvalues[9],
-                ["CLIENT_CLASS"] = upvalues[10],
-                ["CLIENT_SERVICE"] = upvalues[11],
-            }
-            local inventory = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.inventory.inventory_profile_data.normal_items
-
-            for _, frame in pairs(scrollingFrame:GetChildren()) do
-                if (frame.Name == "GemReward" or frame.Name == "GoldReward" or frame.Name == "TrophyReward" or frame.Name == "XPReward") and frame.Visible then
-                    local amountLabel = frame:FindFirstChild("Main") and frame.Main:FindFirstChild("Amount")
-                    if amountLabel then
-                        local rewardType = frame.Name:gsub("Reward", "")
-                        local gainedAmount = amountLabel.Text
-                        local totalAmount = inventory[rewardType:lower()]
+            local levelPlayer = player.PlayerGui.Main.Frame.BottomLeft.Menu:FindFirstChild("TextLabel")
             
-                        if totalAmount then
-                            table.insert(ValuesRewards, gainedAmount .. "[" .. totalAmount .. "]\n")
-                        else
-                            table.insert(ValuesRewards, gainedAmount .. "\n")
-                        end
-                    end
-                end
+            if levelPlayer then
+                table.insert(numberAndAfter, levelPlayer.Text)
             end
 
-            -- Collect the formatted result rewards into a string
-            local rewardsString = table.concat(ValuesRewards, "\n")
+            local grade = game:GetService("Players").LocalPlayer.ReplicatedData:FindFirstChild("grade")
+            local cash = game:GetService("Players").LocalPlayer.ReplicatedData:FindFirstChild("cash")
 
-            local levelDataRemote = workspace._MAP_CONFIG:WaitForChild("GetLevelData")
-            local ResultUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
-            local act = ResultUI.Holder.LevelName.Text
-            local levelData = levelDataRemote:InvokeServer()
+            if grade and cash then
+                table.insert(statsString, grade.Value .. "\n" .. "Cash: $" .. cash.Value)
+            end
 
-            local ValuesMapConfig = {}
-            
-            local result = ResultUI.Holder.Title.Text
-            local elapsedTimeText = ResultUI.Holder.Middle.Timer.Text
-            local timeParts = string.split(elapsedTimeText, ":")
-            local totalSeconds = 0
-            
-            if #timeParts == 3 then
-                local hours = tonumber(timeParts[1]) or 0
-                local minutes = tonumber(timeParts[2]) or 0
-                local seconds = tonumber(timeParts[3]) or 0
-                totalSeconds = (hours * 3600) + (minutes * 60) + seconds
-            elseif #timeParts == 2 then
-                local minutes = tonumber(timeParts[1]) or 0
-                local seconds = tonumber(timeParts[2]) or 0
-                totalSeconds = (minutes * 60) + seconds
-            elseif #timeParts == 1 then
-                totalSeconds = tonumber(timeParts[1]) or 0
-            end
-            
-            local hours = math.floor(totalSeconds / 3600)
-            local minutes = math.floor((totalSeconds % 3600) / 60)
-            local seconds = totalSeconds % 60
-            
-            local formattedTime = string.format("%02d:%02d:%02d", hours, minutes, seconds)
-            
-            if type(levelData) == "table" then
-                if levelData.world and levelData._gamemode and levelData._difficulty then
-                    local formattedValue = levelData.world .. " " .. act .." - " .. levelData._gamemode .. " [" .. levelData._difficulty .. "]"
-            
-                    local FormattedFinal = "\n" .. formattedTime .. " - " .. result .. "\n" .. formattedValue
-            
-                    table.insert(ValuesMapConfig, FormattedFinal)
-                else
-                    print("Faltando informações necessárias no levelData.")
-                end
-            else
-                print("O dado recebido não é uma tabela.")
-            end      
+            local frame = game:GetService("Players").LocalPlayer.PlayerGui.Results.Frame:FindFirstChild("Stats")
 
-            local playerData = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data
-            local gemsEmoji = "<:gemsAA:1322365177320177705>"
-            local goldEmoji = "<:goldAA:1322369598015668315>"
-            local traitReroll = "<:traitRerollAA:1322370533106384987>"
+            if frame then
+                local deaths = frame:FindFirstChild("Deaths") and frame.Deaths.Value or 0
+                local kills = frame:FindFirstChild("Kills") and frame.Kills.Value or 0
+                local playerCount = frame:FindFirstChild("PlayerCount") and frame.PlayerCount.Value or 0
+                local score = frame:FindFirstChild("Score") and frame.Score.Value or 0
+                local timeSpent = frame:FindFirstChild("TimeSpent") and frame.TimeSpent.Value or 0
 
-            local keysToPrint = {
-                ["gem_amount"] = gemsEmoji,
-                ["gold_amount"] = goldEmoji,
-                ["trait_reroll_tokens"] = traitReroll,
-                ["trophies"] = "🏆",
-                ["christmas2024_meter_value"] = "🎁"
-            }
-            
-            local battlepassData = playerData.battlepass_data
-            local silverChristmasXp = battlepassData.silver_christmas.xp
-            
-            local ValuesBattlepassXp = {}
-            
-            local holidayStars = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceHolidayStars")
-            local Candies = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceCandies")
-            
-            if holidayStars and Candies then
-                table.insert(ValuesBattlepassXp, holidayStars.Value)
-                table.insert(ValuesBattlepassXp, Candies.Value)
-            end
-            
-            table.insert(ValuesBattlepassXp, silverChristmasXp)
-            table.insert(ValuesBattlepassXp, battlepassData)
-            
-            local message = ""
-            
-            for _, key in ipairs({"gem_amount", "gold_amount", "trait_reroll_tokens", "trophies", "christmas2024_meter_value"}) do
-                if playerData[key] then
-                    message = message .. keysToPrint[key] .. " " .. playerData[key] .. "\n"
-                end
-            end
-            
-            if holidayStars then
-                local holidayEmoji = "<:holidayEventAA:1322369599517491241>"
-                message = message .. holidayEmoji .. tostring(holidayStars.Value) .. "\n"
-            end            
-            if Candies then
-                local candieEmoji = "<:candieAA:1322369601182629929>"
-                message = message .. candieEmoji .. Candies.Value .. "\n"
-            end
-            
-            table.insert(ValuesStatPlayer, message)            
-            local statsString = table.concat(ValuesStatPlayer, "\n")
-            local mapConfigString = table.concat(ValuesMapConfig, "\n")
-            
-            local color = 7995647
-            if result == "DEFEAT" then
-                color = 16711680
-            elseif result == "VICTORY" then
-                color = 65280
+                local output = string.format(
+                    "\nDeaths: %s\nKills: %s\nPlayerCount: %s\nScore: %s\nTimeSpent: %s",
+                    tostring(deaths.Text), tostring(kills.Text), tostring(playerCount.Text), tostring(score.Text), tostring(timeSpent.Text)
+                )
+                table.insert(mapConfigString, output)
             end
 
             local payload = {
                 content = pingContent,
                 embeds = {
                     {
-                        description = string.format("User: %s\nLevel: %s\n\nPlayer Stats:\n%s\nRewards:\n%s\nMatch Result:%s", formattedName, numberAndAfter, statsString, rewardsString, mapConfigString),
+                        description = string.format(
+                            "User: %s\nLevel: %s\n\nPlayer Stats:\n%s\n\nMatch Result%s", 
+                            formattedName, 
+                            table.concat(numberAndAfter, ", "),
+                            table.concat(statsString, "\n"),
+                            table.concat(mapConfigString, "\n")
+                        ),
                         color = color,
                         fields = {
                             {
@@ -164,7 +62,7 @@ function webhook()
                             }
                         },
                         author = {
-                            name = "Anime Adventures"
+                            name = "Jujutsu Infinite"
                         },
                         thumbnail = {
                             url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png?ex=673e5b4c&is=673d09cc&hm=1d58485280f1d6a376e1bee009b21caa0ae5cad9624832dd3d921f1e3b2217ce&"
@@ -172,7 +70,7 @@ function webhook()
                     }
                 },
                 attachments = {}
-            }
+            }            
 
             local payloadJson = HttpService:JSONEncode(payload)
 
