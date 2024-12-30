@@ -287,7 +287,7 @@ function HitKillInvestigation()
             for _, mob in pairs(mobList) do
                 local humanoid = mob:FindFirstChild("Humanoid")
                 if humanoid then
-                    local targetCFrame = GetCFrame(mob)
+                    local targetCFrame = GetCFrame(mob, 15)
                     local tween = tweenModel(game.Players.LocalPlayer.Character, targetCFrame)
                     tween:Play()
                     tween.Completed:Wait()
@@ -295,13 +295,13 @@ function HitKillInvestigation()
                         [1] = "Fists"
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("ChangeWeapon"):FireServer(unpack(changeWeaponArgs))
-					wait(.3)
+					wait(.2)
                     local attackArgs = {
                         [1] = 1,
                         [2] = {}
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("M1"):FireServer(unpack(attackArgs))
-                    wait(.3)
+                    wait(.2)
                     humanoid.Health = 0
                 end
                 wait(1)
@@ -378,6 +378,7 @@ function autoInvestigation()
 						game:GetService('VirtualInputManager'):SendKeyEvent(true, 'E', false, game)
 						wait(.5)
 						game:GetService('VirtualInputManager'):SendKeyEvent(false, 'E', false, game)
+						wait(1)
 						local teleportCFrame2 = workspace.Map.Parts.SpawnLocation.CFrame
 						local tween2 = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame2)
 						tween2:Play()
@@ -389,7 +390,7 @@ function autoInvestigation()
 					tween:Play()
 					tween.Completed:Wait()
 					game:GetService('VirtualInputManager'):SendKeyEvent(true, 'E', false, game)
-					wait(.2)
+					wait(.3)
 					game:GetService('VirtualInputManager'):SendKeyEvent(false, 'E', false, game)
 				end
 				wait(1)
@@ -460,8 +461,11 @@ function autoSkipDialogue()
 		local skipButton = game:GetService("Players").LocalPlayer.PlayerGui.StorylineDialogue.Frame.Dialogue:FindFirstChild("Skip")
 
 		if skipButton and skipButton.Visible == true then
-			if skipButton.TextLabel.Text == "Skip (0/1)" then
+			if skipButton.TextLabel.Text == "Skip (0/1)" and skipButton.Visible == true then
 				game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Client"):WaitForChild("StorylineDialogueSkip"):FireServer()
+				wait(5)
+			else
+				print("No Dialogue")
 			end
 		end
 		wait(1)
