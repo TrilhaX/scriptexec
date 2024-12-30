@@ -36,9 +36,20 @@ local speed = 1000
 --START OF FUNCTIONS
 function hideUIExec()
 	if getgenv().hideUIExec then
-		local windowFrame = game:GetService("CoreGui").LinoriaGui.windowFrame
-		windowFrame.Visible = false
-		wait()
+		local coreGui = game:GetService("CoreGui")
+		local windowFrame = nil
+		
+		if coreGui:FindFirstChild("LinoriaGui") then
+			windowFrame = coreGui.LinoriaGui:FindFirstChild("windowFrame")
+		elseif coreGui:FindFirstChild("RobloxGui") and coreGui.RobloxGui:FindFirstChild("LinoriaGui") then
+			windowFrame = coreGui.RobloxGui.LinoriaGui:FindFirstChild("windowFrame")
+		end
+		
+		if windowFrame then
+			windowFrame.Visible = false
+		else
+			warn("windowFrame não encontrado.")
+		end		
 	end
 end
 
@@ -1680,7 +1691,7 @@ LeftGroupBox:AddToggle("Auto Place", {
 	end,
 })
 
-LeftGroupBox:AddToggle("Auto Place", {
+LeftGroupBox:AddToggle("OSPIXW", {
 	Text = "Only Start Place in X Wave",
 	Default = false,
 
@@ -1690,9 +1701,9 @@ LeftGroupBox:AddToggle("Auto Place", {
 	end,
 })
 
-LeftGroupBox:AddInput('inputAutoPlaceWaveX', {
+LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
     Default = '',
-    Text = "Start Place at x Wave",
+    Text = "Start Upgrade at x Wave",
     Numeric = true,
     Finished = false,
     Placeholder = 'Press enter after paste',
@@ -1711,7 +1722,7 @@ LeftGroupBox:AddToggle("Auto Upgrade", {
 	end,
 })
 
-LeftGroupBox:AddToggle("Auto Upgrade", {
+LeftGroupBox:AddToggle("OUIXW", {
 	Text = "Only Upgrade in X Wave",
 	Default = false,
 
@@ -1720,9 +1731,9 @@ LeftGroupBox:AddToggle("Auto Upgrade", {
 	end,
 })
 
-LeftGroupBox:AddInput('inputAutoPlaceWaveX', {
+LeftGroupBox:AddInput('inputAutoSellWaveX', {
     Default = '',
-    Text = "Start Place at x Wave",
+    Text = "Start Sell at x Wave",
     Numeric = true,
     Finished = false,
     Placeholder = 'Press enter after paste',
@@ -1741,8 +1752,8 @@ LeftGroupBox:AddToggle("Auto Sell", {
 	end,
 })
 
-LeftGroupBox:AddToggle("Auto Upgrade", {
-	Text = "Only Upgrade in X Wave",
+LeftGroupBox:AddToggle("OSIXW", {
+	Text = "Only Sell in X Wave",
 	Default = false,
 
 	Callback = function(Value)

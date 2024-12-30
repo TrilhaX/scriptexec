@@ -38,9 +38,20 @@ local speed = 1000
 --START OF FUNCTIONS
 function hideUIExec()
 	if getgenv().hideUIExec then
-		local windowFrame = game:GetService("CoreGui").LinoriaGui.windowFrame
-		windowFrame.Visible = false
-		wait()
+		local coreGui = game:GetService("CoreGui")
+		local windowFrame = nil
+		
+		if coreGui:FindFirstChild("LinoriaGui") then
+			windowFrame = coreGui.LinoriaGui:FindFirstChild("windowFrame")
+		elseif coreGui:FindFirstChild("RobloxGui") and coreGui.RobloxGui:FindFirstChild("LinoriaGui") then
+			windowFrame = coreGui.RobloxGui.LinoriaGui:FindFirstChild("windowFrame")
+		end
+		
+		if windowFrame then
+			windowFrame.Visible = false
+		else
+			warn("windowFrame não encontrado.")
+		end		
 	end
 end
 
