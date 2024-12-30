@@ -904,11 +904,10 @@ RightGroupbox:AddToggle("AB", {
 })
 
 RightGroupbox:AddToggle("AB", {
-    Text = "Auto Quest",
+    Text = "Auto Quest (IN REWORK)",
     Default = false,
     Callback = function(Value)
-        getgenv().autoQuest = Value
-        autoQuest()
+		print("W.I.P")
     end,
 })
 
