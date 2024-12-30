@@ -894,7 +894,7 @@ RightGroupbox:AddToggle("AJ", {
     end,
 })
 
-RightGroupbox:AddToggle("AB", {
+RightGroupbox:AddToggle("AUTOINVESTIGATION", {
     Text = "Auto Investigation",
     Default = false,
     Callback = function(Value)
