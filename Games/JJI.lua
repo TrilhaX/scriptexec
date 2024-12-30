@@ -261,20 +261,26 @@ function autoChest()
 end
 
 function HitKill()
-	while getgenv().HitKill == true do
-		local mobs = workspace.Objects:FindFirstChild("Mobs")
+    while getgenv().HitKill == true do
+        local mobs = workspace.Objects:FindFirstChild("Mobs")
 
-		if mobs then
-			for i, v in pairs(mobs:GetChildren()) do
-				local humanoid = v:FindFirstChild("Humanoid")
-				if humanoid then
-					local health = v.Humanoid
-					health.Health = 0
-				end
-			end
-		end
-		wait(delaytoAttack)
-	end
+        if mobs then
+            for _, v in pairs(mobs:GetChildren()) do
+                local humanoid = v:FindFirstChild("Humanoid")
+                if humanoid then
+                    local targetHealth = 0
+                    local decrement = 500
+                    local delay = 0.05
+
+                    while humanoid.Health > targetHealth do
+                        humanoid.Health = math.max(humanoid.Health - decrement, targetHealth)
+                        wait(delay)
+                    end
+                end
+            end
+        end
+        wait(delaytoAttack)
+    end
 end
 
 function HitKillInvestigation()
@@ -282,7 +288,7 @@ function HitKillInvestigation()
         local mobs = workspace.Objects:FindFirstChild("Mobs")
 
         if mobs then
-            local mobList = mobs:GetChildren() -- Obtenha todos os mobs
+            local mobList = mobs:GetChildren()
             
             for _, mob in pairs(mobList) do
                 local humanoid = mob:FindFirstChild("Humanoid")
@@ -291,18 +297,28 @@ function HitKillInvestigation()
                     local tween = tweenModel(game.Players.LocalPlayer.Character, targetCFrame)
                     tween:Play()
                     tween.Completed:Wait()
+                    
                     local changeWeaponArgs = {
                         [1] = "Fists"
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("ChangeWeapon"):FireServer(unpack(changeWeaponArgs))
-					wait(.2)
+                    wait(0.2)
+                    
                     local attackArgs = {
                         [1] = 1,
                         [2] = {}
                     }
                     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("M1"):FireServer(unpack(attackArgs))
-                    wait(.2)
-                    humanoid.Health = 0
+                    wait(0.2)
+
+                    local targetHealth = 0
+                    local decrement = 500
+                    local delay = 0.05
+
+                    while humanoid.Health > targetHealth do
+                        humanoid.Health = math.max(humanoid.Health - decrement, targetHealth)
+                        wait(delay)
+                    end
                 end
                 wait(1)
             end
@@ -322,36 +338,31 @@ function HitKillBoss()
                 local tween = tweenModel(game.Players.LocalPlayer.Character, targetCFrame)
                 tween:Play()
                 tween.Completed:Wait()
-				wait(.5)
-				local args = {
-					[1] = "Fists"
-				}
-				
-				game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("ChangeWeapon"):FireServer(unpack(args))
-				wait(.3)
-				local args = {
-					[1] = 1,
-					[2] = {}
-				}
-				
-				game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("M1"):FireServer(unpack(args))
-				for _, mob in pairs(mobs:GetChildren()) do
-					local humanoid = mob:FindFirstChild("Humanoid")
-	
-					if humanoid then
-						if not mob:FindFirstChild("BossSpawn") then
-							humanoid.Health = 0
-						end
-					end
-				end
-            end
+                wait(0.5)
 
-            for _, mob in pairs(mobs:GetChildren()) do
-                local humanoid = mob:FindFirstChild("Humanoid")
+                local changeWeaponArgs = {
+                    [1] = "Fists"
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("ChangeWeapon"):FireServer(unpack(changeWeaponArgs))
+                wait(0.3)
 
-                if humanoid then
-                    if not mob:FindFirstChild("BossSpawn") then
-                        humanoid.Health = 0
+                local attackArgs = {
+                    [1] = 1,
+                    [2] = {}
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Server"):WaitForChild("Combat"):WaitForChild("M1"):FireServer(unpack(attackArgs))
+
+                for _, mob in pairs(mobs:GetChildren()) do
+                    local humanoid = mob:FindFirstChild("Humanoid")
+
+                    if humanoid and not mob:FindFirstChild("BossSpawn") then
+                        local targetHealth = 0
+                        local decrement = 500
+                        local delay = 0.05
+                        while humanoid.Health > targetHealth do
+                            humanoid.Health = math.max(humanoid.Health - decrement, targetHealth)
+                            wait(delay)
+                        end
                     end
                 end
             end
@@ -415,17 +426,22 @@ function getSkill()
 end
 
 function tpToItem()
-	local drops = workspace.Objects.Drops
+	while getgenv().tpToItem == true do
+		local drops = workspace.Objects.Drops
 
 
-	for i,v in pairs(drops:GetChildren())do
-		if selectedItem == v.Name then
+		for i,v in pairs(drops:GetChildren())do
 			local teleportCFrame = GetCFrame(v.Root)
 			local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
 			tween:Play()
 			tween.Completed:Wait()
-			break
+			if v.Root then
+				game:GetService('VirtualInputManager'):SendKeyEvent(true, 'E', false, game)
+				wait(.3)
+				game:GetService('VirtualInputManager'):SendKeyEvent(false, 'E', false, game)
+			end
 		end
+		wait()
 	end
 end
 
@@ -737,14 +753,12 @@ LeftGroupBox:AddToggle("HKII", {
 	end,
 })
 
-LeftGroupBox:AddSlider('DTHKM', {
-    Text = 'Delay to hit kill mobs',
-    Default = 0,
-    Min = 0,
-    Max = 10,
-    Rounding = 0,
-    Compact = false,
-
+LeftGroupBox:AddInput('DTHKM', {
+    Default = '',
+    Text = "Delay to Hit Kill mobs",
+    Numeric = true,
+    Finished = false,
+    Placeholder = 'Press enter after paste',
     Callback = function(Value)
         delaytoAttack = Value
     end
@@ -824,30 +838,13 @@ local MyButton = LeftGroupBox:AddButton({
 	DoubleClick = false,
 })
 
-LeftGroupBox:AddDropdown("dropdownDropsItem", {
-	Values = ValuesDrops,
-	Default = "None",
-	Multi = false,
-	Text = "Select Item To Tp",
+LeftGroupBox:AddToggle("AFI", {
+	Text = "Auto Farm Items",
+	Default = false,
 	Callback = function(Value)
-		selectedItem = Value
-	end,
-})
-
-local MyButton = LeftGroupBox:AddButton({
-	Text = "Tp to Item",
-	Func = function()
+		getgenv().tpToItem = Value
 		tpToItem()
 	end,
-	DoubleClick = false,
-})
-
-local MyButton = LeftGroupBox:AddButton({
-	Text = "Refresh Items Dropdown",
-	Func = function()
-		Options.dropdownDropsItem:SetValue(ValuesDrops)
-	end,
-	DoubleClick = false,
 })
 
 local RightGroupbox = Tabs.Main:AddRightGroupbox("Farm")
