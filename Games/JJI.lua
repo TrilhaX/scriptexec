@@ -33,7 +33,7 @@ local player = Players.LocalPlayer
 local GuiService = game:GetService("GuiService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local TweenService = game:GetService("TweenService")
-local speed = 100
+local speed = 1000
 
 --START OF FUNCTIONS
 function hideUIExec()
