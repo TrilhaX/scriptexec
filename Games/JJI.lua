@@ -273,7 +273,7 @@ function HitKill()
 				end
 			end
 		end
-		wait()
+		wait(delaytoAttack)
 	end
 end
 
@@ -307,7 +307,7 @@ function HitKillInvestigation()
                 wait(1)
             end
         end
-        wait()
+        wait(delaytoAttack)
     end
 end
 
@@ -356,7 +356,7 @@ function HitKillBoss()
                 end
             end
         end
-        wait()
+        wait(delaytoAttack)
     end
 end
 
@@ -735,6 +735,19 @@ LeftGroupBox:AddToggle("HKII", {
 		getgenv().HitKillInvestigation = Value
 		HitKillInvestigation()
 	end,
+})
+
+LeftGroupBox:AddSlider('DTHKM', {
+    Text = 'Delay to hit kill mobs',
+    Default = 0,
+    Min = 0,
+    Max = 10,
+    Rounding = 0,
+    Compact = false,
+
+    Callback = function(Value)
+        delaytoAttack = Value
+    end
 })
 
 LeftGroupBox:AddToggle("ASD", {
