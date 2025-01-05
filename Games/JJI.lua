@@ -1,9 +1,7 @@
 repeat task.wait() until game:IsLoaded()
-wait(10)
 warn("[TEMPEST HUB] Loading Ui")
 wait()
-local MacLib =
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/maclibTempestHubUI/main/maclib.lua"))()
+local MacLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/maclibTempestHubUI/main/maclib.lua"))()
 
 --Loading UI Library
 local Window = MacLib:Window({
