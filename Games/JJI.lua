@@ -1,6 +1,5 @@
-repeat
-	task.wait()
-until game:IsLoaded()
+repeat task.wait() until game:IsLoaded()
+wait(10)
 warn("[TEMPEST HUB] Loading Ui")
 wait()
 local MacLib =
