@@ -1,5 +1,4 @@
-repeat	task.wait() until game:IsLoaded()
-wait(10)
+repeat task.wait() until game:IsLoaded()
 warn("[TEMPEST HUB] Loading Ui")
 wait()
 local MacLib =
@@ -118,6 +117,24 @@ function aeuat()
 end
 
 function hideUI()
+	local success, coreGui = pcall(function() return game:GetService("CoreGui") end)
+	if not success or not coreGui then
+		warn("CoreGui not accessible.")
+		return
+	end
+
+	local successRobloxGui, robloxGui = pcall(function() return coreGui:FindFirstChild("RobloxGui") end)
+	if not successRobloxGui or not robloxGui then
+		warn("RobloxGui not found in CoreGui.")
+		return
+	end
+
+	local successMaclibGui, maclibGui = pcall(function() return robloxGui:FindFirstChild("MaclibGui") end)
+	if not successMaclibGui or not maclibGui then
+		warn("MaclibGui not found in RobloxGui.")
+		return
+	end
+
 	local UICorner1 = Instance.new("UICorner")
 	local UICorner2 = Instance.new("UICorner")
 	local backgroundFrame = Instance.new("Frame")
@@ -125,7 +142,7 @@ function hideUI()
 	local UIPadding = Instance.new("UIPadding")
 
 	backgroundFrame.Name = "backgroundFrame"
-	backgroundFrame.Parent = game.CoreGui.RobloxGui.MaclibGui
+	backgroundFrame.Parent = maclibGui
 	backgroundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 	backgroundFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	backgroundFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -158,13 +175,12 @@ function hideUI()
 	UIPadding.PaddingBottom = UDim.new(0.1, 0)
 
 	tempestButton.Activated:Connect(function()
-		local coreGui = game:GetService("CoreGui")
-		local maclib = coreGui.RobloxGui:FindFirstChild("MaclibGui")
-		if maclib then
+		local successMaclib, maclib = pcall(function() return robloxGui:FindFirstChild("MaclibGui") end)
+		if successMaclib and maclib then
 			maclib.Base.Visible = not maclib.Base.Visible
 			maclib.Notifications.Visible = not maclib.Notifications.Visible
 		else
-			warn("MaclibGui not found in CoreGui.")
+			warn("MaclibGui not found during button activation.")
 		end
 	end)
 end
@@ -477,7 +493,6 @@ function autoInvestigation()
 	while getgenv().autoInvestigation == true do
 		if game.PlaceId == 78904562518018 then
 			wait(delaytoAttackMob)
-			print("Iniciando loop de autoInvestigação...")
 			local ReadyScreen = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ReadyScreen")
 			if ReadyScreen and ReadyScreen.Enabled == true then
 				break
@@ -486,34 +501,27 @@ function autoInvestigation()
 			local missionItems = workspace.Objects:FindFirstChild("MissionItems")
 
 			if missionItems then
-				print("MissionItems encontrados.")
 				local items = missionItems:GetChildren()
 
 				if #items > 0 then
 					for _, v in ipairs(items) do
-						print("Analisando item:", v.Name)
 						if v.Name == "Civilian" then
-							print("Civilian encontrado.")
 							local HumanoidRootPart = v:FindFirstChild("HumanoidRootPart")
 							if HumanoidRootPart then
-								print("HumanoidRootPart do Civilian encontrado. Teletransportando...")
 								local teleportCFrame = HumanoidRootPart.CFrame
 								local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
 								tween:Play()
 								tween.Completed:Wait()
-								print("Coletando Civilian.")
 								local pr = v:FindFirstChild("PickUp")
 								if pr then
 									fireproximityprompt(pr, 5, true)
 								end
-								print("Teletransportando de volta ao Spawn.")
 								local teleportCFrame2 = workspace.Map.Parts.SpawnLocation.CFrame
 								local tween2 = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame2)
 								tween2:Play()
 								tween2.Completed:Wait()
 							end
 						elseif v.Name == "CursedObject" then
-							print("CursedObject encontrado.")
 							local pr = v:FindFirstChild("Collect")
 							local teleportCFrame = v.CFrame
 							local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
@@ -533,13 +541,11 @@ function autoInvestigation()
 
 			local mobs = workspace.Objects:FindFirstChild("Mobs")
 			if mobs then
-				print("Mobs encontrados.")
 				local mobList = mobs:GetChildren()
 				local highestHealthMob = nil
 				local highestHealth = -1
 
 				for _, mob in ipairs(mobList) do
-					-- Usando pcall para evitar erros ao acessar mobs que podem estar incompletos
 					local success, humanoid = pcall(function()
 						return mob:FindFirstChild("Humanoid")
 					end)
@@ -551,13 +557,11 @@ function autoInvestigation()
 				end
 
 				if highestHealthMob then
-					print("Mob com maior vida encontrado:", highestHealthMob.Name, "Vida:", highestHealth)
 					local targetCFrame = GetCFrame(highestHealthMob, 15)
 					local tween = tweenModel(game.Players.LocalPlayer.Character, targetCFrame)
 					tween:Play()
 					tween.Completed:Wait()
 
-					print("Mudando para arma Fists.")
 					game:GetService("ReplicatedStorage")
 						:WaitForChild("Remotes")
 						:WaitForChild("Server")
@@ -566,7 +570,6 @@ function autoInvestigation()
 						:FireServer("Fists")
 					wait(0.2)
 
-					print("Atacando mob:", highestHealthMob.Name)
 					game:GetService("ReplicatedStorage")
 						:WaitForChild("Remotes")
 						:WaitForChild("Server")
@@ -576,11 +579,9 @@ function autoInvestigation()
 					wait(0.2)
 
 					while highestHealthMob:FindFirstChild("Humanoid") and highestHealthMob.Humanoid.Health > 0 do
-						print("Vida do mob", highestHealthMob.Name, "atual:", highestHealthMob.Humanoid.Health)
 						highestHealthMob.Humanoid.Health = math.max(highestHealthMob.Humanoid.Health - 500, 0)
 						wait(0.05)
 					end
-					print("Mob", highestHealthMob.Name, "eliminado.")
 				else
 					print("Nenhum mob encontrado com vida válida.")
 				end
@@ -1286,9 +1287,9 @@ sections.MainSection4:Button({
 tabs.Main:Select()
 
 MacLib:SetFolder("Tempest Hub")
-MacLib:SetFolder("Tempest Hub/_JJI_1")
+MacLib:SetFolder("Tempest Hub/_JJI_")
 
-local GameConfigName = "_JJI_1"
+local GameConfigName = "_JJI_"
 local player = game.Players.LocalPlayer
 MacLib:LoadConfig(player.Name .. GameConfigName)
 spawn(function()
