@@ -290,6 +290,35 @@ function ServerHop()
 	loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Server-hop-7401"))()
 end
 
+function autoUseBuff()
+	while getgenv().autoUseBuff do
+		local consumables = game:GetService("ReplicatedStorage").ReplicatedAssets.VFX:FindFirstChild("ConsumableModels")
+
+		if consumables then
+			for _, v in pairs(consumables:GetChildren()) do
+				local args = {
+					[1] = v.Name
+				}
+		
+				local success, errorMessage = pcall(function()
+					game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
+						:WaitForChild("Server"):WaitForChild("Data")
+						:WaitForChild("EquipItem"):InvokeServer(unpack(args))
+				end)
+		
+				if success then
+					print(v.Name .. " used successfully.")
+				else
+					warn("Failed to use " .. v.Name .. ": " .. errorMessage)
+				end
+			end
+		else
+			warn("No consumables found!")
+		end		
+		wait(1)
+	end
+end
+
 function autoRetry()
 	while getgenv().autoRetry == true do
 		local ReadyScreen = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ReadyScreen")
@@ -1060,6 +1089,15 @@ sections.MainSection1:Toggle({
 		autoChest()
 	end,
 }, "autoGetChest")
+
+sections.MainSection1:Toggle({
+	Name = "Auto Use Buff",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoUseBuff = value
+		autoUseBuff()
+	end,
+}, "autoUseBuff")
 
 local Dropdown = sections.MainSection1:Dropdown({
 	Name = "Select Keybind",
