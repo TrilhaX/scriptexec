@@ -1306,4 +1306,3 @@ for i, v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
 	v:Disable()
 end
 warn("[TEMPEST HUB] Loaded")
-hideUI()
