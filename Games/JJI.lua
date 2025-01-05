@@ -1,4 +1,6 @@
-repeat task.wait() until game:IsLoaded()
+repeat
+	task.wait()
+until game:IsLoaded()
 warn("[TEMPEST HUB] Loading Ui")
 wait()
 local MacLib =
@@ -8,7 +10,7 @@ local MacLib =
 local Window = MacLib:Window({
 	Title = "Tempest Hub",
 	Subtitle = "Jujutsu Infinite",
-	Size = UDim2.fromOffset(686, 450),
+	Size = UDim2.fromOffset(900, 500),
 	DragStyle = 1,
 	DisabledWindowControls = {},
 	ShowUserInfo = true,
@@ -117,19 +119,25 @@ function aeuat()
 end
 
 function hideUI()
-	local success, coreGui = pcall(function() return game:GetService("CoreGui") end)
+	local success, coreGui = pcall(function()
+		return game:GetService("CoreGui")
+	end)
 	if not success or not coreGui then
 		warn("CoreGui not accessible.")
 		return
 	end
 
-	local successRobloxGui, robloxGui = pcall(function() return coreGui:FindFirstChild("RobloxGui") end)
+	local successRobloxGui, robloxGui = pcall(function()
+		return coreGui:FindFirstChild("RobloxGui")
+	end)
 	if not successRobloxGui or not robloxGui then
 		warn("RobloxGui not found in CoreGui.")
 		return
 	end
 
-	local successMaclibGui, maclibGui = pcall(function() return robloxGui:FindFirstChild("MaclibGui") end)
+	local successMaclibGui, maclibGui = pcall(function()
+		return robloxGui:FindFirstChild("MaclibGui")
+	end)
 	if not successMaclibGui or not maclibGui then
 		warn("MaclibGui not found in RobloxGui.")
 		return
@@ -175,7 +183,9 @@ function hideUI()
 	UIPadding.PaddingBottom = UDim.new(0.1, 0)
 
 	tempestButton.Activated:Connect(function()
-		local successMaclib, maclib = pcall(function() return robloxGui:FindFirstChild("MaclibGui") end)
+		local successMaclib, maclib = pcall(function()
+			return robloxGui:FindFirstChild("MaclibGui")
+		end)
 		if successMaclib and maclib then
 			maclib.Base.Visible = not maclib.Base.Visible
 			maclib.Notifications.Visible = not maclib.Notifications.Visible
@@ -434,160 +444,156 @@ end
 
 function autoBoss()
 	while getgenv().autoBoss == true do
-		if game.PlaceId == 119359147980471 then
-			wait(delaytoAttackMob)
-			local mobs = workspace.Objects:FindFirstChild("Mobs")
+		wait(delaytoAttackMob)
+		local mobs = workspace.Objects:FindFirstChild("Mobs")
 
-			if mobs then
-				local bossSpawn = workspace.Objects.Spawns:FindFirstChild("BossSpawn")
-				if bossSpawn then
-					local targetCFrame = GetCFrame(bossSpawn)
-					local tween = tweenModel(game.Players.LocalPlayer.Character, targetCFrame)
-					tween:Play()
-					tween.Completed:Wait()
-					wait(0.5)
+		if mobs then
+			local bossSpawn = workspace.Objects.Spawns:FindFirstChild("BossSpawn")
+			if bossSpawn then
+				local targetCFrame = GetCFrame(bossSpawn)
+				local tween = tweenModel(game.Players.LocalPlayer.Character, targetCFrame)
+				tween:Play()
+				tween.Completed:Wait()
+				wait(0.5)
 
-					local changeWeaponArgs = {
-						[1] = "Fists",
-					}
-					game:GetService("ReplicatedStorage")
-						:WaitForChild("Remotes")
-						:WaitForChild("Server")
-						:WaitForChild("Combat")
-						:WaitForChild("ChangeWeapon")
-						:FireServer(unpack(changeWeaponArgs))
-					wait(0.3)
+				local changeWeaponArgs = {
+					[1] = "Fists",
+				}
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("Remotes")
+					:WaitForChild("Server")
+					:WaitForChild("Combat")
+					:WaitForChild("ChangeWeapon")
+					:FireServer(unpack(changeWeaponArgs))
+				wait(0.3)
 
-					local attackArgs = {
-						[1] = 1,
-						[2] = {},
-					}
-					game:GetService("ReplicatedStorage")
-						:WaitForChild("Remotes")
-						:WaitForChild("Server")
-						:WaitForChild("Combat")
-						:WaitForChild("M1")
-						:FireServer(unpack(attackArgs))
+				local attackArgs = {
+					[1] = 1,
+					[2] = {},
+				}
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("Remotes")
+					:WaitForChild("Server")
+					:WaitForChild("Combat")
+					:WaitForChild("M1")
+					:FireServer(unpack(attackArgs))
 
-					for _, mob in pairs(mobs:GetChildren()) do
-						local humanoid = mob:FindFirstChild("Humanoid")
+				for _, mob in pairs(mobs:GetChildren()) do
+					local humanoid = mob:FindFirstChild("Humanoid")
 
-						if humanoid and not mob:FindFirstChild("BossSpawn") then
-							local targetHealth = 0
-							local decrement = 500
-							local delay = 0.05
-							while humanoid.Health > targetHealth do
-								humanoid.Health = math.max(humanoid.Health - decrement, targetHealth)
-								wait(delay)
-							end
+					if humanoid and not mob:FindFirstChild("BossSpawn") then
+						local targetHealth = 0
+						local decrement = 500
+						local delay = 0.05
+						while humanoid.Health > targetHealth do
+							humanoid.Health = math.max(humanoid.Health - decrement, targetHealth)
+							wait(delay)
 						end
 					end
 				end
 			end
 		end
-		wait(delaytoAttack)
+		wait(1)
 	end
 end
 
 function autoInvestigation()
 	while getgenv().autoInvestigation == true do
-		if game.PlaceId == 78904562518018 then
-			wait(delaytoAttackMob)
-			local ReadyScreen = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ReadyScreen")
-			if ReadyScreen and ReadyScreen.Enabled == true then
-				break
-			end
+		wait(delaytoAttackMob)
+		local ReadyScreen = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ReadyScreen")
+		if ReadyScreen and ReadyScreen.Enabled == true then
+			break
+		end
 
-			local missionItems = workspace.Objects:FindFirstChild("MissionItems")
+		local missionItems = workspace.Objects:FindFirstChild("MissionItems")
 
-			if missionItems then
-				local items = missionItems:GetChildren()
+		if missionItems then
+			local items = missionItems:GetChildren()
 
-				if #items > 0 then
-					for _, v in ipairs(items) do
-						if v.Name == "Civilian" then
-							local HumanoidRootPart = v:FindFirstChild("HumanoidRootPart")
-							if HumanoidRootPart then
-								local teleportCFrame = HumanoidRootPart.CFrame
-								local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
-								tween:Play()
-								tween.Completed:Wait()
-								local pr = v:FindFirstChild("PickUp")
-								if pr then
-									fireproximityprompt(pr, 5, true)
-								end
-								local teleportCFrame2 = workspace.Map.Parts.SpawnLocation.CFrame
-								local tween2 = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame2)
-								tween2:Play()
-								tween2.Completed:Wait()
-							end
-						elseif v.Name == "CursedObject" then
-							local pr = v:FindFirstChild("Collect")
-							local teleportCFrame = v.CFrame
+			if #items > 0 then
+				for _, v in ipairs(items) do
+					if v.Name == "Civilian" then
+						local HumanoidRootPart = v:FindFirstChild("HumanoidRootPart")
+						if HumanoidRootPart then
+							local teleportCFrame = HumanoidRootPart.CFrame
 							local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
 							tween:Play()
 							tween.Completed:Wait()
+							local pr = v:FindFirstChild("PickUp")
 							if pr then
 								fireproximityprompt(pr, 5, true)
 							end
+							local teleportCFrame2 = workspace.Map.Parts.SpawnLocation.CFrame
+							local tween2 = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame2)
+							tween2:Play()
+							tween2.Completed:Wait()
+						end
+					elseif v.Name == "CursedObject" then
+						local pr = v:FindFirstChild("Collect")
+						local teleportCFrame = v.CFrame
+						local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
+						tween:Play()
+						tween.Completed:Wait()
+						if pr then
+							fireproximityprompt(pr, 5, true)
 						end
 					end
-				else
-					print("Nenhum item dentro de MissionItems.")
 				end
 			else
-				print("MissionItems não encontrados. Indo atrás do mob com maior vida.")
+				print("Nenhum item dentro de MissionItems.")
+			end
+		else
+			print("MissionItems não encontrados. Indo atrás do mob com maior vida.")
+		end
+
+		local mobs = workspace.Objects:FindFirstChild("Mobs")
+		if mobs then
+			local mobList = mobs:GetChildren()
+			local highestHealthMob = nil
+			local highestHealth = -1
+
+			for _, mob in ipairs(mobList) do
+				local success, humanoid = pcall(function()
+					return mob:FindFirstChild("Humanoid")
+				end)
+
+				if success and humanoid and humanoid:IsA("Humanoid") and humanoid.Health > highestHealth then
+					highestHealth = humanoid.Health
+					highestHealthMob = mob
+				end
 			end
 
-			local mobs = workspace.Objects:FindFirstChild("Mobs")
-			if mobs then
-				local mobList = mobs:GetChildren()
-				local highestHealthMob = nil
-				local highestHealth = -1
+			if highestHealthMob then
+				local targetCFrame = GetCFrame(highestHealthMob, 15)
+				local tween = tweenModel(game.Players.LocalPlayer.Character, targetCFrame)
+				tween:Play()
+				tween.Completed:Wait()
 
-				for _, mob in ipairs(mobList) do
-					local success, humanoid = pcall(function()
-						return mob:FindFirstChild("Humanoid")
-					end)
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("Remotes")
+					:WaitForChild("Server")
+					:WaitForChild("Combat")
+					:WaitForChild("ChangeWeapon")
+					:FireServer("Fists")
+				wait(0.2)
 
-					if success and humanoid and humanoid:IsA("Humanoid") and humanoid.Health > highestHealth then
-						highestHealth = humanoid.Health
-						highestHealthMob = mob
-					end
-				end
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("Remotes")
+					:WaitForChild("Server")
+					:WaitForChild("Combat")
+					:WaitForChild("M1")
+					:FireServer(1, {})
+				wait(0.2)
 
-				if highestHealthMob then
-					local targetCFrame = GetCFrame(highestHealthMob, 15)
-					local tween = tweenModel(game.Players.LocalPlayer.Character, targetCFrame)
-					tween:Play()
-					tween.Completed:Wait()
-
-					game:GetService("ReplicatedStorage")
-						:WaitForChild("Remotes")
-						:WaitForChild("Server")
-						:WaitForChild("Combat")
-						:WaitForChild("ChangeWeapon")
-						:FireServer("Fists")
-					wait(0.2)
-
-					game:GetService("ReplicatedStorage")
-						:WaitForChild("Remotes")
-						:WaitForChild("Server")
-						:WaitForChild("Combat")
-						:WaitForChild("M1")
-						:FireServer(1, {})
-					wait(0.2)
-
-					while highestHealthMob:FindFirstChild("Humanoid") and highestHealthMob.Humanoid.Health > 0 do
-						highestHealthMob.Humanoid.Health = math.max(highestHealthMob.Humanoid.Health - 500, 0)
-						wait(0.05)
-					end
-				else
-					print("Nenhum mob encontrado com vida válida.")
+				while highestHealthMob:FindFirstChild("Humanoid") and highestHealthMob.Humanoid.Health > 0 do
+					highestHealthMob.Humanoid.Health = math.max(highestHealthMob.Humanoid.Health - 500, 0)
+					wait(0.05)
 				end
 			else
-				print("Nenhum mob encontrado na área.")
+				print("Nenhum mob encontrado com vida válida.")
 			end
+		else
+			print("Nenhum mob encontrado na área.")
 		end
 		wait()
 	end
@@ -610,7 +616,6 @@ end
 function tpToItem()
 	while getgenv().tpToItem == true do
 		local drops = workspace.Objects.Drops
-
 		if getgenv().IgnoreTalisman and not getgenv().ServerHopToItems then
 			for i, v in pairs(drops:GetChildren()) do
 				if v.Name ~= "Talisman" then
@@ -619,7 +624,7 @@ function tpToItem()
 					tween:Play()
 					tween.Completed:Wait()
 					if v.Root then
-						fireproximityprompt(pr, 3, true)
+						fireproximityprompt(v.Collect, 3, true)
 					end
 				end
 			end
@@ -633,7 +638,7 @@ function tpToItem()
 					tween:Play()
 					tween.Completed:Wait()
 					if v.Root then
-						fireproximityprompt(pr, 3, true)
+						fireproximityprompt(v.Collect, 3, true)
 					end
 				end
 			end
@@ -647,7 +652,7 @@ function tpToItem()
 				tween:Play()
 				tween.Completed:Wait()
 				if v.Root then
-					fireproximityprompt(pr, 3, true)
+					fireproximityprompt(v.Collect, 3, true)
 				end
 			end
 		elseif not getgenv().IgnoreTalisman and getgenv().ServerHopToItems then
@@ -659,11 +664,23 @@ function tpToItem()
 				tween:Play()
 				tween.Completed:Wait()
 				if v.Root then
-					fireproximityprompt(pr, 3, true)
+					fireproximityprompt(v.Collect, 3, true)
 				end
 			end
 			if not foundItems then
 				ServerHop()
+			end
+		else
+			for i, v in pairs(drops:GetChildren()) do
+				print("Checking drop:", v.Name)
+				local teleportCFrame = GetCFrame(v.Root)
+				print("Teleporting to:", teleportCFrame)
+				local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
+				tween:Play()
+				tween.Completed:Wait()
+				if v.Root then
+					fireproximityprompt(v.Collect, 3, true)
+				end
 			end
 		end
 		wait()
@@ -684,20 +701,6 @@ function autoJoin()
 			:WaitForChild("Raids")
 			:WaitForChild("QuickStart")
 			:InvokeServer(unpack(args))
-		wait()
-	end
-end
-
-function unlockAllAbiliti()
-	while getgenv().unlockAllAbiliti == true do
-		local maestrias = game:GetService("Players").LocalPlayer.ReplicatedData:FindFirstChild("masteries")
-
-		if maestrias then
-			for i, v in pairs(maestrias:GetChildren()) do
-				v.level.Value = 1000
-				v.exp.Value = 999999999999999999
-			end
-		end
 		wait()
 	end
 end
@@ -1017,8 +1020,8 @@ sections.MainSection1:Slider({
 	Maximum = 100,
 	DisplayMethod = "Round",
 	Precision = 0,
-	Callback = function(Value)
-		delaytoAttack = Value
+	Callback = function(value)
+		delaytoAttack = value
 	end,
 }, "DTHKM")
 
@@ -1026,7 +1029,7 @@ sections.MainSection1:Toggle({
 	Name = "Auto Skip Dialogue",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoSkipDialogue = Value
+		getgenv().autoSkipDialogue = value
 		autoSkipDialogue()
 	end,
 }, "autoSkipDialogue")
@@ -1035,7 +1038,7 @@ sections.MainSection1:Toggle({
 	Name = "Auto Retry",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoRetry = Value
+		getgenv().autoRetry = value
 		autoRetry()
 	end,
 }, "autoRetry")
@@ -1044,25 +1047,16 @@ sections.MainSection1:Toggle({
 	Name = "Auto Leave",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoLeave = Value
+		getgenv().autoLeave = value
 		autoLeave()
 	end,
 }, "autoLeave")
 
 sections.MainSection1:Toggle({
-	Name = "Unlock All Abilities",
-	Default = false,
-	Callback = function(value)
-		getgenv().unlockAllAbiliti = Value
-		unlockAllAbiliti()
-	end,
-}, "unlockAllAbilities")
-
-sections.MainSection1:Toggle({
 	Name = "Auto Get Chest",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoChest = Value
+		getgenv().autoChest = value
 		autoChest()
 	end,
 }, "autoGetChest")
@@ -1073,8 +1067,8 @@ local Dropdown = sections.MainSection1:Dropdown({
 	Required = true,
 	Options = ValuesKeybinds,
 	Default = None,
-	Callback = function(Value)
-		selectedKeybind = Value
+	Callback = function(value)
+		selectedKeybind = value
 	end,
 }, "selectKeybind")
 
@@ -1084,8 +1078,8 @@ local Dropdown = sections.MainSection1:Dropdown({
 	Required = true,
 	Options = ValuesInates,
 	Default = None,
-	Callback = function(Value)
-		selectedInate = Value
+	Callback = function(value)
+		selectedInate = value
 	end,
 }, "selectSkill")
 
@@ -1100,7 +1094,7 @@ sections.MainSection1:Toggle({
 	Name = "Auto Farm Items",
 	Default = false,
 	Callback = function(value)
-		getgenv().tpToItem = Value
+		getgenv().tpToItem = value
 		tpToItem()
 	end,
 }, "autoFarmItems")
@@ -1109,7 +1103,7 @@ sections.MainSection1:Toggle({
 	Name = "Ignore Talisman",
 	Default = false,
 	Callback = function(value)
-		getgenv().IgnoreTalisman = Value
+		getgenv().IgnoreTalisman = value
 	end,
 }, "ignoreTalisman")
 
@@ -1117,7 +1111,7 @@ sections.MainSection1:Toggle({
 	Name = "Server Hop To Items",
 	Default = false,
 	Callback = function(value)
-		getgenv().ServerHopToItems = Value
+		getgenv().ServerHopToItems = value
 	end,
 }, "serverHopToItems")
 
@@ -1131,8 +1125,8 @@ local Dropdown = sections.MainSection2:Dropdown({
 	Required = true,
 	Options = { "Boss", "Investigation" },
 	Default = None,
-	Callback = function(Value)
-		selectedType = Value
+	Callback = function(value)
+		selectedType = value
 	end,
 }, "selectType")
 
@@ -1142,8 +1136,8 @@ local Dropdown = sections.MainSection2:Dropdown({
 	Required = true,
 	Options = ValuesBoss,
 	Default = None,
-	Callback = function(Value)
-		selectedBoss = Value
+	Callback = function(value)
+		selectedBoss = value
 	end,
 }, "selectBossOrAct")
 
@@ -1153,8 +1147,8 @@ local Dropdown = sections.MainSection2:Dropdown({
 	Required = true,
 	Options = { "easy", "medium", "hard", "nightmare" },
 	Default = None,
-	Callback = function(Value)
-		selectedDifficulty = Value
+	Callback = function(value)
+		selectedDifficulty = value
 	end,
 }, "selectDifficulty")
 
@@ -1162,7 +1156,7 @@ sections.MainSection2:Toggle({
 	Name = "Auto Join",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoJoin = Value
+		getgenv().autoJoin = value
 		autoJoin()
 	end,
 }, "autoJoin")
@@ -1171,7 +1165,7 @@ sections.MainSection2:Toggle({
 	Name = "Auto Boss",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoBoss = Value
+		getgenv().autoBoss = value
 		autoBoss()
 	end,
 }, "autoBoss")
@@ -1180,7 +1174,7 @@ sections.MainSection2:Toggle({
 	Name = "Auto Investigation",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoInvestigation = Value
+		getgenv().autoInvestigation = value
 		autoInvestigation()
 	end,
 }, "autoInvestigation")
@@ -1192,8 +1186,8 @@ sections.MainSection2:Slider({
 	Maximum = 100,
 	DisplayMethod = "Round",
 	Precision = 0,
-	Callback = function(Value)
-		delaytoAttackMob = Value
+	Callback = function(value)
+		delaytoAttackMob = value
 	end,
 }, "delayToInvest/Boss")
 
@@ -1217,11 +1211,11 @@ sections.MainSection3:Input({
 	Name = "Webhook Url",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "All",
-	Callback = function(Value)
-		urlwebhook = Value
+	Callback = function(value)
+		urlwebhook = value
 	end,
-	onChanged = function(Value)
-		urlwebhook = Value
+	onChanged = function(value)
+		urlwebhook = value
 	end,
 }, "webhookURl")
 
@@ -1229,11 +1223,11 @@ sections.MainSection3:Input({
 	Name = "User ID",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "Numeric",
-	Callback = function(Value)
-		getgenv().pingUserId = Value
+	Callback = function(value)
+		getgenv().pingUserId = value
 	end,
-	onChanged = function(Value)
-		getgenv().pingUserId = Value
+	onChanged = function(value)
+		getgenv().pingUserId = value
 	end,
 }, "userID")
 
@@ -1241,7 +1235,7 @@ sections.MainSection3:Toggle({
 	Name = "Send Webhook when finish investigation",
 	Default = false,
 	Callback = function(value)
-		getgenv().webhook = Value
+		getgenv().webhook = value
 		webhook()
 	end,
 }, "webhookToggle")
@@ -1250,7 +1244,7 @@ sections.MainSection3:Toggle({
 	Name = "Ping user",
 	Default = false,
 	Callback = function(value)
-		getgenv().pingUser = Value
+		getgenv().pingUser = value
 	end,
 }, "pingUserToggle")
 
@@ -1270,7 +1264,7 @@ sections.MainSection4:Toggle({
 	Name = "Auto Execute",
 	Default = false,
 	Callback = function(value)
-		getgenv().aeuat = Value
+		getgenv().aeuat = value
 		aeuat()
 	end,
 }, "AutoExecute")
@@ -1306,3 +1300,4 @@ for i, v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
 	v:Disable()
 end
 warn("[TEMPEST HUB] Loaded")
+hideUI()
