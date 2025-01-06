@@ -67,7 +67,7 @@ local player = Players.LocalPlayer
 local GuiService = game:GetService("GuiService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local TweenService = game:GetService("TweenService")
-local speed = 250
+local speed = 200
 
 --START OF FUNCTIONS
 function hideUIExec()
@@ -337,6 +337,7 @@ function autoRetry()
 							elseif loot.Enabled == true then
 								wait()
 							else
+								wait(delaytoRep)
 								local GuiService = game:GetService("GuiService")
 								local VirtualInputManager = game:GetService("VirtualInputManager")
 								GuiService.SelectedObject = buttonRetry
@@ -385,6 +386,7 @@ function autoLeave()
 							elseif loot.Enabled == true then
 								wait()
 							else
+								wait(delaytoRep)
 								GuiService.SelectedObject = buttonLeave
 								VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
 								VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
@@ -419,20 +421,6 @@ function autoChest()
 					local pr = v:FindFirstChild("Collect")
 					fireproximityprompt(pr, 15, true)
 					wait(0.5)
-					if loot.Enabled == true then
-						while loot.Enabled == true do
-							GuiService.SelectedObject = loot.Frame.Flip
-							VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-							VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-							wait(0.5)
-						end
-					end
-				else
-					if loot.Enabled == true then
-						GuiService.SelectedObject = loot.Frame.Flip
-						VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-						VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-					end
 				end
 			end
 			while loot.Enabled == true do
@@ -455,7 +443,7 @@ function HitKill()
 				local humanoid = v:FindFirstChild("Humanoid")
 				if humanoid then
 					local targetHealth = 0
-					local decrement = 1000
+					local decrement = 500
 					local delay = 0.1
 
 					while humanoid.Health > targetHealth do
@@ -511,7 +499,7 @@ function autoBoss()
 					if humanoid and not mob:FindFirstChild("BossSpawn") then
 						local targetHealth = 0
 						local decrement = 500
-						local delay = 0.05
+						local delay = 0.1
 						while humanoid.Health > targetHealth do
 							humanoid.Health = math.max(humanoid.Health - decrement, targetHealth)
 							wait(delay)
@@ -614,7 +602,7 @@ function autoInvestigation()
 
 				while highestHealthMob:FindFirstChild("Humanoid") and highestHealthMob.Humanoid.Health > 0 do
 					highestHealthMob.Humanoid.Health = math.max(highestHealthMob.Humanoid.Health - 500, 0)
-					wait(0.05)
+					wait(0.1)
 				end
 			else
 				print("Nenhum mob encontrado com vida válida.")
@@ -1078,6 +1066,18 @@ sections.MainSection1:Toggle({
 		autoLeave()
 	end,
 }, "autoLeave")
+
+sections.MainSection1:Slider({
+	Name = "Delay to Replay/Leave",
+	Default = 0,
+	Minimum = 0,
+	Maximum = 100,
+	DisplayMethod = "Round",
+	Precision = 0,
+	Callback = function(value)
+		delaytoRep = value
+	end,
+}, "DTRL")
 
 sections.MainSection1:Toggle({
 	Name = "Auto Get Chest",
