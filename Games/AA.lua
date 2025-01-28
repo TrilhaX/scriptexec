@@ -400,9 +400,6 @@ function placeInRedZones()
                             found = true
 						end
 					end
-					if not found then
-						print("Unidade possuída não encontrada no mapa:", ownedUnit.unit_id)
-					end
 				end
 			end
 		end
@@ -410,8 +407,6 @@ function placeInRedZones()
 		local matchingUUIDs = checkEquippedAgainstOwned()
 		if #matchingUUIDs > 0 then
 			printUnitNames(matchingUUIDs)
-		else
-			print("Nenhuma unidade equipada corresponde às unidades possuídas.")
 		end	
 		wait()
 	end
@@ -458,29 +453,28 @@ function InfRange()
 				warn("Pasta '_UNITS' não encontrada no workspace!")
 				return
 			end
-
+		
 			for _, matchedUUID in pairs(matchedUUIDs) do
 				local ownedUnit = ownedUnits[matchedUUID]
 				if ownedUnit and ownedUnit.unit_id then
-					local found = false
 					for _, unit in pairs(unitsFolder:GetChildren()) do
 						local baseName = getBaseName(ownedUnit.unit_id)
 						if baseName:lower() ~= "bulma" and baseName:lower() ~= "speedwagon" then
 							if getBaseName(unit.Name) == baseName then
-								unit.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-								found = true
+								local humanoidRootPart = unit:WaitForChild("HumanoidRootPart", 5)
+								if humanoidRootPart then
+									humanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+								end
 							end
 						end
 					end
 				end
 			end
-		end
+		end		
 
 		local matchingUUIDs = checkEquippedAgainstOwned()
 		if #matchingUUIDs > 0 then
 			printUnitNames(matchingUUIDs)
-		else
-			print("Nenhuma unidade equipada corresponde às unidades possuídas.")
 		end
 		wait()
 	end
@@ -652,8 +646,6 @@ function UseActiveAttackE()
 	while toggle do
 		erwin1 = {}
 
-		print("Buscando unidades 'erwin'...")
-
 		for _, v in pairs(game:GetService("Workspace")._UNITS:GetChildren()) do
 			if v.Name == "erwin" and v._stats.player.Value == goat then
 				table.insert(erwin1, v)
@@ -692,32 +684,23 @@ end
 
 function UseActiveAttackW()
 	local player = game.Players.LocalPlayer
-	print("Iniciando a função UseActiveAttackW para", player.Name)
 
 	while toggle2 do
-		print("Verificando a presença do jogador e seu personagem...")
 		repeat
 			wait(1)
 		until player and player.Character
-		print("Jogador e personagem encontrados:", player.Name)
 
 		local wendy1 = {}
-		print("Filtrando unidades Wendy...")
 
 		for _, unit in pairs(game:GetService("Workspace")._UNITS:GetChildren()) do
 			if (unit.Name == "wendy" or unit.Name == "wendy_halloween") and unit._stats.player.Value == player then
 				table.insert(wendy1, unit)
-				print("Unidade Wendy ou Wendy Halloween encontrada:", unit.Name)
 			end
 		end
 
-		print("Número de unidades Wendy ou Wendy Halloween controladas pelo jogador:", #wendy1)
-
 		if CheckWendyCount(wendy1) then
-			print("Número correto de unidades Wendy (4) encontrado, iniciando ataque ativo...")
 
 			if not toggle2 then
-				print("A execução do buff foi interrompida, toggle desativado.")
 				break
 			end
 			for _, wendyUnit in ipairs(wendy1) do
@@ -730,13 +713,9 @@ function UseActiveAttackW()
 				print("Ataque ativo invocado para a Wendy:", wendyUnit.Name)
 				wait(15.8)
 			end
-		else
-			print("Número incorreto de unidades Wendy, não aplicando buff.")
 		end
 		wait(1)
 	end
-
-	print("Função UseActiveAttackW finalizada.")
 end
 
 function CheckLeafyCount(leafy1)
@@ -749,8 +728,6 @@ function UseActiveAttackL()
 
 	while toggle3 do
 		leafy1 = {}
-
-		print("Buscando unidades 'leafy'...")
 
 		for _, v in pairs(game:GetService("Workspace")._UNITS:GetChildren()) do
 			if v.Name == "leafy" and v._stats.player.Value == goat then
@@ -1107,25 +1084,28 @@ function autoUpgrade()
 			for _, matchedUUID in pairs(matchedUUIDs) do
 				local ownedUnit = ownedUnits[matchedUUID]
 				if ownedUnit and ownedUnit.unit_id then
-					local found = false
+					local unitsToUpgrade = {}
+
 					for _, unit in pairs(unitsFolder:GetChildren()) do
 						if getBaseName(ownedUnit.unit_id) == getBaseName(unit.Name) then
+							table.insert(unitsToUpgrade, unit)
+						end
+					end
+		
+					if #unitsToUpgrade > 0 then
+						for _, unitInstance in pairs(unitsToUpgrade) do
 							local args = {
-								[1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(ownedUnit.unit_id))
+								[1] = unitInstance
 							}
-
+		
 							local success, err = pcall(function()
 								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
 							end)
-
+		
 							if not success then
 								warn("Erro ao realizar upgrade da unidade:", err)
 							end
-							found = true
 						end
-					end
-					if not found then
-						print("Unidade possuída não encontrada no mapa:", ownedUnit.unit_id)
 					end
 				end
 			end
@@ -1134,8 +1114,6 @@ function autoUpgrade()
 		local matchingUUIDs = checkEquippedAgainstOwned()
 		if #matchingUUIDs > 0 then
 			printUnitNames(matchingUUIDs)
-		else
-			print("Nenhuma unidade equipada corresponde às unidades possuídas.")
 		end		
         wait()
     end
