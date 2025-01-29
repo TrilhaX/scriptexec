@@ -1,3 +1,4 @@
+repeat task.wait() until game:IsLoaded()
 warn("[TEMPEST HUB] Loading Ui")
 wait()
 local repo = "https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/"
@@ -1199,6 +1200,60 @@ function universalSkill()
     end
 end
 
+function dupeVegeto()
+	while getgenv().dupeVegeto == true do
+		local units = workspace._UNITS
+		local gokuAndvegeto = {}
+	
+		function bothUnitsExist()
+			local hasVegeta = false
+			local hasGoku = false
+	
+			for _, unit in pairs(units:GetChildren()) do
+				if unit.Name == "vegeta_majin" then
+					if workspace._UNITS.vegeta_majin._stats.upgrade.Value >= 7 then
+						hasVegeta = true
+						print("Ta upgrade 7")
+					else
+						print("Nao ta upgrade 7")
+					end
+				elseif unit.Name == "goku_ssj3" then
+					if workspace._UNITS.goku_ssj3._stats.upgrade.Value >= 7 then
+						hasGoku = true
+						print("Ta upgrade 7")
+					else
+						print("Nao ta upgrade 7")
+					end
+				end
+			end
+	
+			return hasVegeta and hasGoku
+		end
+	
+		function handleNewUnit(unit)
+			if bothUnitsExist() and not gokuAndvegeto[unit] then
+				gokuAndvegeto[unit] = true
+				print("Unidades Vegeta e Goku detectadas: " .. unit:GetFullName())
+				local args = {
+					[1] = workspace._UNITS.goku_ssj3
+				}
+	
+				game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+				wait(1)
+			end
+		end
+	
+		units.ChildAdded:Connect(function(unit)
+			handleNewUnit(unit)
+		end)
+	
+		for _, unit in pairs(units:GetChildren()) do
+			handleNewUnit(unit)
+		end
+		wait()
+	end
+end
+
 function webhook()
     while getgenv().webhook == true do
         local discordWebhookUrl = urlwebhook
@@ -1704,6 +1759,16 @@ Tab1:AddToggle("PlaceInRedZones", {
 		placeInRedZones()
 	end,
 })
+
+Tab1:AddToggle("DupeVegeto", {
+	Text = "Dupe Vegeto",
+	Default = false,
+	Callback = function(Value)
+		getgenv().dupeVegeto = Value
+		dupeVegeto()
+	end,
+})
+
 Tab1:AddToggle("InfRange", {
 	Text = "Inf Range",
 	Default = false,
