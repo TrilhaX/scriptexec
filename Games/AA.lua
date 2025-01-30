@@ -915,8 +915,10 @@ end
 
 function disableNotifications()
 	local notifications = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("NotificationWindows")
-	if notifications then
+	local notifications2 = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("MessageGui")
+	if notifications and notifications2 then
 		notifications.Enabled = false
+		notifications2.Enabled = false
 	end
 end
 
@@ -1015,7 +1017,7 @@ function autoPlace()
 				end
 			end
 		end			
-		wait()
+		wait(1)
 	end
 end
 
@@ -1051,7 +1053,10 @@ function autoUpgrade()
 		end
 		
 		function getBaseName(unitName)
-			return string.match(unitName, "^(.-)_evolved$") or unitName
+			return string.match(unitName, "^(.-)_evolved$") 
+				or string.match(unitName, "^(.-)_christmas$") 
+				or string.match(unitName, "^(.-)_halloween$")
+				or unitName
 		end
 		
 		function printUnitNames(matchedUUIDs)
@@ -1095,7 +1100,7 @@ function autoUpgrade()
 		if #matchingUUIDs > 0 then
 			printUnitNames(matchingUUIDs)
 		end		
-        wait()
+        wait(1)
     end
 end
 
@@ -1180,48 +1185,68 @@ function universalSkill()
 end
 
 function dupeVegeto()
-	while getgenv().dupeVegeto == true do
-		local units = workspace._UNITS
-		local gokuAndvegeto = {}
-	
-		function bothUnitsExist()
-			local hasVegeta = false
-			local hasGoku = false
-	
-			for _, unit in pairs(units:GetChildren()) do
-				if unit.Name == "vegeta_majin" then
-					if workspace._UNITS.vegeta_majin._stats.upgrade.Value >= 7 then
-						hasVegeta = true
-					end
-				elseif unit.Name == "goku_ssj3" then
-					if workspace._UNITS.goku_ssj3._stats.upgrade.Value >= 7 then
-						hasGoku = true
-					end
-				end
-			end
-	
-			return hasVegeta and hasGoku
-		end
-	
-		function handleNewUnit(unit)
-			if bothUnitsExist() and not gokuAndvegeto[unit] then
-				gokuAndvegeto[unit] = true
-				local args = {
-					[1] = workspace._UNITS.goku_ssj3
-				}
-	
-				game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
-				wait(1)
-			end
-		end
-	
-		units.ChildAdded:Connect(function(unit)
-			handleNewUnit(unit)
-		end)
-	
-		for _, unit in pairs(units:GetChildren()) do
-			handleNewUnit(unit)
-		end
+    while getgenv().dupeVegeto == true do
+        function safeWaitForChild(parent, childName, timeout)
+            local child = parent:FindFirstChild(childName)
+            local elapsedTime = 0
+            while not child and elapsedTime < timeout do
+                wait(0.1)
+                elapsedTime = elapsedTime + 0.1
+                child = parent:FindFirstChild(childName)
+            end
+            return child
+        end
+
+        local gokuSSJ3 = safeWaitForChild(workspace:WaitForChild("_UNITS"), "goku_ssj3", 5)
+        if gokuSSJ3 then
+            local args = { [1] = gokuSSJ3 }
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end
+
+        local vegetaMajin = safeWaitForChild(workspace:WaitForChild("_UNITS"), "vegeta_majin", 5)
+        if vegetaMajin then
+            local args = { [1] = vegetaMajin }
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end
+
+        local gokuSSJ3Dead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "goku_ssj3", 5)
+        if gokuSSJ3Dead then
+            local args = { [1] = gokuSSJ3Dead }
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end
+
+        local vegetaMajinDead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "vegeta_majin", 5)
+        if vegetaMajinDead then
+            local args = { [1] = vegetaMajinDead }
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end
+        wait()
+    end
+end
+
+function dupeGriffith()
+	while getgenv().dupeGriffith == true do
+        function safeWaitForChild(parent, childName, timeout)
+            local child = parent:FindFirstChild(childName)
+            local elapsedTime = 0
+            while not child and elapsedTime < timeout do
+                wait(0.1)
+                elapsedTime = elapsedTime + 0.1
+                child = parent:FindFirstChild(childName)
+            end
+            return child
+        end
+		
+		local griffithNormal = safeWaitForChild(workspace:WaitForChild("_UNITS"), "femto_egg", 5)
+        if griffithNormal then
+            local args = { [1] = griffithNormal }
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end
+		local griffithDead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "femto_egg", 5)
+        if griffithDead then
+            local args = { [1] = griffithDead }
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end
 		wait()
 	end
 end
@@ -1727,6 +1752,15 @@ Tab1:AddToggle("PlaceInRedZones", {
 	Callback = function(Value)
 		getgenv().placeInRedZones = Value
 		placeInRedZones()
+	end,
+})
+
+Tab1:AddToggle("DupeVegeto", {
+	Text = "Dupe Griffith",
+	Default = false,
+	Callback = function(Value)
+		getgenv().dupeGriffith = Value
+		dupeGriffith()
 	end,
 })
 
