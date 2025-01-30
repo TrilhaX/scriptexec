@@ -653,10 +653,8 @@ function UseActiveAttackE()
 			end
 		end
 
-		print("Erwins encontrados: ", #erwin1)
 
 		if CheckErwinCount(erwin1) then
-			print("Verificando se os 'erwins' são válidos...")
 
 			for i, erwin in ipairs(erwin1) do
 				if not toggle then
@@ -667,13 +665,10 @@ function UseActiveAttackE()
 				local client_to_server = endpoints:WaitForChild("client_to_server")
 				local use_active_attack = client_to_server:WaitForChild("use_active_attack")
 
-				print("Ativando ataque para Erwin: ", erwin)
 
 				use_active_attack:InvokeServer(erwin)
 				wait(15.7)
 			end
-		else
-			print("Número insuficiente de 'Erwins' para ativar o ataque.")
 		end
 		wait(2)
 	end
@@ -705,13 +700,11 @@ function UseActiveAttackW()
 				break
 			end
 			for _, wendyUnit in ipairs(wendy1) do
-				print("Ativando o ataque para a Wendy:", wendyUnit.Name)
 				game:GetService("ReplicatedStorage")
 					:WaitForChild("endpoints")
 					:WaitForChild("client_to_server")
 					:WaitForChild("use_active_attack")
 					:InvokeServer(wendyUnit)
-				print("Ataque ativo invocado para a Wendy:", wendyUnit.Name)
 				wait(15.8)
 			end
 		end
@@ -736,10 +729,8 @@ function UseActiveAttackL()
 			end
 		end
 
-		print("leafy encontrados: ", #leafy1)
 
 		if CheckLeafyCount(leafy1) then
-			print("Verificando se os 'leafy' são válidos...")
 
 			for i, leafy in ipairs(leafy1) do
 				if not toggle3 then
@@ -750,13 +741,10 @@ function UseActiveAttackL()
 				local client_to_server = endpoints:WaitForChild("client_to_server")
 				local use_active_attack = client_to_server:WaitForChild("use_active_attack")
 
-				print("Ativando ataque para leafy: ", leafy)
 
 				use_active_attack:InvokeServer(leafy)
 				wait(15.7)
 			end
-		else
-			print("Número insuficiente de 'leafy' para ativar o ataque.")
 		end
 		wait(1)
 	end
@@ -936,12 +924,12 @@ function autoPlace()
 	while getgenv().autoPlace == true do
 		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
 		local success, upvalues = pcall(debug.getupvalues, Loader.init)
-
+		
 		if not success then
 			warn("Failed to get upvalues from Loader.init")
 			return
 		end
-
+		
 		local Modules = {
 			["CORE_CLASS"] = upvalues[6],
 			["CORE_SERVICE"] = upvalues[7],
@@ -950,9 +938,11 @@ function autoPlace()
 			["CLIENT_CLASS"] = upvalues[10],
 			["CLIENT_SERVICE"] = upvalues[11],
 		}
-
+		
 		local StatsServiceClient = Modules["CLIENT_SERVICE"] and Modules["CLIENT_SERVICE"]["StatsServiceClient"]
-
+		
+		local unitTypes = {}
+		
 		function createAreaVisualization(center, radius)
 			local area = Instance.new("Part")
 			area.Name = "UnitSpawnArea"
@@ -967,75 +957,64 @@ function autoPlace()
 			area.Parent = workspace
 			return area
 		end
-
+		
 		function getRandomPositionAroundWaypoint(waypointPosition, radius)
 			local angle = math.random() * (2 * math.pi)
 			local distance = math.random() * radius
 			local offset = Vector3.new(math.cos(angle) * distance, 0, math.sin(angle) * distance)
 			return waypointPosition + offset
 		end
-
-		function GetCFrame(position, rotationX, rotationY)
-			return CFrame.new(position) * CFrame.Angles(math.rad(rotationX), math.rad(rotationY), 0)
-		end
-
-		if
-			StatsServiceClient
-			and StatsServiceClient.module
-			and StatsServiceClient.module.session
-			and StatsServiceClient.module.session.collection
-			and StatsServiceClient.module.session.collection.collection_profile_data
-			and StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
-		then
-			local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
-			local radius = 5
-			local existingPositions = {}
-
-			local lane = workspace._BASES.pve.LANES:FindFirstChild("1")
-			local waypoint = lane:FindFirstChild("3")
-			if not waypoint then
-				warn("Waypoint not found in lane")
-				return
+		
+		function GetCFrame(position, rotationX, rotationY, isAerial)
+			if isAerial then
+				return CFrame.new(position.X, position.Y + 20, position.Z) * CFrame.Angles(math.rad(rotationX), math.rad(rotationY), 0)
+			else
+				return CFrame.new(position) * CFrame.Angles(math.rad(rotationX), math.rad(rotationY), 0)
 			end
+		end
+		
+		function alternarUnidadeTipo(unitID)
+			if not unitTypes[unitID] then
+				local isAerial = math.random() < 0.5
+				unitTypes[unitID] = isAerial and "aerea" or "terrestre"
+			end
+		end
+		
+		function placeUnit(unitID, waypoint, radius)
+			alternarUnidadeTipo(unitID)
+			local isAerial = unitTypes[unitID] == "aerea"
+			
+			local spawnPosition = getRandomPositionAroundWaypoint(waypoint.Position, radius)
+			local spawnCFrame = GetCFrame(spawnPosition, 0, 0, isAerial)
 
-			createAreaVisualization(waypoint.Position, radius)
-
+			game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unitID, spawnCFrame)
+		end
+		
+		if StatsServiceClient and StatsServiceClient.module and StatsServiceClient.module.session and StatsServiceClient.module.session.collection and StatsServiceClient.module.session.collection.collection_profile_data and StatsServiceClient.module.session.collection.collection_profile_data.equipped_units then
+			local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
+			local waypoints = workspace._BASES.pve.LANES["1"]:GetChildren()
+		
+			local totalWaypoints = #waypoints
+			local waypointStep = totalWaypoints / 100
+			local radiusMax = 15
+			local radiusStep = radiusMax / 100
+		
 			for _, unit in pairs(equippedUnits) do
 				if type(unit) == "table" then
 					for _, unitID in pairs(unit) do
-						local spawnPosition = getRandomPositionAroundWaypoint(waypoint.Position, radius)
-						local spawnCFrame = GetCFrame(spawnPosition, 0, 0)
-
-						local args = {
-							[1] = unitID,
-							[2] = spawnCFrame,
-						}
-
-						table.insert(existingPositions, spawnPosition)
-						game:GetService("ReplicatedStorage")
-							:WaitForChild("endpoints")
-							:WaitForChild("client_to_server")
-							:WaitForChild("spawn_unit")
-							:InvokeServer(unpack(args))
+						local selectedWaypointIndex = math.clamp(math.floor(selectedDistance * waypointStep), 1, totalWaypoints)
+						local selectedRadius = math.clamp(selectedGroundDistance * radiusStep, 1, radiusMax)
+						local waypoint = waypoints[selectedWaypointIndex]
+						placeUnit(unitID, waypoint, selectedRadius)
 					end
 				else
-					local spawnPosition = getRandomPositionAroundWaypoint(waypoint.Position, radius)
-					local spawnCFrame = GetCFrame(spawnPosition, 0, 0)
-
-					local args = {
-						[1] = unit,
-						[2] = spawnCFrame,
-					}
-
-					table.insert(existingPositions, spawnPosition)
-					game:GetService("ReplicatedStorage")
-						:WaitForChild("endpoints")
-						:WaitForChild("client_to_server")
-						:WaitForChild("spawn_unit")
-						:InvokeServer(unpack(args))
+					local selectedWaypointIndex = math.clamp(math.floor(selectedDistance * waypointStep), 1, totalWaypoints)
+					local selectedRadius = math.clamp(selectedGroundDistance * radiusStep, 1, radiusMax)
+					local waypoint = waypoints[selectedWaypointIndex]
+					placeUnit(unit, waypoint, selectedRadius)
 				end
 			end
-		end
+		end			
 		wait()
 	end
 end
@@ -1213,16 +1192,10 @@ function dupeVegeto()
 				if unit.Name == "vegeta_majin" then
 					if workspace._UNITS.vegeta_majin._stats.upgrade.Value >= 7 then
 						hasVegeta = true
-						print("Ta upgrade 7")
-					else
-						print("Nao ta upgrade 7")
 					end
 				elseif unit.Name == "goku_ssj3" then
 					if workspace._UNITS.goku_ssj3._stats.upgrade.Value >= 7 then
 						hasGoku = true
-						print("Ta upgrade 7")
-					else
-						print("Nao ta upgrade 7")
 					end
 				end
 			end
@@ -1233,7 +1206,6 @@ function dupeVegeto()
 		function handleNewUnit(unit)
 			if bothUnitsExist() and not gokuAndvegeto[unit] then
 				gokuAndvegeto[unit] = true
-				print("Unidades Vegeta e Goku detectadas: " .. unit:GetFullName())
 				local args = {
 					[1] = workspace._UNITS.goku_ssj3
 				}
@@ -1562,8 +1534,6 @@ function printChallenges(module)
 			table.insert(challengesKeys, key)
 		end
 		return challengesKeys
-	else
-		print("O módulo não contém 'challenges'.")
 	end
 end
 
@@ -2044,13 +2014,50 @@ LeftGroupBox:AddInput('inputAutoPlaceWaveX', {
     end
 })
 
+LeftGroupBox:AddSlider('distancePercentage', {
+	Text = 'Distance Percentage',
+	Default = 0,
+	Min = 0,
+	Max = 100,
+	Rounding = 0,
+	Compact = false,
+	Callback = function(Value)
+		selectedDistance = Value
+	end
+})
+
+LeftGroupBox:AddSlider('GroundPercentage', {
+	Text = 'Ground Percentage',
+	Default = 0,
+	Min = 0,
+	Max = 100,
+	Rounding = 0,
+	Compact = false,
+	Callback = function(Value)
+		selectedGroundDistance = Value
+	end
+})
+
+LeftGroupBox:AddSlider('GroundPercentage', {
+	Text = 'Hill Percentage',
+	Default = 0,
+	Min = 0,
+	Max = 100,
+	Rounding = 0,
+	Compact = false,
+	Callback = function(Value)
+		selectedHillDistance = Value
+	end
+})
+
 LeftGroupBox:AddToggle("AutoPlace", {
 	Text = "Auto Place",
 	Default = false,
-
 	Callback = function(Value)
 		getgenv().autoPlace = Value
-		autoPlace()
+		if Value then
+			autoPlace()
+		end
 	end,
 })
 
