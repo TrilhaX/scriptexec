@@ -1,3 +1,4 @@
+repeat task.wait() until game:IsLoaded()
 warn("[TEMPEST HUB] Loading Ui")
 wait()
 local repo = "https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/"
@@ -64,7 +65,7 @@ function aeuat()
 
 				queue_on_teleport([[         
                     repeat task.wait() until game:IsLoaded()
-                    wait(1)
+                    wait(3)
                     if getgenv().executed then return end    
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
                 ]])
@@ -76,6 +77,139 @@ function aeuat()
 		end)
 		wait()
 	end
+end
+
+function blackScreen()
+	local screenGui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("BlackScreenTempestHub")
+	if screenGui then
+        screenGui.Enabled = not screenGui.Enabled
+    end
+end
+
+function createBC()
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "BlackScreenTempestHub"
+	screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+	screenGui.Enabled = false
+	
+	local frame = Instance.new("Frame")
+	frame.Name = "BackgroundFrame"
+	frame.Size = UDim2.new(1, 0, 2, 0)
+	frame.Position = UDim2.new(0, 0, 0, -60)
+	frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	frame.Parent = screenGui
+	
+	local centerFrame = Instance.new("Frame")
+	centerFrame.Name = "CenterFrame"
+	centerFrame.Size = UDim2.new(0, 300, 0, 300)
+	centerFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
+	centerFrame.AnchorPoint = Vector2.new(0, 0.7)
+	centerFrame.BackgroundTransparency = 1
+	centerFrame.Parent = frame
+	
+	local yOffset = 0
+	local player = game.Players.LocalPlayer
+	
+	local name = player.Name
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Name = "NameLabel"
+	nameLabel.Size = UDim2.new(0, 200, 0, 50)
+	nameLabel.Position = UDim2.new(0.5, -100, 0, yOffset)
+	nameLabel.Text = "Name: " .. name
+	nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	nameLabel.TextSize = 20
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Parent = centerFrame
+	yOffset = yOffset + 55
+	
+	local levelText = player.PlayerGui.spawn_units.Lives.Main.Desc.Level.Text
+	local numberAndAfter = levelText:sub(7)
+	local levelLabel = Instance.new("TextLabel")
+	levelLabel.Name = "LevelLabel"
+	levelLabel.Size = UDim2.new(0, 200, 0, 50)
+	levelLabel.Position = UDim2.new(0.5, -100, 0, yOffset)
+	levelLabel.Text = "Level: " .. numberAndAfter
+	levelLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	levelLabel.TextSize = 20
+	levelLabel.BackgroundTransparency = 1
+	levelLabel.Parent = centerFrame
+	yOffset = yOffset + 55
+	
+	local gemsAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("gem_amount")
+	local Gems = Instance.new("TextLabel")
+	Gems.Name = "gemsLabel"
+	Gems.Size = UDim2.new(0, 200, 0, 50)
+	Gems.Position = UDim2.new(0.5, -100, 0, yOffset)
+	Gems.Text = "Gems: " .. gemsAmount.Value
+	Gems.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Gems.TextSize = 20
+	Gems.BackgroundTransparency = 1
+	Gems.Parent = centerFrame
+	yOffset = yOffset + 55
+	
+	local goldAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("gold_amount")
+	local Gold = Instance.new("TextLabel")
+	Gold.Name = "goldLabel"
+	Gold.Size = UDim2.new(0, 200, 0, 50)
+	Gold.Position = UDim2.new(0.5, -100, 0, yOffset)
+	Gold.Text = "Gold: " .. goldAmount.Value
+	Gold.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Gold.TextSize = 20
+	Gold.BackgroundTransparency = 1
+	Gold.Parent = centerFrame
+	yOffset = yOffset + 55
+	
+	local holidayAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceHolidayStars")
+	local Holiday = Instance.new("TextLabel")
+	Holiday.Name = "holidayLabel"
+	Holiday.Size = UDim2.new(0, 200, 0, 50)
+	Holiday.Position = UDim2.new(0.5, -100, 0, yOffset)
+	Holiday.Text = "Holiday Stars: " .. holidayAmount.Value
+	Holiday.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Holiday.TextSize = 20
+	Holiday.BackgroundTransparency = 1
+	Holiday.Parent = centerFrame
+	yOffset = yOffset + 55
+	
+	local candyAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceCandies")
+	local candy = Instance.new("TextLabel")
+	candy.Name = "candyLabel"
+	candy.Size = UDim2.new(0, 200, 0, 50)
+	candy.Position = UDim2.new(0.5, -100, 0, yOffset)
+	candy.Text = "Candy: " .. candyAmount.Value
+	candy.TextColor3 = Color3.fromRGB(255, 255, 255)
+	candy.TextSize = 20
+	candy.BackgroundTransparency = 1
+	candy.Parent = centerFrame
+	yOffset = yOffset + 55
+end
+
+function extremeFpsBoost()
+    if getgenv().extremeFpsBoost == true then
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+        game.Lighting.GlobalShadows = false
+        game.Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Part") or obj:IsA("MeshPart") or obj:IsA("UnionOperation") then
+                obj.Material = Enum.Material.SmoothPlastic
+                obj.Color = Color3.new(.5, .5, .5)
+                obj.Transparency = 0
+                obj.CanCollide = true
+            elseif obj:IsA("Mesh") or obj:IsA("SpecialMesh") or obj:IsA("Decal") or obj:IsA("Texture") then
+                obj:Destroy()
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+                obj.Enabled = false
+            end
+        end
+
+        for _, effect in pairs(game.Lighting:GetChildren()) do
+            if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") then
+                effect.Enabled = false
+            end
+        end
+    end
 end
 
 local function tweenModel(model, targetCFrame)
@@ -212,6 +346,138 @@ function hideInfoPlayer()
 		frame:Destroy()
 
 		wait(0.1)
+	end
+end
+
+function placeInRedZones()
+	while getgenv().placeInRedZones == true do
+		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+		local upvalues = debug.getupvalues(Loader.init)
+		
+		local Modules = {
+			["CORE_CLASS"] = upvalues[6],
+			["CORE_SERVICE"] = upvalues[7],
+			["SERVER_CLASS"] = upvalues[8],
+			["SERVER_SERVICE"] = upvalues[9],
+			["CLIENT_CLASS"] = upvalues[10],
+			["CLIENT_SERVICE"] = upvalues[11],
+		}
+		
+		local ownedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.owned_units
+		local equippedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.equipped_units
+		
+		function checkEquippedAgainstOwned()
+			local matchedUUIDs = {}
+		
+			for _, equippedUUID in pairs(equippedUnits) do
+				for key, _ in pairs(ownedUnits) do
+					if tostring(equippedUUID) == tostring(key) then
+						table.insert(matchedUUIDs, key)
+					end
+				end
+			end
+		
+			return matchedUUIDs
+		end
+		
+		function getBaseName(unitName)
+			return string.match(unitName, "^(.-)_evolved$") or unitName
+		end
+		
+		function printUnitNames(matchedUUIDs)
+			local unitsFolder = workspace:FindFirstChild("_UNITS")
+			if not unitsFolder then
+				warn("Pasta '_UNITS' não encontrada no workspace!")
+				return
+			end
+		
+			for _, matchedUUID in pairs(matchedUUIDs) do
+				local ownedUnit = ownedUnits[matchedUUID]
+				if ownedUnit and ownedUnit.unit_id then
+					local found = false
+					for _, unit in pairs(unitsFolder:GetChildren()) do
+						if getBaseName(ownedUnit.unit_id) == getBaseName(unit.Name) then
+                            unit._hitbox.Size = Vector3.new(0, 0, 0)
+                            found = true
+						end
+					end
+				end
+			end
+		end
+		
+		local matchingUUIDs = checkEquippedAgainstOwned()
+		if #matchingUUIDs > 0 then
+			printUnitNames(matchingUUIDs)
+		end	
+		wait()
+	end
+end
+
+function InfRange()
+	while getgenv().InfRange == true do
+        local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+		local upvalues = debug.getupvalues(Loader.init)
+
+		local Modules = {
+			["CORE_CLASS"] = upvalues[6],
+			["CORE_SERVICE"] = upvalues[7],
+			["SERVER_CLASS"] = upvalues[8],
+			["SERVER_SERVICE"] = upvalues[9],
+			["CLIENT_CLASS"] = upvalues[10],
+			["CLIENT_SERVICE"] = upvalues[11],
+		}
+
+		local ownedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.owned_units
+		local equippedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.equipped_units
+
+		function checkEquippedAgainstOwned()
+			local matchedUUIDs = {}
+
+			for _, equippedUUID in pairs(equippedUnits) do
+				for key, _ in pairs(ownedUnits) do
+					if tostring(equippedUUID) == tostring(key) then
+						table.insert(matchedUUIDs, key)
+					end
+				end
+			end
+
+			return matchedUUIDs
+		end
+
+		function getBaseName(unitName)
+			return string.match(unitName, "^(.-)_evolved$") or unitName
+		end
+
+		function printUnitNames(matchedUUIDs)
+			local unitsFolder = workspace:FindFirstChild("_UNITS")
+			if not unitsFolder then
+				warn("Pasta '_UNITS' não encontrada no workspace!")
+				return
+			end
+		
+			for _, matchedUUID in pairs(matchedUUIDs) do
+				local ownedUnit = ownedUnits[matchedUUID]
+				if ownedUnit and ownedUnit.unit_id then
+					for _, unit in pairs(unitsFolder:GetChildren()) do
+						local baseName = getBaseName(ownedUnit.unit_id)
+						if baseName:lower() ~= "bulma" and baseName:lower() ~= "speedwagon" then
+							if getBaseName(unit.Name) == baseName then
+								local humanoidRootPart = unit:WaitForChild("HumanoidRootPart", 5)
+								if humanoidRootPart then
+									humanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+								end
+							end
+						end
+					end
+				end
+			end
+		end		
+
+		local matchingUUIDs = checkEquippedAgainstOwned()
+		if #matchingUUIDs > 0 then
+			printUnitNames(matchingUUIDs)
+		end
+		wait()
 	end
 end
 
@@ -381,18 +647,14 @@ function UseActiveAttackE()
 	while toggle do
 		erwin1 = {}
 
-		print("Buscando unidades 'erwin'...")
-
 		for _, v in pairs(game:GetService("Workspace")._UNITS:GetChildren()) do
 			if v.Name == "erwin" and v._stats.player.Value == goat then
 				table.insert(erwin1, v)
 			end
 		end
 
-		print("Erwins encontrados: ", #erwin1)
 
 		if CheckErwinCount(erwin1) then
-			print("Verificando se os 'erwins' são válidos...")
 
 			for i, erwin in ipairs(erwin1) do
 				if not toggle then
@@ -403,13 +665,10 @@ function UseActiveAttackE()
 				local client_to_server = endpoints:WaitForChild("client_to_server")
 				local use_active_attack = client_to_server:WaitForChild("use_active_attack")
 
-				print("Ativando ataque para Erwin: ", erwin)
 
 				use_active_attack:InvokeServer(erwin)
 				wait(15.7)
 			end
-		else
-			print("Número insuficiente de 'Erwins' para ativar o ataque.")
 		end
 		wait(2)
 	end
@@ -421,51 +680,36 @@ end
 
 function UseActiveAttackW()
 	local player = game.Players.LocalPlayer
-	print("Iniciando a função UseActiveAttackW para", player.Name)
 
 	while toggle2 do
-		print("Verificando a presença do jogador e seu personagem...")
 		repeat
 			wait(1)
 		until player and player.Character
-		print("Jogador e personagem encontrados:", player.Name)
 
 		local wendy1 = {}
-		print("Filtrando unidades Wendy...")
 
 		for _, unit in pairs(game:GetService("Workspace")._UNITS:GetChildren()) do
 			if (unit.Name == "wendy" or unit.Name == "wendy_halloween") and unit._stats.player.Value == player then
 				table.insert(wendy1, unit)
-				print("Unidade Wendy ou Wendy Halloween encontrada:", unit.Name)
 			end
 		end
 
-		print("Número de unidades Wendy ou Wendy Halloween controladas pelo jogador:", #wendy1)
-
 		if CheckWendyCount(wendy1) then
-			print("Número correto de unidades Wendy (4) encontrado, iniciando ataque ativo...")
 
 			if not toggle2 then
-				print("A execução do buff foi interrompida, toggle desativado.")
 				break
 			end
 			for _, wendyUnit in ipairs(wendy1) do
-				print("Ativando o ataque para a Wendy:", wendyUnit.Name)
 				game:GetService("ReplicatedStorage")
 					:WaitForChild("endpoints")
 					:WaitForChild("client_to_server")
 					:WaitForChild("use_active_attack")
 					:InvokeServer(wendyUnit)
-				print("Ataque ativo invocado para a Wendy:", wendyUnit.Name)
 				wait(15.8)
 			end
-		else
-			print("Número incorreto de unidades Wendy, não aplicando buff.")
 		end
 		wait(1)
 	end
-
-	print("Função UseActiveAttackW finalizada.")
 end
 
 function CheckLeafyCount(leafy1)
@@ -479,18 +723,14 @@ function UseActiveAttackL()
 	while toggle3 do
 		leafy1 = {}
 
-		print("Buscando unidades 'leafy'...")
-
 		for _, v in pairs(game:GetService("Workspace")._UNITS:GetChildren()) do
 			if v.Name == "leafy" and v._stats.player.Value == goat then
 				table.insert(leafy1, v)
 			end
 		end
 
-		print("leafy encontrados: ", #leafy1)
 
 		if CheckLeafyCount(leafy1) then
-			print("Verificando se os 'leafy' são válidos...")
 
 			for i, leafy in ipairs(leafy1) do
 				if not toggle3 then
@@ -501,13 +741,10 @@ function UseActiveAttackL()
 				local client_to_server = endpoints:WaitForChild("client_to_server")
 				local use_active_attack = client_to_server:WaitForChild("use_active_attack")
 
-				print("Ativando ataque para leafy: ", leafy)
 
 				use_active_attack:InvokeServer(leafy)
 				wait(15.7)
 			end
-		else
-			print("Número insuficiente de 'leafy' para ativar o ataque.")
 		end
 		wait(1)
 	end
@@ -685,241 +922,181 @@ end
 
 function autoPlace()
 	while getgenv().autoPlace == true do
-		local wave = workspace:FindFirstChild("_wave_num")
-		if getgenv().onlyupgradeinXwave == true then
-			if selectedWaveToUpgrade == wave then
-				local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-				local success, upvalues = pcall(debug.getupvalues, Loader.init)
+		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+		local success, upvalues = pcall(debug.getupvalues, Loader.init)
 		
-				if not success then
-					warn("Failed to get upvalues from Loader.init")
-					return
-				end
+		if not success then
+			warn("Failed to get upvalues from Loader.init")
+			return
+		end
 		
-				local Modules = {
-					["CORE_CLASS"] = upvalues[6],
-					["CORE_SERVICE"] = upvalues[7],
-					["SERVER_CLASS"] = upvalues[8],
-					["SERVER_SERVICE"] = upvalues[9],
-					["CLIENT_CLASS"] = upvalues[10],
-					["CLIENT_SERVICE"] = upvalues[11],
-				}
+		local Modules = {
+			["CORE_CLASS"] = upvalues[6],
+			["CORE_SERVICE"] = upvalues[7],
+			["SERVER_CLASS"] = upvalues[8],
+			["SERVER_SERVICE"] = upvalues[9],
+			["CLIENT_CLASS"] = upvalues[10],
+			["CLIENT_SERVICE"] = upvalues[11],
+		}
 		
-				local ValuesIDUnits = {}
-				local StatsServiceClient = Modules["CLIENT_SERVICE"] and Modules["CLIENT_SERVICE"]["StatsServiceClient"]
+		local StatsServiceClient = Modules["CLIENT_SERVICE"] and Modules["CLIENT_SERVICE"]["StatsServiceClient"]
 		
-				local function getRandomWaypoint(existingPositions)
-					local lane = nil
-					while not lane do
-						lane = workspace._BASES.player.LANES:FindFirstChild("1")
-						wait(1)
-					end
+		local unitTypes = {}
 		
-					local waypoints = {}
-					
-					for _, child in pairs(lane:GetChildren()) do
-						if child.Name ~= "_formation" and child:IsA("BasePart") then
-							table.insert(waypoints, child.CFrame)
-						end
-					end
-					
-					if #waypoints == 0 then
-						if #existingPositions > 0 then
-							local position = existingPositions[math.random(1, #existingPositions)]
-							local offset = Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
-							return CFrame.new(position + offset)
-						else
-							warn("No valid waypoints or existing positions found.")
-							return nil
-						end
-					else
-						return waypoints[math.random(1, #waypoints)]
-					end
-				end
+		function createAreaVisualization(center, radius)
+			local area = Instance.new("Part")
+			area.Name = "UnitSpawnArea"
+			area.Size = Vector3.new(radius * 2, 0.1, radius * 2)
+			area.Position = center + Vector3.new(0, 0.05, 0)
+			area.Anchored = true
+			area.CanCollide = false
+			area.Transparency = 0.5
+			area.Color = Color3.fromRGB(0, 255, 0)
+			area.Shape = Enum.PartType.Cylinder
+			area.Orientation = Vector3.new(90, 0, 0)
+			area.Parent = workspace
+			return area
+		end
 		
-				if StatsServiceClient and StatsServiceClient.module and StatsServiceClient.module.session 
-				and StatsServiceClient.module.session.collection 
-				and StatsServiceClient.module.session.collection.collection_profile_data 
-				and StatsServiceClient.module.session.collection.collection_profile_data.equipped_units then
+		function getRandomPositionAroundWaypoint(waypointPosition, radius)
+			local angle = math.random() * (2 * math.pi)
+			local distance = math.random() * radius
+			local offset = Vector3.new(math.cos(angle) * distance, 0, math.sin(angle) * distance)
+			return waypointPosition + offset
+		end
 		
-					local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
-					local existingPositions = {}
-		
-					for _, unit in pairs(equippedUnits) do
-						if type(unit) == "table" then
-							for _, unitID in pairs(unit) do
-								local waypointCFrame = getRandomWaypoint(existingPositions)
-								if waypointCFrame then
-									local spawnCFrame = GetCFrame(waypointCFrame.Position, 0, 0)
-									local args = {
-										[1] = unitID,
-										[2] = spawnCFrame
-									}
-		
-									table.insert(existingPositions, spawnCFrame.Position)
-		
-									game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unpack(args))
-								end
-							end
-						else
-							local waypointCFrame = getRandomWaypoint(existingPositions)
-							if waypointCFrame then
-								local spawnCFrame = GetCFrame(waypointCFrame.Position, 0, 0)
-								local args = {
-									[1] = unit,
-									[2] = spawnCFrame
-								}
-		
-								table.insert(existingPositions, spawnCFrame.Position)
-		
-								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unpack(args))
-							end
-						end
-					end
-				else
-					warn("Invalid path to StatsServiceClient or equipped_units")
-					return
-				end
-			end
-		else
-			local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-			local success, upvalues = pcall(debug.getupvalues, Loader.init)
-
-			if not success then
-				warn("Failed to get upvalues from Loader.init")
-				return
-			end
-
-			local Modules = {
-				["CORE_CLASS"] = upvalues[6],
-				["CORE_SERVICE"] = upvalues[7],
-				["SERVER_CLASS"] = upvalues[8],
-				["SERVER_SERVICE"] = upvalues[9],
-				["CLIENT_CLASS"] = upvalues[10],
-				["CLIENT_SERVICE"] = upvalues[11],
-			}
-
-			local ValuesIDUnits = {}
-			local StatsServiceClient = Modules["CLIENT_SERVICE"] and Modules["CLIENT_SERVICE"]["StatsServiceClient"]
-
-			local function getRandomWaypoint(existingPositions)
-				local lane = nil
-				while not lane do
-					lane = workspace._BASES.player.LANES["1"]
-					wait(1)
-				end
-
-				local waypoints = {}
-				
-				for _, child in pairs(lane:GetChildren()) do
-					if child.Name ~= "_formation" and child:IsA("BasePart") then
-						table.insert(waypoints, child.CFrame)
-					end
-				end
-				
-				if #waypoints == 0 then
-					if #existingPositions > 0 then
-						local position = existingPositions[math.random(1, #existingPositions)]
-						local offset = Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
-						return CFrame.new(position + offset)
-					else
-						warn("No valid waypoints or existing positions found.")
-						return nil
-					end
-				else
-					return waypoints[math.random(1, #waypoints)]
-				end
-			end
-
-			if StatsServiceClient and StatsServiceClient.module and StatsServiceClient.module.session 
-			and StatsServiceClient.module.session.collection 
-			and StatsServiceClient.module.session.collection.collection_profile_data 
-			and StatsServiceClient.module.session.collection.collection_profile_data.equipped_units then
-
-				local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
-				local existingPositions = {}
-
-				for _, unit in pairs(equippedUnits) do
-					if type(unit) == "table" then
-						for _, unitID in pairs(unit) do
-							local waypointCFrame = getRandomWaypoint(existingPositions)
-							if waypointCFrame then
-								local spawnCFrame = GetCFrame(waypointCFrame.Position, 0, 0)
-								local args = {
-									[1] = unitID,
-									[2] = spawnCFrame
-								}
-
-								table.insert(existingPositions, spawnCFrame.Position)
-
-								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unpack(args))
-							end
-						end
-					else
-						local waypointCFrame = getRandomWaypoint(existingPositions)
-						if waypointCFrame then
-							local spawnCFrame = GetCFrame(waypointCFrame.Position, 0, 0)
-							local args = {
-								[1] = unit,
-								[2] = spawnCFrame
-							}
-
-							table.insert(existingPositions, spawnCFrame.Position)
-
-							game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unpack(args))
-						end
-					end
-				end
+		function GetCFrame(position, rotationX, rotationY, isAerial)
+			if isAerial then
+				return CFrame.new(position.X, position.Y + 20, position.Z) * CFrame.Angles(math.rad(rotationX), math.rad(rotationY), 0)
 			else
-				warn("Invalid path to StatsServiceClient or equipped_units")
-				return
+				return CFrame.new(position) * CFrame.Angles(math.rad(rotationX), math.rad(rotationY), 0)
 			end
 		end
+		
+		function alternarUnidadeTipo(unitID)
+			if not unitTypes[unitID] then
+				local isAerial = math.random() < 0.5
+				unitTypes[unitID] = isAerial and "aerea" or "terrestre"
+			end
+		end
+		
+		function placeUnit(unitID, waypoint, radius)
+			alternarUnidadeTipo(unitID)
+			local isAerial = unitTypes[unitID] == "aerea"
+			
+			local spawnPosition = getRandomPositionAroundWaypoint(waypoint.Position, radius)
+			local spawnCFrame = GetCFrame(spawnPosition, 0, 0, isAerial)
+
+			game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unitID, spawnCFrame)
+		end
+		
+		if StatsServiceClient and StatsServiceClient.module and StatsServiceClient.module.session and StatsServiceClient.module.session.collection and StatsServiceClient.module.session.collection.collection_profile_data and StatsServiceClient.module.session.collection.collection_profile_data.equipped_units then
+			local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
+			local waypoints = workspace._BASES.pve.LANES["1"]:GetChildren()
+		
+			local totalWaypoints = #waypoints
+			local waypointStep = totalWaypoints / 100
+			local radiusMax = 15
+			local radiusStep = radiusMax / 100
+		
+			for _, unit in pairs(equippedUnits) do
+				if type(unit) == "table" then
+					for _, unitID in pairs(unit) do
+						local selectedWaypointIndex = math.clamp(math.floor(selectedDistance * waypointStep), 1, totalWaypoints)
+						local selectedRadius = math.clamp(selectedGroundDistance * radiusStep, 1, radiusMax)
+						local waypoint = waypoints[selectedWaypointIndex]
+						placeUnit(unitID, waypoint, selectedRadius)
+					end
+				else
+					local selectedWaypointIndex = math.clamp(math.floor(selectedDistance * waypointStep), 1, totalWaypoints)
+					local selectedRadius = math.clamp(selectedGroundDistance * radiusStep, 1, radiusMax)
+					local waypoint = waypoints[selectedWaypointIndex]
+					placeUnit(unit, waypoint, selectedRadius)
+				end
+			end
+		end			
 		wait()
 	end
 end
 
 function autoUpgrade()
-	while getgenv().autoUpgrade == true do
-		local wave = workspace:FindFirstChild("_wave_num")
-		if getgenv().onlyupgradeinXwave == true then
-			if selectedWaveToUpgrade == wave then
-				local units = workspace:FindFirstChild("_UNITS")
+    while getgenv().autoUpgrade == true do
+		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+		local upvalues = debug.getupvalues(Loader.init)
+		
+		local Modules = {
+			["CORE_CLASS"] = upvalues[6],
+			["CORE_SERVICE"] = upvalues[7],
+			["SERVER_CLASS"] = upvalues[8],
+			["SERVER_SERVICE"] = upvalues[9],
+			["CLIENT_CLASS"] = upvalues[10],
+			["CLIENT_SERVICE"] = upvalues[11],
+		}
+		
+		local ownedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.owned_units
+		local equippedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.equipped_units
+		
+		function checkEquippedAgainstOwned()
+			local matchedUUIDs = {}
+		
+			for _, equippedUUID in pairs(equippedUnits) do
+				for key, _ in pairs(ownedUnits) do
+					if tostring(equippedUUID) == tostring(key) then
+						table.insert(matchedUUIDs, key)
+					end
+				end
+			end
+		
+			return matchedUUIDs
+		end
+		
+		function getBaseName(unitName)
+			return string.match(unitName, "^(.-)_evolved$") or unitName
+		end
+		
+		function printUnitNames(matchedUUIDs)
+			local unitsFolder = workspace:FindFirstChild("_UNITS")
+			if not unitsFolder then
+				warn("Pasta '_UNITS' não encontrada no workspace!")
+				return
+			end
+		
+			for _, matchedUUID in pairs(matchedUUIDs) do
+				local ownedUnit = ownedUnits[matchedUUID]
+				if ownedUnit and ownedUnit.unit_id then
+					local unitsToUpgrade = {}
 
-				if units then
-					for k, l in pairs(units:GetChildren()) do
-						local unitAssets = game:GetService("ReplicatedStorage").packages.assets.units
-						for i, v in pairs(unitAssets:GetChildren()) do
-							for _, j in pairs(v:GetChildren()) do
-								if string.lower(j.Name) == string.lower(l.Name) and j ~= pve then
-									local args = {
-										[1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(j))
-									}
-
-									game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))    
-								end
+					for _, unit in pairs(unitsFolder:GetChildren()) do
+						if getBaseName(ownedUnit.unit_id) == getBaseName(unit.Name) then
+							table.insert(unitsToUpgrade, unit)
+						end
+					end
+		
+					if #unitsToUpgrade > 0 then
+						for _, unitInstance in pairs(unitsToUpgrade) do
+							local args = {
+								[1] = unitInstance
+							}
+		
+							local success, err = pcall(function()
+								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
+							end)
+		
+							if not success then
+								warn("Erro ao realizar upgrade da unidade:", err)
 							end
 						end
 					end
-				else
-					print("_UNITS não encontrado no workspace.")
-				end
-			end
-		else
-			local units = workspace:FindFirstChild("_UNITS")
-
-			if units then
-				for i,v in pairs(units:GetChildren())do
-					local args = {
-						[1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(v))
-					}
-
-					game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))    
 				end
 			end
 		end
-		wait()
-	end
+		
+		local matchingUUIDs = checkEquippedAgainstOwned()
+		if #matchingUUIDs > 0 then
+			printUnitNames(matchingUUIDs)
+		end		
+        wait()
+    end
 end
 
 function autoSell()
@@ -1002,23 +1179,91 @@ function universalSkill()
     end
 end
 
+function dupeVegeto()
+	while getgenv().dupeVegeto == true do
+		local units = workspace._UNITS
+		local gokuAndvegeto = {}
+	
+		function bothUnitsExist()
+			local hasVegeta = false
+			local hasGoku = false
+	
+			for _, unit in pairs(units:GetChildren()) do
+				if unit.Name == "vegeta_majin" then
+					if workspace._UNITS.vegeta_majin._stats.upgrade.Value >= 7 then
+						hasVegeta = true
+					end
+				elseif unit.Name == "goku_ssj3" then
+					if workspace._UNITS.goku_ssj3._stats.upgrade.Value >= 7 then
+						hasGoku = true
+					end
+				end
+			end
+	
+			return hasVegeta and hasGoku
+		end
+	
+		function handleNewUnit(unit)
+			if bothUnitsExist() and not gokuAndvegeto[unit] then
+				gokuAndvegeto[unit] = true
+				local args = {
+					[1] = workspace._UNITS.goku_ssj3
+				}
+	
+				game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+				wait(1)
+			end
+		end
+	
+		units.ChildAdded:Connect(function(unit)
+			handleNewUnit(unit)
+		end)
+	
+		for _, unit in pairs(units:GetChildren()) do
+			handleNewUnit(unit)
+		end
+		wait()
+	end
+end
+
 function webhook()
     while getgenv().webhook == true do
         local discordWebhookUrl = urlwebhook
-        local resultUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
+        local resultUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Results")
 
-        if resultUI and resultUI.Enabled == true then
-            local ValuesRewards = {}
-            local ValuesStatPlayer = {}        
+        local numberAndAfter = {}
+        local statsString = {}
+        local mapConfigString = {}
+        local ValuesRewards = {}
+    	local ValuesStatPlayer = {}    
+		
+		if resultUI and resultUI.Enabled == true then
             local name = game:GetService("Players").LocalPlayer.Name
             local formattedName = "||" .. name .. "||"
 
             local levelText = game:GetService("Players").LocalPlayer.PlayerGui.spawn_units.Lives.Main.Desc.Level.Text
             local numberAndAfter = levelText:sub(7)
 
+            local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+            local upvalues = debug.getupvalues(Loader.init)
+
+            local Modules = {
+                ["CORE_CLASS"] = upvalues[6],
+                ["CORE_SERVICE"] = upvalues[7],
+                ["SERVER_CLASS"] = upvalues[8],
+                ["SERVER_SERVICE"] = upvalues[9],
+                ["CLIENT_CLASS"] = upvalues[10],
+                ["CLIENT_SERVICE"] = upvalues[11],
+            }
+
+            local gems = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.gem_amount 
+            local gold = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.gold_amount 
+            local holiday = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceHolidayStars").Value
+            local candie = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceCandies").Value
+
+            local ValuesRewards = {}
             local player = game:GetService("Players").LocalPlayer
             local scrollingFrame = player.PlayerGui.ResultsUI.Holder.LevelRewards.ScrollingFrame
-
             local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
             local upvalues = debug.getupvalues(Loader.init)
             local Modules = {
@@ -1042,7 +1287,7 @@ function webhook()
                         if totalAmount then
                             table.insert(ValuesRewards, gainedAmount .. "[" .. totalAmount .. "]\n")
                         else
-                            table.insert(ValuesRewards, gainedAmount .. "\n")
+                            table.insert(ValuesRewards, gainedAmount .. " " ..  frame.Name .. "\n")
                         end
                     end
                 end
@@ -1050,10 +1295,68 @@ function webhook()
 
             local rewardsString = table.concat(ValuesRewards, "\n")
 
-            local levelDataRemote = workspace._MAP_CONFIG:WaitForChild("GetLevelData")
+            function formatNumber(num)
+                if num >= 1000 then
+                    local suffix = "k"
+                    local formatted = num / 1000
+                    if formatted % 1 == 0 then
+                        return formatted .. suffix
+                    else
+                        return string.format("%.1fk", formatted)
+                    end
+                else
+                    return tostring(num)
+                end
+            end
+            
+            local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+            local upvalues = debug.getupvalues(Loader.init)
+            
+            local Modules = {
+                ["CORE_CLASS"] = upvalues[6],
+                ["CORE_SERVICE"] = upvalues[7],
+                ["SERVER_CLASS"] = upvalues[8],
+                ["SERVER_SERVICE"] = upvalues[9],
+                ["CLIENT_CLASS"] = upvalues[10],
+                ["CLIENT_SERVICE"] = upvalues[11],
+            }
+            
+            local clientService = Modules["CLIENT_SERVICE"]
+            local ValuesUnitInfo = {}
+            
+            if clientService and clientService["StatsServiceClient"] then
+                local statsServiceClient = clientService["StatsServiceClient"].module
+                local collectionData = statsServiceClient.session.collection.collection_profile_data
+            
+                if collectionData and collectionData.owned_units then
+                    local ownedUnits = collectionData.owned_units
+                    local equippedUnits = collectionData.unit_ingame_levels
+                    for _, unit in pairs(ownedUnits) do
+                        if type(unit) == "table" then
+                            local unitId = unit.unit_id
+                            local totalKills = unit.total_kills
+                            local worthness = unit.stat_luck
+                            if worthness == nil then
+                                worthness = 0
+                                totalKills = 0
+                            end
+                            if equippedUnits[unitId] then
+                                local formattedUnitInfo = unitId .. " = " .. formatNumber(totalKills) .. ":crossed_swords: [" .. formatNumber(worthness) .. "% W]\n"
+                                table.insert(ValuesUnitInfo, formattedUnitInfo)
+                            end
+                        end
+                    end
+                else
+                    warn("Nenhum dado encontrado em 'owned_units'.")
+                end
+            else
+                warn("CLIENT_SERVICE ou StatsServiceClient não encontrado.")
+            end            
+            
+            local unitInfo = table.concat(ValuesUnitInfo)                   
+            
             local ResultUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
             local act = ResultUI.Holder.LevelName.Text
-            local levelData = levelDataRemote:InvokeServer()
 
             local ValuesMapConfig = {}
             
@@ -1081,69 +1384,45 @@ function webhook()
             
             local formattedTime = string.format("%02d:%02d:%02d", hours, minutes, seconds)
             
+            local levelDataRemote = workspace._MAP_CONFIG:WaitForChild("GetLevelData")
+            local levelData = levelDataRemote:InvokeServer()
+            
             if type(levelData) == "table" then
-                if levelData.world and levelData._gamemode and levelData._difficulty then
-                    local formattedValue = levelData.world .. " " .. act .." - " .. levelData._gamemode .. " [" .. levelData._difficulty .. "]"
+                local difficulty = levelData["_difficulty"]
+                local locationName = levelData["_location_name"]
+                local name = levelData["name"]
             
-                    local FormattedFinal = "\n" .. formattedTime .. " - " .. result .. "\n" .. formattedValue
-            
+
+                if difficulty and name and locationName then
+                    local FormattedFinal = formattedTime .. " - " .. result .. "\n" .. locationName .. " - " .. name .. " [" .. difficulty .. "] "
                     table.insert(ValuesMapConfig, FormattedFinal)
-                else
-                    print("Faltando informações necessárias no levelData.")
                 end
-            else
-                print("O dado recebido não é uma tabela.")
-            end      
-
-            local playerData = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data
-            local gemsEmoji = "<:gemsAA:1322365177320177705>"
-            local goldEmoji = "<:goldAA:1322369598015668315>"
-            local traitReroll = "<:traitRerollAA:1322370533106384987>"
-
-            local keysToPrint = {
-                ["gem_amount"] = gemsEmoji,
-                ["gold_amount"] = goldEmoji,
-                ["trait_reroll_tokens"] = traitReroll,
-                ["trophies"] = "🏆",
-                ["christmas2024_meter_value"] = "🎁"
-            }
-            
-            local battlepassData = playerData.battlepass_data
-            local silverChristmasXp = battlepassData.silver_christmas.xp
-            
-            local ValuesBattlepassXp = {}
-            
-            local holidayStars = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceHolidayStars")
-            local Candies = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceCandies")
-            
-            if holidayStars and Candies then
-                table.insert(ValuesBattlepassXp, holidayStars.Value)
-                table.insert(ValuesBattlepassXp, Candies.Value)
-            end
-            
-            table.insert(ValuesBattlepassXp, silverChristmasXp)
-            table.insert(ValuesBattlepassXp, battlepassData)
-            
-            local message = ""
-            
-            for _, key in ipairs({"gem_amount", "gold_amount", "trait_reroll_tokens", "trophies", "christmas2024_meter_value"}) do
-                if playerData[key] then
-                    message = message .. keysToPrint[key] .. " " .. playerData[key] .. "\n"
-                end
-            end
-            
-            if holidayStars then
-                local holidayEmoji = "<:holidayEventAA:1322369599517491241>"
-                message = message .. holidayEmoji .. tostring(holidayStars.Value) .. "\n"
             end            
-            if Candies then
-                local candieEmoji = "<:candieAA:1322369601182629929>"
-                message = message .. candieEmoji .. Candies.Value .. "\n"
+
+            local mapConfigString = table.concat(ValuesMapConfig, "\n")
+
+            local gui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("GameLevelInfo")
+            local cardsEffect = {}
+            
+            if gui and gui.Enabled then
+                local list = gui:FindFirstChild("List_rg")
+                if list and list.Visible then
+                    local buffs = list:FindFirstChild("Buffs")
+                    if buffs then 
+                        for _, v in pairs(buffs:GetChildren()) do
+                            if v:IsA("TextLabel") then
+                                table.insert(cardsEffect, v.Text)
+                            end
+                        end
+                    end
+                end
             end
             
-            table.insert(ValuesStatPlayer, message)            
-            local statsString = table.concat(ValuesStatPlayer, "\n")
-            local mapConfigString = table.concat(ValuesMapConfig, "\n")
+            if #cardsEffect == 0 then
+                cardsEffect = {"No card"}
+            end
+            
+            local cards = table.concat(cardsEffect, "\n")
             
             local color = 7995647
             if result == "DEFEAT" then
@@ -1152,23 +1431,52 @@ function webhook()
                 color = 65280
             end
 
+            local pingContent = ""
+            if getgenv().pingUser and getgenv().pingUserId then
+                pingContent = "<@" .. getgenv().pingUserId .. ">"
+            elseif getgenv().pingUser then
+                pingContent = "@"
+            end
+
             local payload = {
-                content = pingContent,
+                content = pingcontent,
                 embeds = {
                     {
-                        description = string.format("User: %s\nLevel: %s\n\nPlayer Stats:\n%s\nRewards:\n%s\nMatch Result:%s", formattedName, numberAndAfter, statsString, rewardsString, mapConfigString),
+                        description = "User: " .. formattedName .. "\nLevel: " .. numberAndAfter .. " || [1111/1123] ||",
                         color = color,
                         fields = {
                             {
-                                name = "Discord",
-                                value = "https://discord.gg/ey83AwMvAn"
+                                name = "Player Stats",
+                                value = string.format("<:gemsAA:1322365177320177705> %s\n <:goldAA:1322369598015668315> %s\n<:holidayEventAA:1322369599517491241> %s\n<:candieAA:1322369601182629929> %s\n", gems, gold, holiday, candie),
+                                inline = true
+                            },
+                            {
+                                name = "Rewards",
+                                value = string.format("%s",  rewardsString),
+                                inline = true
+                            },
+                            {
+                                name = "Units",
+                                value = string.format("%s", unitInfo)
+                            },
+                            {
+                                name = "Card Effects",
+                                value = string.format("%s", cards)
+                            },
+                            {
+                                name = "Match Result",
+                                value = string.format("%s", mapConfigString)
                             }
                         },
                         author = {
                             name = "Anime Adventures"
                         },
+                        footer = {
+                            text = "https://discord.gg/MfvHUDp5XF - Tempest Hub"
+                        },
+                        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                         thumbnail = {
-                            url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png?ex=673e5b4c&is=673d09cc&hm=1d58485280f1d6a376e1bee009b21caa0ae5cad9624832dd3d921f1e3b2217ce&"
+                            url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png"
                         }
                     }
                 },
@@ -1214,7 +1522,7 @@ function webhook()
             end
         end
         wait(1)
-    end
+	end
 end
 
 -- Get Informations for Dropdown or other things
@@ -1226,8 +1534,6 @@ function printChallenges(module)
 			table.insert(challengesKeys, key)
 		end
 		return challengesKeys
-	else
-		print("O módulo não contém 'challenges'.")
 	end
 end
 
@@ -1321,7 +1627,7 @@ local Tabs = {
 
 local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Player")
 
-LeftGroupBox:AddToggle("HPI", {
+LeftGroupBox:AddToggle("HidePlayerInfo", {
 	Text = "Hide Player Info",
 	Default = false,
 	Callback = function(Value)
@@ -1330,7 +1636,7 @@ LeftGroupBox:AddToggle("HPI", {
 	end,
 })
 
-LeftGroupBox:AddToggle("SM", {
+LeftGroupBox:AddToggle("SecurityMode", {
 	Text = "Security Mode",
 	Default = false,
 	Callback = function(Value)
@@ -1339,7 +1645,7 @@ LeftGroupBox:AddToggle("SM", {
 	end,
 })
 
-LeftGroupBox:AddToggle("DM", {
+LeftGroupBox:AddToggle("DeleteMap", {
 	Text = "Delete Map",
 	Default = false,
 	Callback = function(Value)
@@ -1348,7 +1654,7 @@ LeftGroupBox:AddToggle("DM", {
 	end,
 })
 
-LeftGroupBox:AddToggle("AL", {
+LeftGroupBox:AddToggle("AutoLeave", {
 	Text = "Auto Leave",
 	Default = false,
 	Callback = function(Value)
@@ -1357,7 +1663,7 @@ LeftGroupBox:AddToggle("AL", {
 	end,
 })
 
-LeftGroupBox:AddToggle("AR", {
+LeftGroupBox:AddToggle("AutoReplay", {
 	Text = "Auto Replay",
 	Default = false,
 	Callback = function(Value)
@@ -1366,7 +1672,7 @@ LeftGroupBox:AddToggle("AR", {
 	end,
 })
 
-LeftGroupBox:AddToggle("AN", {
+LeftGroupBox:AddToggle("AutoNext", {
 	Text = "Auto Next",
 	Default = false,
 	Callback = function(Value)
@@ -1375,7 +1681,7 @@ LeftGroupBox:AddToggle("AN", {
 	end,
 })
 
-LeftGroupBox:AddToggle("AS", {
+LeftGroupBox:AddToggle("AutoStart", {
 	Text = "Auto Start",
 	Default = false,
 	Callback = function(Value)
@@ -1384,7 +1690,7 @@ LeftGroupBox:AddToggle("AS", {
 	end,
 })
 
-LeftGroupBox:AddToggle("ASW", {
+LeftGroupBox:AddToggle("AutoSkipWave", {
 	Text = "Auto Skip Wave",
 	Default = false,
 	Callback = function(Value)
@@ -1397,7 +1703,7 @@ local TabBox2 = Tabs.Main:AddRightTabbox()
 
 local Tab1 = TabBox2:AddTab("Extra")
 
-Tab1:AddToggle("AGB", {
+Tab1:AddToggle("autoGetBattlepass", {
 	Text = "Auto Get Battlepass",
 	Default = false,
 	Callback = function(Value)
@@ -1406,7 +1712,7 @@ Tab1:AddToggle("AGB", {
 	end,
 })
 
-Tab1:AddToggle("DN", {
+Tab1:AddToggle("DisableNotifications", {
 	Text = "Disable Notifications",
 	Default = false,
 	Callback = function(Value)
@@ -1415,7 +1721,34 @@ Tab1:AddToggle("DN", {
 	end,
 })
 
-Tab1:AddToggle("FO", {
+Tab1:AddToggle("PlaceInRedZones", {
+	Text = "Place In Red Zones",
+	Default = false,
+	Callback = function(Value)
+		getgenv().placeInRedZones = Value
+		placeInRedZones()
+	end,
+})
+
+Tab1:AddToggle("DupeVegeto", {
+	Text = "Dupe Vegeto",
+	Default = false,
+	Callback = function(Value)
+		getgenv().dupeVegeto = Value
+		dupeVegeto()
+	end,
+})
+
+Tab1:AddToggle("InfRange", {
+	Text = "Inf Range",
+	Default = false,
+	Callback = function(Value)
+		getgenv().InfRange = Value
+		InfRange()
+	end,
+})
+
+Tab1:AddToggle("FriendsOnly", {
 	Text = "Friends Only",
 	Default = false,
 	Callback = function(Value)
@@ -1427,13 +1760,13 @@ Tab1:AddDropdown("dropdownSelectCapsule", {
 	Values = ValuesCapsules,
 	Default = "None",
 	Multi = false,
-	Text = "Select Unit to Feed",
+	Text = "Select Capsule to Open",
 	Callback = function(Value)
 		selectedCapsule = Value
 	end,
 })
 
-Tab1:AddToggle("AOC", {
+Tab1:AddToggle("AutoOpenCapsule", {
 	Text = "Auto Open Capsule",
 	Default = false,
 	Callback = function(Value)
@@ -1444,7 +1777,7 @@ Tab1:AddToggle("AOC", {
 
 local Tab2 = TabBox2:AddTab("Event")
 
-Tab2:AddToggle("AJCW", {
+Tab2:AddToggle("AutoJoinCursedWomb", {
 	Text = "Auto Join Cursed Womb",
 	Default = false,
 	Callback = function(Value)
@@ -1453,7 +1786,7 @@ Tab2:AddToggle("AJCW", {
 	end,
 })
 
-Tab2:AddToggle("AJHE", {
+Tab2:AddToggle("AutoJoinHalloweenEvent", {
 	Text = "Auto Join Halloween Event",
 	Default = false,
 	Callback = function(Value)
@@ -1462,7 +1795,7 @@ Tab2:AddToggle("AJHE", {
 	end,
 })
 
-Tab2:AddToggle("AJHOE", {
+Tab2:AddToggle("AutoJoinHolidayEvent", {
 	Text = "Auto Join Holiday Event",
 	Default = false,
 	Callback = function(Value)
@@ -1472,7 +1805,7 @@ Tab2:AddToggle("AJHOE", {
 })
 
 
-Tab2:AddToggle("AMHE", {
+Tab2:AddToggle("AutoMatchmakingHalloweenEvent", {
 	Text = "Auto Matchmaking Halloween Event",
 	Default = false,
 	Callback = function(Value)
@@ -1481,7 +1814,7 @@ Tab2:AddToggle("AMHE", {
 	end,
 })
 
-Tab2:AddToggle("AMHOE", {
+Tab2:AddToggle("AutoMatchmakingHolidayEvent", {
 	Text = "Auto Matchmaking Holiday Event",
 	Default = false,
 	Callback = function(Value)
@@ -1490,7 +1823,7 @@ Tab2:AddToggle("AMHOE", {
 	end,
 })
 
-Tab2:AddToggle("AGP", {
+Tab2:AddToggle("AutoGivePresents", {
 	Text = "Auto Give Presents",
 	Default = false,
 	Callback = function(Value)
@@ -1523,7 +1856,7 @@ LeftGroupBox:AddInput('pingUser@', {
     end
 })
 
-LeftGroupBox:AddToggle("WebhookFG", {
+LeftGroupBox:AddToggle("WebhookFinishGame", {
     Text = "Send Webhook when finish game",
     Default = false,
     Callback = function(Value)
@@ -1569,7 +1902,7 @@ Tab2:AddDropdown("dropdownSelectItemsToFeed", {
 	end,
 })
 
-Tab2:AddToggle("AFEED", {
+Tab2:AddToggle("AutoFeed", {
 	Text = "Auto Feed",
 	Default = false,
 	Callback = function(Value)
@@ -1620,7 +1953,7 @@ LeftGroupBox:AddDropdown("dropdownSelectActStory", {
 	end,
 })
 
-LeftGroupBox:AddToggle("AES", {
+LeftGroupBox:AddToggle("AutoEnter", {
 	Text = "Auto Enter",
 	Default = false,
 	Callback = function(Value)
@@ -1655,7 +1988,7 @@ RightGroupbox:AddDropdown("dropdownSelectChallenge", {
 	end,
 })
 
-RightGroupbox:AddToggle("AENTER", {
+RightGroupbox:AddToggle("AutoEnterChallenge", {
 	Text = "Auto Enter",
 	Default = false,
 	Callback = function(Value)
@@ -1681,17 +2014,54 @@ LeftGroupBox:AddInput('inputAutoPlaceWaveX', {
     end
 })
 
-LeftGroupBox:AddToggle("Auto Place", {
+LeftGroupBox:AddSlider('distancePercentage', {
+	Text = 'Distance Percentage',
+	Default = 0,
+	Min = 0,
+	Max = 100,
+	Rounding = 0,
+	Compact = false,
+	Callback = function(Value)
+		selectedDistance = Value
+	end
+})
+
+LeftGroupBox:AddSlider('GroundPercentage', {
+	Text = 'Ground Percentage',
+	Default = 0,
+	Min = 0,
+	Max = 100,
+	Rounding = 0,
+	Compact = false,
+	Callback = function(Value)
+		selectedGroundDistance = Value
+	end
+})
+
+LeftGroupBox:AddSlider('GroundPercentage', {
+	Text = 'Hill Percentage',
+	Default = 0,
+	Min = 0,
+	Max = 100,
+	Rounding = 0,
+	Compact = false,
+	Callback = function(Value)
+		selectedHillDistance = Value
+	end
+})
+
+LeftGroupBox:AddToggle("AutoPlace", {
 	Text = "Auto Place",
 	Default = false,
-
 	Callback = function(Value)
 		getgenv().autoPlace = Value
-		autoPlace()
+		if Value then
+			autoPlace()
+		end
 	end,
 })
 
-LeftGroupBox:AddToggle("OSPIXW", {
+LeftGroupBox:AddToggle("OnlyStartPlaceInXWave", {
 	Text = "Only Start Place in X Wave",
 	Default = false,
 
@@ -1712,7 +2082,7 @@ LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
     end
 })
 
-LeftGroupBox:AddToggle("Auto Upgrade", {
+LeftGroupBox:AddToggle("AutoUpgrade", {
 	Text = "Auto Upgrade",
 	Default = false,
 
@@ -1722,7 +2092,7 @@ LeftGroupBox:AddToggle("Auto Upgrade", {
 	end,
 })
 
-LeftGroupBox:AddToggle("OUIXW", {
+LeftGroupBox:AddToggle("OnlyUpgradeInXWave", {
 	Text = "Only Upgrade in X Wave",
 	Default = false,
 
@@ -1742,7 +2112,7 @@ LeftGroupBox:AddInput('inputAutoSellWaveX', {
     end
 })
 
-LeftGroupBox:AddToggle("Auto Sell", {
+LeftGroupBox:AddToggle("AutoSell", {
 	Text = "Auto Sell",
 	Default = false,
 
@@ -1752,7 +2122,7 @@ LeftGroupBox:AddToggle("Auto Sell", {
 	end,
 })
 
-LeftGroupBox:AddToggle("OSIXW", {
+LeftGroupBox:AddToggle("OnlySellInXWave", {
 	Text = "Only Sell in X Wave",
 	Default = false,
 
@@ -1774,7 +2144,7 @@ RightGroupbox:AddInput('inputAutoPlaceWaveX', {
     end
 })
 
-RightGroupbox:AddToggle("Auto Buff Erwin", {
+RightGroupbox:AddToggle("AutoBuffErwin", {
 	Text = "Auto Universal Skill",
 	Default = false,
 
@@ -1784,7 +2154,7 @@ RightGroupbox:AddToggle("Auto Buff Erwin", {
 	end,
 })
 
-RightGroupbox:AddToggle("Auto Upgrade", {
+RightGroupbox:AddToggle("AutoUpgrade", {
 	Text = "Only Universal Skill in X Wave",
 	Default = false,
 
@@ -1793,7 +2163,7 @@ RightGroupbox:AddToggle("Auto Upgrade", {
 	end,
 })
 
-RightGroupbox:AddToggle("Auto Buff Erwin", {
+RightGroupbox:AddToggle("AutoBuffErwin", {
 	Text = "Auto Buff Erwin",
 	Default = false,
 
@@ -1805,7 +2175,7 @@ RightGroupbox:AddToggle("Auto Buff Erwin", {
 	end,
 })
 
-RightGroupbox:AddToggle("Auto Buff Wenda", {
+RightGroupbox:AddToggle("AutoBuffWenda", {
 	Text = "Auto Buff Wenda",
 	Default = false,
 	Tooltip = "Auto Buff Wenda",
@@ -1818,7 +2188,7 @@ RightGroupbox:AddToggle("Auto Buff Wenda", {
 	end,
 })
 
-RightGroupbox:AddToggle("Auto Buff Leafy", {
+RightGroupbox:AddToggle("AutoBuffLeafy", {
 	Text = "Auto Buff Leafy",
 	Default = false,
 
@@ -1848,7 +2218,7 @@ LeftGroupBox:AddDropdown("dropdownSelectItemToBuy", {
 	end,
 })
 
-LeftGroupBox:AddToggle("ABS", {
+LeftGroupBox:AddToggle("AutoBuy", {
 	Text = "Auto Buy",
 	Default = false,
 
@@ -1909,7 +2279,7 @@ end
 
 local MenuGroup = TabsUI["UI Settings"]:AddLeftGroupbox("Menu")
 
-MenuGroup:AddToggle("huwe", {
+MenuGroup:AddToggle("HideUiWhenExecute", {
 	Text = "Hide UI When Execute",
 	Default = false,
 	Callback = function(Value)
@@ -1918,12 +2288,29 @@ MenuGroup:AddToggle("huwe", {
 	end,
 })
 
-MenuGroup:AddToggle("AUTOEXECUTE", {
+MenuGroup:AddToggle("AutoExecute", {
 	Text = "Auto Execute",
 	Default = false,
 	Callback = function(Value)
 		getgenv().aeuat = Value
 		aeuat()
+	end,
+})
+
+MenuGroup:AddToggle("BlackScreen", {
+	Text = "Blackscreen",
+	Default = false,
+	Callback = function(Value)
+		blackScreen()
+	end,
+})
+
+MenuGroup:AddToggle("FPSBoost", {
+	Text = "FPS Boost",
+	Default = false,
+	Callback = function(Value)
+        getgenv().extremeFpsBoost = Value
+		extremeFpsBoost()
 	end,
 })
 
@@ -1964,3 +2351,4 @@ for i, v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
 	v:Disable()
 end
 warn("[TEMPEST HUB] Loaded")
+createBC()
