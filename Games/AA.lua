@@ -33,22 +33,8 @@ local GuiService = game:GetService("GuiService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local TweenService = game:GetService("TweenService")
 local speed = 1000
-local selectedMapChallenges = {}
-local selectedChallengesDiff = {}
 
 --START OF FUNCTIONS
-
-function safeWaitForChild(parent, childName, timeout)
-    local child = parent:FindFirstChild(childName)
-    local elapsedTime = 0
-    while not child and elapsedTime < timeout do
-        wait(0.1)
-        elapsedTime = elapsedTime + 0.1
-        child = parent:FindFirstChild(childName)
-    end
-    return child
-end
-
 function hideUIExec()
 	if getgenv().hideUIExec then
 		local coreGui = game:GetService("CoreGui")
@@ -408,12 +394,11 @@ function placeInRedZones()
 			for _, matchedUUID in pairs(matchedUUIDs) do
 				local ownedUnit = ownedUnits[matchedUUID]
 				if ownedUnit and ownedUnit.unit_id then
+					local found = false
 					for _, unit in pairs(unitsFolder:GetChildren()) do
 						if getBaseName(ownedUnit.unit_id) == getBaseName(unit.Name) then
-							local hitbox = unit:FindFirstChild("_hitbox")
-							if hitbox then
-								hitbox.Size = Vector3.new(0, 0, 0)
-							end
+                            unit._hitbox.Size = Vector3.new(0, 0, 0)
+                            found = true
 						end
 					end
 				end
@@ -607,119 +592,10 @@ function autoEnter()
 	end
 end
 
-function autoEnterChallenge()
-    while getgenv().autoEnterChallenge == true do
-        local level = workspace._CHALLENGES.Challenges._lobbytemplate315:FindFirstChild("Level")
-        local challenge = workspace._CHALLENGES.Challenges._lobbytemplate315:FindFirstChild("Challenge")
-        if level and challenge then
-            for _, map in pairs(selectedMapChallenges) do
-                for _, diff in pairs(selectedChallengesDiff) do
-                    if level.Value == map and challenge.Value == diff then
-						local args = {
-							[1] = "_lobbytemplate315"
-						}
-						
-						game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_join_lobby"):InvokeServer(unpack(args))						
-                    end
-                end
-            end
-        end
-        wait()
-    end
-end
-
-function autoEnterInfiniteCastle()
-	while getgenv().autoEnterInfiniteCastle == true do
-		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-		upvalues = debug.getupvalues(Loader.init)
-		local Modules = {
-			["CORE_CLASS"] = upvalues[6],
-			["CORE_SERVICE"] = upvalues[7],
-			["SERVER_CLASS"] = upvalues[8],
-			["SERVER_SERVICE"] = upvalues[9],
-			["CLIENT_CLASS"] = upvalues[10],
-			["CLIENT_SERVICE"] = upvalues[11],
-		}
-		local lastInfcastle = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.level_data.infinite_tower.floor_reached
-		if selectedHardInfCastle == true then
-			local args = {
-				[1] = lastInfcastle,
-				[2] = "Hard"
-			}
-			
-			game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_start_infinite_tower"):InvokeServer(unpack(args))
-		else
-			local args = {
-				[1] = lastInfcastle,
-				[2] = "Normal"
-			}
-			
-			game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_start_infinite_tower"):InvokeServer(unpack(args))
-		end
-		wait()
-	end
-end
-
 function autoEnterRaid()
 	while getgenv().autoEnterRaid == true do
-		if selectedFriendsOnly == true then
-			local args = {
-				[1] = "_lobbytemplate210"
-			}
-			
-			game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_join_lobby"):InvokeServer(unpack(args))
-			wait(1)
-			local args = {
-				[1] = "_lobbytemplate210",
-				[2] = selectedRaidMap,
-				[3] = true,
-				[4] = "Hard"
-			}
-			
-			game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_lock_level"):InvokeServer(unpack(args))
-			local args = {
-				[1] = "_lobbytemplategreen1",
-			}
-	
-			game:GetService("ReplicatedStorage")
-				:WaitForChild("endpoints")
-				:WaitForChild("client_to_server")
-				:WaitForChild("request_start_game")
-				:InvokeServer(unpack(args))
-		else
-			local args = {
-				[1] = "_lobbytemplate210"
-			}
-			
-			game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_join_lobby"):InvokeServer(unpack(args))
-			wait(1)
-			local args = {
-				[1] = "_lobbytemplate210",
-				[2] = selectedRaidMap,
-				[3] = false,
-				[4] = "Hard"
-			}
-			
-			game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_lock_level"):InvokeServer(unpack(args))
-			wait(1)
-			local args = {
-				[1] = "_lobbytemplategreen1",
-			}
-	
-			game:GetService("ReplicatedStorage")
-				:WaitForChild("endpoints")
-				:WaitForChild("client_to_server")
-				:WaitForChild("request_start_game")
-				:InvokeServer(unpack(args))
-		end
-		wait()
-	end
-end
-
-function autoEnterLegendStage()
-	while getgenv().autoEnterLegendStage == true do
 		local args = {
-			[1] = "_lobbytemplategreen1",
+			[1] = "_lobbytemplate214",
 		}
 
 		game:GetService("ReplicatedStorage")
@@ -728,36 +604,21 @@ function autoEnterLegendStage()
 			:WaitForChild("request_join_lobby")
 			:InvokeServer(unpack(args))
 		wait(1)
-		if selectedFriendsOnly == true then
-			local args = {
-				[1] = "_lobbytemplategreen1",
-				[2] = selectedLegendStageMap,
-				[3] = true,
-				[4] = "Hard",
-			}
+		local args = {
+			[1] = "_lobbytemplate214",
+			[2] = selectedMapRaid,
+			[3] = selectedFriendsOnly,
+			[4] = "Hard",
+		}
 
-			game:GetService("ReplicatedStorage")
-				:WaitForChild("endpoints")
-				:WaitForChild("client_to_server")
-				:WaitForChild("request_lock_level")
-				:InvokeServer(unpack(args))
-		else
-			local args = {
-				[1] = "_lobbytemplategreen1",
-				[2] = selectedLegendStageMap,
-				[3] = false,
-				[4] = "Hard",
-			}
-
-			game:GetService("ReplicatedStorage")
-				:WaitForChild("endpoints")
-				:WaitForChild("client_to_server")
-				:WaitForChild("request_lock_level")
-				:InvokeServer(unpack(args))
-		end
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("endpoints")
+			:WaitForChild("client_to_server")
+			:WaitForChild("request_lock_level")
+			:InvokeServer(unpack(args))
 		wait(1)
 		local args = {
-			[1] = "_lobbytemplategreen1",
+			[1] = "_lobbytemplate214",
 		}
 
 		game:GetService("ReplicatedStorage")
@@ -765,6 +626,12 @@ function autoEnterLegendStage()
 			:WaitForChild("client_to_server")
 			:WaitForChild("request_start_game")
 			:InvokeServer(unpack(args))
+		break
+	end
+end
+
+function autoEnterChallenge()
+	while getgenv().autoEnterChallenge == true do
 		wait()
 	end
 end
@@ -1156,289 +1023,199 @@ end
 
 function autoUpgrade()
     while getgenv().autoUpgrade == true do
-		if getgenv().onlyupgradeinwaveX == true then
-			local wave = workspace:FindFirstChild("_wave_num")
-			if getgenv().selectedWaveToUpgrade == wave then
-				local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-				local upvalues = debug.getupvalues(Loader.init)
-				
-				local Modules = {
-					["CORE_CLASS"] = upvalues[6],
-					["CORE_SERVICE"] = upvalues[7],
-					["SERVER_CLASS"] = upvalues[8],
-					["SERVER_SERVICE"] = upvalues[9],
-					["CLIENT_CLASS"] = upvalues[10],
-					["CLIENT_SERVICE"] = upvalues[11],
-				}
-				
-				local ownedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.owned_units
-				local equippedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.equipped_units
-				
-				function checkEquippedAgainstOwned()
-					local matchedUUIDs = {}
-					
-					for _, equippedUUID in pairs(equippedUnits) do
-						for key, _ in pairs(ownedUnits) do
-							if tostring(equippedUUID) == tostring(key) then
-								table.insert(matchedUUIDs, key)
-							end
-						end
-					end
-					
-					return matchedUUIDs
-				end
-				
-				function getBaseName(unitName)
-					return string.match(unitName, "^(.-)_evolved$")
-						or string.match(unitName, "^(.-)_christmas$")
-						or string.match(unitName, "^(.-)_halloween$")
-						or unitName
-				end
-				
-				function printUnitNames(matchedUUIDs)
-					local unitsFolder = workspace:FindFirstChild("_UNITS")
-					if not unitsFolder then
-						warn("Pasta '_UNITS' não encontrada no workspace!")
-						return
-					end
-					
-					for _, matchedUUID in pairs(matchedUUIDs) do
-						local ownedUnit = ownedUnits[matchedUUID]
-						if ownedUnit and ownedUnit.unit_id then
-							local unitsToUpgrade = {}
-							
-							for _, unit in pairs(unitsFolder:GetChildren()) do
-								if getBaseName(ownedUnit.unit_id) == getBaseName(unit.Name) then
-									table.insert(unitsToUpgrade, unit)
-								end
-							end
-							
-							if #unitsToUpgrade > 0 then
-								for _, unitInstance in pairs(unitsToUpgrade) do
-									if getgenv().focusFarm == true then
-										if getBaseName(unitInstance.Name) == "speedwagon" or getBaseName(unitInstance.Name) == "bulma" then
-											local args = {
-												[1] = unitInstance
-											}
-											
-											local success, err = pcall(function()
-												game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
-											end)
-											
-											if not success then
-												warn("Erro ao realizar upgrade da unidade:", err)
-											end
-										end
-									else
-										local args = {
-											[1] = unitInstance
-										}
-										
-										local success, err = pcall(function()
-											game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
-										end)
-										
-										if not success then
-											warn("Erro ao realizar upgrade da unidade:", err)
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-				
-				local matchingUUIDs = checkEquippedAgainstOwned()
-				if #matchingUUIDs > 0 then
-					printUnitNames(matchingUUIDs)
-				end
-			end
-		else
-			local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-			local upvalues = debug.getupvalues(Loader.init)
-			
-			local Modules = {
-				["CORE_CLASS"] = upvalues[6],
-				["CORE_SERVICE"] = upvalues[7],
-				["SERVER_CLASS"] = upvalues[8],
-				["SERVER_SERVICE"] = upvalues[9],
-				["CLIENT_CLASS"] = upvalues[10],
-				["CLIENT_SERVICE"] = upvalues[11],
-			}
-			
-			local ownedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.owned_units
-			local equippedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.equipped_units
-			
-			function checkEquippedAgainstOwned()
-				local matchedUUIDs = {}
-				
-				for _, equippedUUID in pairs(equippedUnits) do
-					for key, _ in pairs(ownedUnits) do
-						if tostring(equippedUUID) == tostring(key) then
-							table.insert(matchedUUIDs, key)
-						end
-					end
-				end
-				
-				return matchedUUIDs
-			end
-			
-			function getBaseName(unitName)
-				return string.match(unitName, "^(.-)_evolved$")
-					or string.match(unitName, "^(.-)_christmas$")
-					or string.match(unitName, "^(.-)_halloween$")
-					or unitName
-			end
-			
-			function printUnitNames(matchedUUIDs)
-				local unitsFolder = workspace:FindFirstChild("_UNITS")
-				if not unitsFolder then
-					warn("Pasta '_UNITS' não encontrada no workspace!")
-					return
-				end
-				
-				for _, matchedUUID in pairs(matchedUUIDs) do
-					local ownedUnit = ownedUnits[matchedUUID]
-					if ownedUnit and ownedUnit.unit_id then
-						local unitsToUpgrade = {}
-						
-						for _, unit in pairs(unitsFolder:GetChildren()) do
-							if getBaseName(ownedUnit.unit_id) == getBaseName(unit.Name) then
-								table.insert(unitsToUpgrade, unit)
-							end
-						end
-						
-						if #unitsToUpgrade > 0 then
-							for _, unitInstance in pairs(unitsToUpgrade) do
-								if getgenv().focusFarm == true then
-									if getBaseName(unitInstance.Name) == "speedwagon" or getBaseName(unitInstance.Name) == "bulma" then
-										local args = {
-											[1] = unitInstance
-										}
-										
-										local success, err = pcall(function()
-											game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
-										end)
-										
-										if not success then
-											warn("Erro ao realizar upgrade da unidade:", err)
-										end
-									end
-								else
-									local args = {
-										[1] = unitInstance
-									}
-									
-									local success, err = pcall(function()
-										game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
-									end)
-									
-									if not success then
-										warn("Erro ao realizar upgrade da unidade:", err)
-									end
-								end
-							end
-						end
+		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+		local upvalues = debug.getupvalues(Loader.init)
+		
+		local Modules = {
+			["CORE_CLASS"] = upvalues[6],
+			["CORE_SERVICE"] = upvalues[7],
+			["SERVER_CLASS"] = upvalues[8],
+			["SERVER_SERVICE"] = upvalues[9],
+			["CLIENT_CLASS"] = upvalues[10],
+			["CLIENT_SERVICE"] = upvalues[11],
+		}
+		
+		local ownedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.owned_units
+		local equippedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.equipped_units
+		
+		function checkEquippedAgainstOwned()
+			local matchedUUIDs = {}
+		
+			for _, equippedUUID in pairs(equippedUnits) do
+				for key, _ in pairs(ownedUnits) do
+					if tostring(equippedUUID) == tostring(key) then
+						table.insert(matchedUUIDs, key)
 					end
 				end
 			end
-			
-			local matchingUUIDs = checkEquippedAgainstOwned()
-			if #matchingUUIDs > 0 then
-				printUnitNames(matchingUUIDs)
+		
+			return matchedUUIDs
+		end
+		
+		function getBaseName(unitName)
+			return string.match(unitName, "^(.-)_evolved$") 
+				or string.match(unitName, "^(.-)_christmas$") 
+				or string.match(unitName, "^(.-)_halloween$")
+				or unitName
+		end
+		
+		function printUnitNames(matchedUUIDs)
+			local unitsFolder = workspace:FindFirstChild("_UNITS")
+			if not unitsFolder then
+				warn("Pasta '_UNITS' não encontrada no workspace!")
+				return
+			end
+		
+			for _, matchedUUID in pairs(matchedUUIDs) do
+				local ownedUnit = ownedUnits[matchedUUID]
+				if ownedUnit and ownedUnit.unit_id then
+					local unitsToUpgrade = {}
+
+					for _, unit in pairs(unitsFolder:GetChildren()) do
+						if getBaseName(ownedUnit.unit_id) == getBaseName(unit.Name) then
+							table.insert(unitsToUpgrade, unit)
+						end
+					end
+		
+					if #unitsToUpgrade > 0 then
+						for _, unitInstance in pairs(unitsToUpgrade) do
+							local args = {
+								[1] = unitInstance
+							}
+		
+							local success, err = pcall(function()
+								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
+							end)
+		
+							if not success then
+								warn("Erro ao realizar upgrade da unidade:", err)
+							end
+						end
+					end
+				end
 			end
 		end
+		
+		local matchingUUIDs = checkEquippedAgainstOwned()
+		if #matchingUUIDs > 0 then
+			printUnitNames(matchingUUIDs)
+		end		
         wait(1)
     end
 end
 
 function autoSell()
-    while getgenv().autoSell do
-        local units = workspace:FindFirstChild("_UNITS")
-        if units then
-            local wave = workspace:FindFirstChild("_wave_num")
-            if getgenv().onlysellinXwave == true then
-                if selectedWaveToSell == wave then
-                    for _, v in pairs(units:GetChildren()) do
-                        local args = {
-                            [1] = game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"):WaitForChild("vanilla_ice")
-                        }
-                        game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("sell_unit_ingame"):InvokeServer(unpack(args))
-                    end
-                end
-            else
-                for _, v in pairs(units:GetChildren()) do
-                    local args = {
-                        [1] = game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"):WaitForChild("vanilla_ice")
-                    }
-                    game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("sell_unit_ingame"):InvokeServer(unpack(args))
-                end
-            end
-        end
-        wait()
-    end
-end
+	while getgenv().autoSell == true do
+		if getgenv().onlysellinXwave == true then
+			local wave = workspace:FindFirstChild("_wave_num")
+			if selectedWaveToSell == wave then
+				local units = workspace:FindFirstChild("_UNITS")
+
+				if units then
+					for i,v in pairs(units:GetChildren())do
+						local args = {
+							[1] = game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"):WaitForChild("vanilla_ice")
+						}
+						
+						game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("sell_unit_ingame"):InvokeServer(unpack(args))
+					end
+				end
+			end
+		else
+			local units = workspace:FindFirstChild("_UNITS")
+
+			if units then
+				for i,v in pairs(units:GetChildren())do
+					local args = {
+						[1] = game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"):WaitForChild("vanilla_ice")
+					}
+					
+					game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("sell_unit_ingame"):InvokeServer(unpack(args))
+				end
+			end
+		end
+		wait()
+	end
+end		
 
 function universalSkill()
-    while getgenv().universalSkill do
-        local units = workspace:WaitForChild("_UNITS")
-        local url = "https://raw.githubusercontent.com/buang5516/buanghub/main/AA/UnitsAbility.luau"
+    while getgenv().universalSkill == true do
+        if getgenv().universalSkillinXWave == true then
+            local wave = workspace:FindFirstChild("_wave_num")
+            if selectedWaveToUniversalSkill == wave then
+                local units = workspace:WaitForChild("_UNITS")
 
-        local success, content = pcall(function()
-            return game:HttpGet(url, true)
-        end)
+                if units then
+                    for i, v in pairs(units:GetChildren()) do
+                        local args = {
+                            [1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(v))
+                        }
 
-        if success then
-            local successLoad, data = pcall(function()
-                return loadstring(content)()
-            end)
-
-            if successLoad then
-                for _, v in pairs(data) do
-                    for _, l in pairs(units:GetChildren()) do
-                        if getBaseName(v) == getBaseName(l.Name) then
-                            local args = { [1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(l)) }
-                            local success, err = pcall(function()
-                                game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
-                            end)
-
-                            if not success then
-                                warn("Error occurred: " .. err)
-                            end
+                        local success, err = pcall(function()
+                            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+                        end)
+                        
+                        if not success then
+                            warn("Error occurred: " .. err)
                         end
                     end
                 end
-            else
-                print("Erro ao carregar a tabela.")
             end
         else
-            print("Erro ao obter o arquivo.")
+            local units = workspace:WaitForChild("_UNITS")
+
+            if units then
+                for i, v in pairs(units:GetChildren()) do
+                    local args = {
+                        [1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(v))
+                    }
+
+                    local success, err = pcall(function()
+                        game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+                    end)
+                    
+                    if not success then
+                        warn("Error occurred: " .. err)
+                    end
+                end
+            end
         end
         wait()
     end
 end
 
 function dupeVegeto()
-    while getgenv().dupeVegeto do
-        local gokuSSJ3 = safeWaitForChild(workspace:WaitForChild("_UNITS"), "goku_ssj3", 1)
+    while getgenv().dupeVegeto == true do
+        function safeWaitForChild(parent, childName, timeout)
+            local child = parent:FindFirstChild(childName)
+            local elapsedTime = 0
+            while not child and elapsedTime < timeout do
+                wait(0.1)
+                elapsedTime = elapsedTime + 0.1
+                child = parent:FindFirstChild(childName)
+            end
+            return child
+        end
+
+        local gokuSSJ3 = safeWaitForChild(workspace:WaitForChild("_UNITS"), "goku_ssj3", 5)
         if gokuSSJ3 then
             local args = { [1] = gokuSSJ3 }
             game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
         end
 
-        local vegetaMajin = safeWaitForChild(workspace:WaitForChild("_UNITS"), "vegeta_majin", 1)
+        local vegetaMajin = safeWaitForChild(workspace:WaitForChild("_UNITS"), "vegeta_majin", 5)
         if vegetaMajin then
             local args = { [1] = vegetaMajin }
             game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
         end
 
-        local gokuSSJ3Dead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "goku_ssj3", 1)
+        local gokuSSJ3Dead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "goku_ssj3", 5)
         if gokuSSJ3Dead then
             local args = { [1] = gokuSSJ3Dead }
             game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
         end
 
-        local vegetaMajinDead = safeWaitForChild(game:GetService("ReplicatedStorage"):FindFirstChild("_DEAD_UNITS"), "vegeta_majin", 1)
+        local vegetaMajinDead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "vegeta_majin", 5)
         if vegetaMajinDead then
             local args = { [1] = vegetaMajinDead }
             game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
@@ -1448,31 +1225,30 @@ function dupeVegeto()
 end
 
 function dupeGriffith()
-    while getgenv().dupeGriffith do
-        local griffithNormal = safeWaitForChild(workspace:WaitForChild("_UNITS"), "femto_egg", 1)
+	while getgenv().dupeGriffith == true do
+        function safeWaitForChild(parent, childName, timeout)
+            local child = parent:FindFirstChild(childName)
+            local elapsedTime = 0
+            while not child and elapsedTime < timeout do
+                wait(0.1)
+                elapsedTime = elapsedTime + 0.1
+                child = parent:FindFirstChild(childName)
+            end
+            return child
+        end
+		
+		local griffithNormal = safeWaitForChild(workspace:WaitForChild("_UNITS"), "femto_egg", 5)
         if griffithNormal then
             local args = { [1] = griffithNormal }
             game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
         end
-
-        local griffithDead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "femto_egg", 1)
+		local griffithDead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "femto_egg", 5)
         if griffithDead then
             local args = { [1] = griffithDead }
             game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
         end
-        wait()
-    end
-end
-
-function autoSacrificeGriffith()
-    while getgenv().autoSacrificeGriffith do
-        local griffithNormal = workspace:WaitForChild("_UNITS"):FindFirstChild("femto_egg")
-        if griffithNormal then
-            local args = { [1] = griffithNormal }
-            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
-        end
-        wait()
-    end
+		wait()
+	end
 end
 
 function webhook()
@@ -1815,19 +1591,6 @@ if portals then
 		local nameWithoutUnderscore = string.sub(v.Name, 2)
 		table.insert(ValuesPortalsMaps, nameWithoutUnderscore)
 	end
-end
-
-local levelsModule = require(game:GetService("ReplicatedStorage").src.Data.Levels)
-local ChallengeMapValues = {}
-
-if type(levelsModule) == "table" then
-    for levelName, levelData in pairs(levelsModule) do
-        if levelData.id then
-            table.insert(ChallengeMapValues, tostring(levelData.id))
-        end
-    end
-else
-    print("O módulo não contém uma tabela de níveis.")
 end
 
 local capsules = game:GetService("ReplicatedStorage").packages.assets:FindFirstChild("ItemModels")
@@ -2236,100 +1999,35 @@ LeftGroupBox:AddToggle("AutoEnter", {
 local RightGroupbox = Tabs.Farm:AddRightGroupbox("Challenge")
 
 RightGroupbox:AddDropdown("dropdownChallengeMap", {
-    Values = ChallengeMapValues,
-    Default = "None",
-    Multi = true,
+	Values = storyMapValues,
+	Default = "None",
+	Multi = false,
 
-    Text = "Select Map",
+	Text = "Select Map",
 
-    Callback = function(Values)
-        selectedMapChallenges = Values
-    end,
-})
-
-RightGroupbox:AddDropdown("dropdownSelectChallenge", {
-    Values = challengeValues,
-    Default = "None",
-    Multi = true,
-
-    Text = "Select Difficulty",
-
-    Callback = function(Value)
-        selectedChallengesDiff = Value
-    end,
-})
-
-RightGroupbox:AddToggle("AutoEnterChallenge", {
-    Text = "Auto Enter Challenge",
-    Default = false,
-    Callback = function(Value)
-        getgenv().autoEnterChallenge = Value
-        autoEnterChallenge()
-    end,
-})
-
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Raid")
-
-RightGroupbox:AddDropdown("dropdownSelectRaid", {
-    Values = ChallengeMapValues,
-    Default = "None",
-    Multi = false,
-
-    Text = "Select Map",
-
-    Callback = function(Value)
-        selectedRaidMap = Value
-    end,
-})
-
-RightGroupbox:AddToggle("AutoEnterRaid", {
-    Text = "Auto Enter Raid",
-    Default = false,
-    Callback = function(Value)
-        getgenv().autoEnterRaid = Value
-        autoEnterRaid()
-    end,
-})
-
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Legend Stage")
-
-RightGroupbox:AddDropdown("dropdownSelectLegendStage", {
-    Values = ChallengeMapValues,
-    Default = "None",
-    Multi = false,
-
-    Text = "Select Map",
-
-    Callback = function(Value)
-        selectedLegendStageMap = Value
-    end,
-})
-
-RightGroupbox:AddToggle("AutoEnterLegendStage", {
-    Text = "Auto Enter Legend Stage",
-    Default = false,
-    Callback = function(Value)
-        getgenv().autoEnterLegendStage = Value
-        autoEnterLegendStage()
-    end,
-})
-
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Infinite Castle")
-
-RightGroupbox:AddToggle("HardInfCastle", {
-	Text = "Hard Inf Castle",
-	Default = false,
-	Callback = function(Value)
-		getgenv().selectedHardInfCastle = Value
+	Callback = function(Values)
+		selectedDifficulty = Values
 	end,
 })
 
-RightGroupbox:AddToggle("AutoEnterInfCastle", {
-	Text = "Auto Enter Inf Caslte",
+RightGroupbox:AddDropdown("dropdownSelectChallenge", {
+	Values = challengeValues,
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Difficulty",
+
+	Callback = function(Value)
+		selectedChallenge = Value
+	end,
+})
+
+RightGroupbox:AddToggle("AutoEnterChallenge", {
+	Text = "Auto Enter",
 	Default = false,
 	Callback = function(Value)
-		getgenv().autoEnterInfiniteCastle = Value
-		autoEnterInfiniteCastle()
+		getgenv().autoEnterChallenge = Value
+		autoEnterChallenge()
 	end,
 })
 
@@ -2418,16 +2116,6 @@ LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
     end
 })
 
-
-LeftGroupBox:AddToggle("FocusInFarm", {
-	Text = "Focus Farm",
-	Default = false,
-
-	Callback = function(Value)
-		getgenv().focusFarm = Value
-	end,
-})
-
 LeftGroupBox:AddToggle("AutoUpgrade", {
 	Text = "Auto Upgrade",
 	Default = false,
@@ -2506,16 +2194,6 @@ RightGroupbox:AddToggle("AutoUpgrade", {
 
 	Callback = function(Value)
 		getgenv().universalSkillinXWave = Value
-	end,
-})
-
-RightGroupbox:AddToggle("AutoSacrificeGriffith", {
-	Text = "Auto Sacrifice Griffith",
-	Default = false,
-
-	Callback = function(Value)
-		getgenv().autoSacrificeGriffith = Value
-		autoSacrificeGriffith()
 	end,
 })
 
