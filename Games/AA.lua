@@ -419,6 +419,15 @@ function extremeFpsBoost()
     end
 end
 
+function autoWalk()
+	while getgenv().autoWalk == true do
+		game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.W, false, game)
+		wait(1)
+		game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.S, false, game)
+		wait(1)
+	end
+end
+
 function tweenModel(model, targetCFrame)
 	if not model.PrimaryPart then
 		warn("PrimaryPart is not set for the model")
@@ -2553,6 +2562,16 @@ LeftGroupBox:AddToggle("HidePlayerInfo", {
 		hideInfoPlayer()
 	end,
 })
+
+LeftGroupBox:AddToggle("AutoWalk", {
+	Text = "Auto Walk",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoWalk = Value
+		autoWalk()
+	end,
+})
+
 
 LeftGroupBox:AddDropdown("dropdownSelectActStory", {
 	Values = {2, 3, 4, 5, 6},
