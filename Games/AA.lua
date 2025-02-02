@@ -755,6 +755,32 @@ function InfRange()
 	end
 end
 
+function autoGetQuest()
+	while getgenv().autoGetQuest == true do
+		local quests = {
+			game:GetService("Players").LocalPlayer.PlayerGui.QuestsUI.Main.Main.Main.Content.daily:FindFirstChild("Scroll"),
+			game:GetService("Players").LocalPlayer.PlayerGui.QuestsUI.Main.Main.Main.Content.event:FindFirstChild("Scroll"),
+			game:GetService("Players").LocalPlayer.PlayerGui.QuestsUI.Main.Main.Main.Content.infinite:FindFirstChild("Scroll"),
+			game:GetService("Players").LocalPlayer.PlayerGui.QuestsUI.Main.Main.Main.Content.story:FindFirstChild("Scroll")
+		}
+		
+		for _, quest in pairs(quests) do
+			if quest then
+				for _, child in pairs(quest:GetChildren()) do
+					if child.Name ~= "UIListLayout" and child.Name ~= "RefreshFrame" and child.Name ~= "Empty" then
+						local args = {
+							[1] = child
+						}
+						
+						game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("redeem_quest"):InvokeServer(unpack(args))						
+					end
+				end
+			end
+		end
+		wait()
+	end
+end
+
 function autostart()
 	while getgenv().autostart == true do
 		game:GetService("ReplicatedStorage").endpoints.client_to_server.vote_start:InvokeServer()
@@ -2658,6 +2684,15 @@ Tab1:AddToggle("autoGetBattlepass", {
 	Callback = function(Value)
 		getgenv().autoGetBattlepass = Value
 		autoGetBattlepass()
+	end,
+})
+
+Tab1:AddToggle("autoGetQuest", {
+	Text = "Auto Get Quest",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoGetQuest = Value
+		autoGetQuest()
 	end,
 })
 
