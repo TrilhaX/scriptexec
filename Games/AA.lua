@@ -36,6 +36,12 @@ local speed = 1000
 local selectedMapChallenges = {}
 local selectedChallengesDiff = {}
 local selectedTierContract = {}
+local selectedIgnoreContractChallenge = {}
+local selectedIgnoreDmgBonus = {}
+local selectedTierPortal = {}
+local selectedPassiveToRoll = {}
+local dmgBonus = {"None", "air", "physical", "light", "fire", "storm", "dark", "magic", "aqua"}
+local passivesValues = {"superior 1", "range 1", "nimble 1", "superior 2", "range 2", "nimble 2", "superior 3", "range 3", "nimble 3", "adept 1", "culling 1", "sniper 1", "godspeed 1", "reaper 1", "celestial 1", "divine 1", "golden 1", "unique 1"}
 
 --START OF FUNCTIONS
 
@@ -80,7 +86,6 @@ function aeuat()
 
 				queue_on_teleport([[         
                     repeat task.wait() until game:IsLoaded()
-                    wait(3)
                     if getgenv().executed then return end    
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
                 ]])
@@ -170,99 +175,104 @@ function showInfoUnits()
 end
 
 function createBC()
-	local player = game:GetService("Players").LocalPlayer
-	local screengui = Instance.new("ScreenGui")
-	local BackgroundFrame = Instance.new("Frame")
-	local statFrame = Instance.new("Frame")
-	local border = Instance.new("UICorner")
-	
-	local levelLabel = Instance.new("TextLabel")
-	local gemsLabel = Instance.new("TextLabel")
-	local goldLabel = Instance.new("TextLabel")
-	local holidayLabel = Instance.new("TextLabel")
-	local assassinLabel = Instance.new("TextLabel")
-	
-	screengui.Name = "BlackScreenTempestHub"
-	screengui.Parent = game:GetService("Players").LocalPlayer.PlayerGui
-	screengui.Enabled = false
-	
-	BackgroundFrame.Name = "BackgroundFrame"
-	BackgroundFrame.Parent = screengui
-	BackgroundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-	BackgroundFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-	BackgroundFrame.BorderSizePixel = 0
-	BackgroundFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-	BackgroundFrame.Size = UDim2.new(1, 0, 2, 0)
-	
-	statFrame.Name = "statFrame"
-	statFrame.Parent = BackgroundFrame
-	statFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-	statFrame.BackgroundColor3 = Color3.fromRGB(67, 67, 67)
-	statFrame.BorderSizePixel = 0
-	statFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-	statFrame.Size = UDim2.new(0, 850, 0, 550)
-	
-	border.Parent = statFrame
-	
-	function createLabel(name, positionY)
-		local label = Instance.new("TextLabel")
-		label.Name = name
-		label.Parent = statFrame
-		label.AnchorPoint = Vector2.new(0.5, 0.5)
-		label.BackgroundTransparency = 1
-		label.Position = UDim2.new(0.5, 0, positionY, 0)
-		label.Size = UDim2.new(0, 850, 0, 60)
-		label.Font = Enum.Font.SourceSans
-		label.TextColor3 = Color3.new(1, 1, 1)
-		label.TextScaled = true
-		label.TextWrapped = true
-		return label
-	end
-	
-	nameLabel = createLabel("nameLabel", 0.1)
-	nameLabel.Text = "Tempest Hub"
-	
-	levelLabel = createLabel("levelLabel", 0.25)
-	gemsLabel = createLabel("gemsLabel", 0.4)
-	goldLabel = createLabel("goldLabel", 0.55)
-	holidayLabel = createLabel("holidayLabel", 0.7)
-	assassinLabel = createLabel("assassinLabel", 0.85)
+    local existingScreenGui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("BlackScreenTempestHub")
+    if existingScreenGui then
+        return
+    end
+    
+    local player = game:GetService("Players").LocalPlayer
+    local screengui = Instance.new("ScreenGui")
+    local BackgroundFrame = Instance.new("Frame")
+    local statFrame = Instance.new("Frame")
+    local border = Instance.new("UICorner")
+    
+    local levelLabel = Instance.new("TextLabel")
+    local gemsLabel = Instance.new("TextLabel")
+    local goldLabel = Instance.new("TextLabel")
+    local holidayLabel = Instance.new("TextLabel")
+    local assassinLabel = Instance.new("TextLabel")
+    
+    screengui.Name = "BlackScreenTempestHub"
+    screengui.Parent = game:GetService("Players").LocalPlayer.PlayerGui
+    screengui.Enabled = false
+    
+    BackgroundFrame.Name = "BackgroundFrame"
+    BackgroundFrame.Parent = screengui
+    BackgroundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    BackgroundFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+    BackgroundFrame.BorderSizePixel = 0
+    BackgroundFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    BackgroundFrame.Size = UDim2.new(1, 0, 2, 0)
+    
+    statFrame.Name = "statFrame"
+    statFrame.Parent = BackgroundFrame
+    statFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    statFrame.BackgroundColor3 = Color3.fromRGB(67, 67, 67)
+    statFrame.BorderSizePixel = 0
+    statFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    statFrame.Size = UDim2.new(0, 850, 0, 550)
+    
+    border.Parent = statFrame
+    
+    function createLabel(name, positionY)
+        local label = Instance.new("TextLabel")
+        label.Name = name
+        label.Parent = statFrame
+        label.AnchorPoint = Vector2.new(0.5, 0.5)
+        label.BackgroundTransparency = 1
+        label.Position = UDim2.new(0.5, 0, positionY, 0)
+        label.Size = UDim2.new(0, 850, 0, 60)
+        label.Font = Enum.Font.SourceSans
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.TextScaled = true
+        label.TextWrapped = true
+        return label
+    end
+    
+    nameLabel = createLabel("nameLabel", 0.1)
+    nameLabel.Text = "Tempest Hub"
+    
+    levelLabel = createLabel("levelLabel", 0.25)
+    gemsLabel = createLabel("gemsLabel", 0.4)
+    goldLabel = createLabel("goldLabel", 0.55)
+    holidayLabel = createLabel("holidayLabel", 0.7)
+    assassinLabel = createLabel("assassinLabel", 0.85)
 
-	local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-	local upvalues = debug.getupvalues(Loader.init)
+    local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+    local upvalues = debug.getupvalues(Loader.init)
 
-	local Modules = {
-		["CORE_CLASS"] = upvalues[6],
-		["CORE_SERVICE"] = upvalues[7],
-		["SERVER_CLASS"] = upvalues[8],
-		["SERVER_SERVICE"] = upvalues[9],
-		["CLIENT_CLASS"] = upvalues[10],
-		["CLIENT_SERVICE"] = upvalues[11],
-	}
+    local Modules = {
+        ["CORE_CLASS"] = upvalues[6],
+        ["CORE_SERVICE"] = upvalues[7],
+        ["SERVER_CLASS"] = upvalues[8],
+        ["SERVER_SERVICE"] = upvalues[9],
+        ["CLIENT_CLASS"] = upvalues[10],
+        ["CLIENT_SERVICE"] = upvalues[11],
+    }
 
-	local sakamotoCoin = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.inventory.inventory_profile_data.normal_items.sakamoto_coin
-	
-	function updateStats()
-		local levelText = player.PlayerGui.spawn_units.Lives.Main.Desc.Level.Text
-		local levelValue = levelText:sub(7)
-		levelLabel.Text = "Level: " .. levelValue
-	
-		local gemsAmount = player._stats:FindFirstChild("gem_amount")
-		gemsLabel.Text = "Gems: " .. (gemsAmount and gemsAmount.Value or "0")
-	
-		local goldAmount = player._stats:FindFirstChild("gold_amount")
-		goldLabel.Text = "Gold: " .. (goldAmount and goldAmount.Value or "0")
-	
-		local holidayAmount = player._stats:FindFirstChild("_resourceHolidayStars")
-		holidayLabel.Text = "Holiday Stars: " .. (holidayAmount and holidayAmount.Value or "0")
-	
-		local assassinAmount = player._stats:FindFirstChild("assassin_token")
-		assassinLabel.Text = "Assassin Token: " .. (sakamotoCoin or "0")
-	end
-	
-	game:GetService("RunService").RenderStepped:Connect(function()
-		updateStats()
-	end)
+    local sakamotoCoin = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.inventory.inventory_profile_data.normal_items.sakamoto_coin
+    
+    function updateStats()
+        local levelText = player.PlayerGui.spawn_units.Lives.Main.Desc.Level.Text
+        local levelValue = levelText:sub(7)
+        levelLabel.Text = "Level: " .. levelValue
+    
+        local gemsAmount = player._stats:FindFirstChild("gem_amount")
+        gemsLabel.Text = "Gems: " .. (gemsAmount and gemsAmount.Value or "0")
+    
+        local goldAmount = player._stats:FindFirstChild("gold_amount")
+        goldLabel.Text = "Gold: " .. (goldAmount and goldAmount.Value or "0")
+    
+        local holidayAmount = player._stats:FindFirstChild("_resourceHolidayStars")
+        holidayLabel.Text = "Holiday Stars: " .. (holidayAmount and holidayAmount.Value or "0")
+    
+        local assassinAmount = player._stats:FindFirstChild("assassin_token")
+        assassinLabel.Text = "Assassin Token: " .. (sakamotoCoin or "0")
+    end
+    
+    game:GetService("RunService").RenderStepped:Connect(function()
+        updateStats()
+    end)
 end
 
 function createInfoUnit()
@@ -315,7 +325,6 @@ function createInfoUnit()
 						unitInMap = true
 						local totalKills = ownedUnit.total_kills or 0
 						local worthness = ownedUnit.stat_luck or 0
-						print("Unit ID:", ownedUnit.unit_id, "Total Kills:", totalKills, "Worthness:", worthness)
 						local billboardGui = Instance.new("BillboardGui")
 						billboardGui.Adornee = unit
 						billboardGui.Size = UDim2.new(0, 250, 0, 75)
@@ -594,7 +603,7 @@ function hideInfoPlayer()
 					end
 				end
 				limitBreak.Boost.Text = "99999"
-				if gem and gold then
+				if gem and gold and holidayStars then
 					gem.Level.Text = "99999"
 					gold.Level.Text = "99999"
 					holidayStars.Level.Text = "99999"
@@ -913,6 +922,24 @@ function autoEnterChallenge()
     end
 end
 
+function autoEnterDailyChallenge()
+	while getgenv().autoEnterDailyChallenge == true do
+		local args = {
+			[1] = "_lobbytemplate320"
+		}
+		
+		game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_join_lobby"):InvokeServer(unpack(args))		
+		wait()
+	end
+end
+
+function autoMatchmakingDailyChallenge()
+	while getgenv().autoMatchmakingDailyChallenge == true do
+		game:GetService("ReplicatedStorage").endpoints.client_to_server.request_matchmaking:InvokeServer("__DAILY_CHALLENGE")
+		wait()
+	end
+end
+
 function autoEnterInfiniteCastle()
 	while getgenv().autoEnterInfiniteCastle == true do
 		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
@@ -1052,6 +1079,76 @@ function autoEnterLegendStage()
 			:InvokeServer(unpack(args))
 		wait()
 	end
+end
+
+function autoEnterPortal()
+    while getgenv().autoEnterPortal == true do
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local endpoints = ReplicatedStorage:WaitForChild("endpoints")
+        local client_to_server = endpoints:WaitForChild("client_to_server")
+        local save_notifications_state = client_to_server:WaitForChild("save_notifications_state")
+
+        local args = { [1] = "Items", [2] = 0 }
+        print("Sending notification state with args:", args)
+        save_notifications_state:InvokeServer(unpack(args))
+
+        wait(1)
+
+        local Loader = require(ReplicatedStorage.src.Loader)
+        local upvalues = debug.getupvalues(Loader.init)
+
+        local Modules = {
+            ["CORE_CLASS"] = upvalues[6],
+            ["CORE_SERVICE"] = upvalues[7],
+            ["SERVER_CLASS"] = upvalues[8],
+            ["SERVER_SERVICE"] = upvalues[9],
+            ["CLIENT_CLASS"] = upvalues[10],
+            ["CLIENT_SERVICE"] = upvalues[11],
+        }
+
+        local uniqueItems = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.inventory.inventory_profile_data.unique_items
+
+        if type(uniqueItems) == "table" then
+            for _, item in pairs(uniqueItems) do
+                if item.uuid then
+                    local uniqueItemData = item._unique_item_data
+                    if uniqueItemData and uniqueItemData._unique_portal_data then
+                        local portalData = uniqueItemData._unique_portal_data
+                        
+                        if portalData.level_id and portalData.portal_depth and portalData._weak_against and portalData._weak_against[1] and portalData._weak_against[1].damage_type then
+                            for _, tier in pairs(selectedTierPortal) do
+                                tier = tostring(tier) -- Garantir que o valor seja string
+                                for _, IgnoreDmgBonus in pairs(selectedIgnoreDmgBonus) do
+                                    IgnoreDmgBonus = tostring(IgnoreDmgBonus) -- Garantir que o valor seja string
+                                    
+									if IgnoreDmgBonus == "" or IgnoreDmgBonus == nil or IgnoreDmgBonus  ==  "None" then
+                                        if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier then
+                                            local args = {
+                                                [1] = tostring(item.uuid),
+                                                [2] = (getgenv().FriendsOnly and {["friends_only"] = true}) or nil
+                                            }
+                                            print("Portal data matches (no IgnoreDmgBonus), invoking server with args:", args)
+                                            client_to_server:WaitForChild("use_portal"):InvokeServer(unpack(args))
+                                        end
+                                    else
+                                        if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier and tostring(portalData._weak_against[1].damage_type) ~= IgnoreDmgBonus then
+                                            local args = {
+                                                [1] = tostring(item.uuid),
+                                                [2] = (getgenv().FriendsOnly and {["friends_only"] = true}) or nil
+                                            }
+                                            print("Portal data matches, invoking server with args:", args)
+                                            client_to_server:WaitForChild("use_portal"):InvokeServer(unpack(args))
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        wait()
+    end
 end
 
 function CheckErwinCount(erwin1)
@@ -1411,7 +1508,7 @@ function autoPlace()
 					end
 				end
 				
-				function checkEquippedAgainstOwned()
+				function checkEquippedAgainstOwnedAutoPlace()
 					local ownedUnits = StatsServiceClient.module.session.collection.collection_profile_data.owned_units
 					local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
 					local matchedUUIDs = {}
@@ -1445,7 +1542,7 @@ function autoPlace()
 					local spawnPosition = getRandomPositionAroundWaypoint(waypoint.Position, radius)
 					local spawnCFrame = GetCFrame(spawnPosition, 0, 0, isAerial)
 				
-					local matchedUnits, unitNames = checkEquippedAgainstOwned()
+					local matchedUnits, unitNames = checkEquippedAgainstOwnedAutoPlace()
 				
 					for _, matchedID in pairs(matchedUnits) do
 						if matchedID == unitID then
@@ -1474,7 +1571,7 @@ function autoPlace()
 					local femtoEggID = nil
 				
 					for _, unitID in pairs(equippedUnits) do
-						local matchedUnits, unitNames = checkEquippedAgainstOwned()
+						local matchedUnits, unitNames = checkEquippedAgainstOwnedAutoPlace()
 						for _, matchedID in pairs(matchedUnits) do
 							local unitName = unitNames[matchedID]
 							if unitName == "femto_egg" then
@@ -1503,7 +1600,6 @@ function autoPlace()
 					local radiusStep = radiusMax / 100
 				
 					for _, unitID in pairs(unitQueue) do
-						-- Process each unitID
 						local selectedWaypointIndex = math.clamp(math.floor(selectedDistance * waypointStep), 1, totalWaypoints)
 						local selectedRadius = math.clamp(selectedGroundDistance * radiusStep, 1, radiusMax)
 						local waypoint = waypoints[selectedWaypointIndex]
@@ -1579,7 +1675,7 @@ function autoPlace()
 				end
 			end
 			
-			function checkEquippedAgainstOwned()
+			function checkEquippedAgainstOwnedAutoPlace()
 				local ownedUnits = StatsServiceClient.module.session.collection.collection_profile_data.owned_units
 				local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
 				local matchedUUIDs = {}
@@ -1613,7 +1709,7 @@ function autoPlace()
 				local spawnPosition = getRandomPositionAroundWaypoint(waypoint.Position, radius)
 				local spawnCFrame = GetCFrame(spawnPosition, 0, 0, isAerial)
 			
-				local matchedUnits, unitNames = checkEquippedAgainstOwned()
+				local matchedUnits, unitNames = checkEquippedAgainstOwnedAutoPlace()
 			
 				for _, matchedID in pairs(matchedUnits) do
 					if matchedID == unitID then
@@ -1642,7 +1738,7 @@ function autoPlace()
 				local femtoEggID = nil
 			
 				for _, unitID in pairs(equippedUnits) do
-					local matchedUnits, unitNames = checkEquippedAgainstOwned()
+					local matchedUnits, unitNames = checkEquippedAgainstOwnedAutoPlace()
 					for _, matchedID in pairs(matchedUnits) do
 						local unitName = unitNames[matchedID]
 						if unitName == "femto_egg" then
@@ -1671,7 +1767,6 @@ function autoPlace()
 				local radiusStep = radiusMax / 100
 			
                 for _, unitID in pairs(unitQueue) do
-                    -- Process each unitID
                     local selectedWaypointIndex = math.clamp(math.floor(selectedDistance * waypointStep), 1, totalWaypoints)
                     local selectedRadius = math.clamp(selectedGroundDistance * radiusStep, 1, radiusMax)
                     local waypoint = waypoints[selectedWaypointIndex]
@@ -1945,13 +2040,13 @@ end
 
 function dupeGriffith()
     while getgenv().dupeGriffith do
-        local griffithNormal = safeWaitForChild(workspace:WaitForChild("_UNITS"), "femto_egg", 1)
+        local griffithNormal = safeWaitForChild(workspace:WaitForChild("_UNITS"), "femto_egg", 0.5)
         if griffithNormal then
             local args = { [1] = griffithNormal }
             game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
         end
 
-        local griffithDead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "femto_egg", 1)
+        local griffithDead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "femto_egg", 0.5)
         if griffithDead then
             local args = { [1] = griffithDead }
             game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
@@ -1964,43 +2059,44 @@ function autoSacrificeGriffith()
     while getgenv().autoSacrificeGriffith == true do
 		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
 		local success, upvalues = pcall(debug.getupvalues, Loader.init)
-		
+
 		if not success then
 			warn("Failed to get upvalues from Loader.init")
 			return
 		end
-		
+
 		local Modules = {
 			["CLIENT_SERVICE"] = upvalues[11],
 		}
-		
+
 		local StatsServiceClient = Modules["CLIENT_SERVICE"] and Modules["CLIENT_SERVICE"]["StatsServiceClient"]
 		local restrictedUnits = {"orwin", "wendy", "elf"}
 		local unitTypes = {}
-		
+
 		function getRandomPositionAroundGriffith(position, radius)
 			local angle = math.random() * (2 * math.pi)
 			local distance = math.random() * radius
 			local offset = Vector3.new(math.cos(angle) * distance, 0, math.sin(angle) * distance)
-			return position + offset
+			local result = position + offset
+			return result
 		end
-		
+
 		function alternarUnidadeTipo(unitID)
 			if not unitTypes[unitID] then
 				unitTypes[unitID] = math.random() < 0.5 and "aerea" or "terrestre"
 			end
 		end
-		
+
 		function checkEquippedAgainstOwnedGriffith()
 			local ownedUnits = StatsServiceClient.module.session.collection.collection_profile_data.owned_units
 			local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
 			local matchedUUIDs = {}
 			local unitNames = {}
-		
+
 			if not ownedUnits or not equippedUnits then
 				return {}, {}
 			end
-		
+
 			for _, equippedUUID in pairs(equippedUnits) do
 				for key, unitData in pairs(ownedUnits) do
 					if tostring(equippedUUID) == tostring(key) then
@@ -2014,7 +2110,7 @@ function autoSacrificeGriffith()
 
 			return matchedUUIDs, unitNames
 		end
-		
+
 		function isFemtoInMap()
 			for _, unit in pairs(workspace:GetChildren()) do
 				if unit:IsA("Model") and unit.Name == "griffith_reincarnation" then
@@ -2023,16 +2119,16 @@ function autoSacrificeGriffith()
 			end
 			return false
 		end
-		
-		function placeUnit(unitID, griffithPosition, radius)
+
+		function placeUnitGriffith(unitID, griffithPosition, radius)
 			alternarUnidadeTipo(unitID)
-			for _, unit in pairs(workspace:GetChildren()) do
+			for _, unit in pairs(workspace._UNITS:GetChildren()) do
 				if unit:IsA("Model") and unit.Name == "femto_egg" then
 					local spawnPosition = getRandomPositionAroundGriffith(griffithPosition, radius)
 					spawnPosition = Vector3.new(spawnPosition.X, spawnPosition.Y - 1, spawnPosition.Z + 1)
-				
+
 					local matchedUnits, unitNames = checkEquippedAgainstOwnedGriffith()
-				
+
 					for _, matchedID in pairs(matchedUnits) do
 						if matchedID == unitID then
 							local unitName = unitNames[unitID]
@@ -2048,7 +2144,7 @@ function autoSacrificeGriffith()
 													wendyCount = wendyCount + 1
 												end
 											end
-				
+
 											if wendyCount == 6 then
 												local allWendyUpgraded = true
 												for i, v in pairs(unit:GetChildren()) do
@@ -2057,7 +2153,7 @@ function autoSacrificeGriffith()
 														if v:FindFirstChild("_stats") then
 															upgrade = v._stats.upgrade.Value
 														end
-				
+
 														if upgrade then
 															if upgrade < 6 then
 																allWendyUpgraded = false
@@ -2065,7 +2161,7 @@ function autoSacrificeGriffith()
 														end
 													end
 												end
-				
+
 												if allWendyUpgraded then
 													local femtoEgg = workspace:WaitForChild("_UNITS"):WaitForChild("femto_egg")
 													if femtoEgg and femtoEgg:IsA("Model") and femtoEgg:FindFirstChild("HumanoidRootPart") then
@@ -2073,10 +2169,8 @@ function autoSacrificeGriffith()
 															[1] = femtoEgg
 														}
 														game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
-													else
-														warn("femto_egg not found or does not have a valid HumanoidRootPart")
 													end
-												end																			
+												end
 											else
 												game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unitID, CFrame.new(spawnPosition))
 											end
@@ -2087,20 +2181,20 @@ function autoSacrificeGriffith()
 						end
 					end
 				end
-				
-				if StatsServiceClient and StatsServiceClient.module and StatsServiceClient.module.session and StatsServiceClient.module.session.collection and StatsServiceClient.module.session.collection.collection_profile_data and StatsServiceClient.module.session.collection.collection_profile_data.equipped_units then
-					local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
-					local griffith = workspace._UNITS:FindFirstChild("femto_egg")
-				
-					if griffith then
-						local griffithPosition = griffith.HumanoidRootPart.Position
-						local spawnRadius = 10
-				
-						for _, unit in pairs(equippedUnits) do
-							placeUnit(unit, griffithPosition, spawnRadius)
-						end
-					end
-				end	
+			end
+		end
+
+		if StatsServiceClient and StatsServiceClient.module and StatsServiceClient.module.session and StatsServiceClient.module.session.collection and StatsServiceClient.module.session.collection.collection_profile_data and StatsServiceClient.module.session.collection.collection_profile_data.equipped_units then
+			local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
+			local griffith = workspace._UNITS:FindFirstChild("femto_egg")
+
+			if griffith then
+				local griffithPosition = griffith.HumanoidRootPart.Position
+				local spawnRadius = 10
+
+				for _, unit in pairs(equippedUnits) do
+					placeUnitGriffith(unit, griffithPosition, spawnRadius)
+				end
 			end
 		end
         wait()
@@ -2109,57 +2203,265 @@ end
 
 function autoContractMatchmaking()
     while getgenv().autoContractMatchmaking == true do
-        local scroll = game:GetService("Players").LocalPlayer.PlayerGui.ContractsUI.Main.Main.Frame.Outer.main.Scroll
-
-        for _, v in pairs(scroll:GetChildren()) do
-            if v.Name == "MissionFrame" then
-                if v.Main.Cleared.Visible == true then
-                    print("Fez")
-                else
-                    for _, tier in ipairs(selectedTierContract) do
-                        local args = {
-                            [1] = "__EVENT_CONTRACT_Sakamoto:" .. tier
-                        }
-                        game:GetService("ReplicatedStorage").endpoints.client_to_server.request_matchmaking:InvokeServer(unpack(args))
-                    end
-                end
-            end
-        end
+		local scroll = game:GetService("Players").LocalPlayer.PlayerGui.ContractsUI.Main.Main.Frame.Outer.main.Scroll
+		local remoteSent = false
+		
+		for _, v in pairs(scroll:GetChildren()) do
+			if v.Name == "MissionFrame" then
+				if v.Main.Cleared.Visible ~= true then
+					local player = game:GetService("Players").LocalPlayer
+					local missionContainer = player.PlayerGui.ContractsUI.Main.Main.Frame.Outer.main.Scroll
+		
+					function findTextLabelByName(frame, name)
+						for _, child in ipairs(frame:GetChildren()) do
+							if child:IsA("TextLabel") and child.Name == name then
+								return child
+							end
+							local result = findTextLabelByName(child, name)
+							if result then
+								return result
+							end
+						end
+						return nil
+					end
+		
+					local missionFrames = {}
+					for _, frame in ipairs(missionContainer:GetChildren()) do
+						if frame:IsA("Frame") then
+							table.insert(missionFrames, frame)
+						end
+					end
+		
+					table.sort(missionFrames, function(a, b)
+						return a.AbsolutePosition.X < b.AbsolutePosition.X
+					end)
+		
+					for i, frame in ipairs(missionFrames) do
+						local challenge = findTextLabelByName(frame, "Challenge")
+						local difficulty = findTextLabelByName(frame, "Difficulty")
+		
+						local difficultyText = difficulty.Text:match("%d+")
+						local challengeText = challenge.Text:lower():gsub(" ", "_")
+		
+						for _, map in pairs(selectedTierContract) do
+							for _, diff in pairs(selectedIgnoreContractChallenge) do
+								if difficultyText == tostring(map) and challengeText ~= tostring(diff) and not remoteSent then
+									local args = {
+										[1] = "__EVENT_CONTRACT_Sakamoto:" .. tostring(i)
+									}
+				
+									game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("open_event_contract_portal"):InvokeServer(unpack(args))
+									remoteSent = true
+									break
+								end
+							end
+						end
+					end
+				end
+			end
+		end
         wait()
     end
 end
 
 function autoContract()
-	while getgenv().autoContract == true do
-		local players = game:GetService("Players")
-		local player = players.LocalPlayer
+    while getgenv().autoContract == true do
+        local scroll = game:GetService("Players").LocalPlayer.PlayerGui.ContractsUI.Main.Main.Frame.Outer.main.Scroll
+        local remoteSent = false
+
+        for _, v in pairs(scroll:GetChildren()) do
+            if v.Name == "MissionFrame" then
+
+                if v.Main.Cleared.Visible ~= true then
+                    local player = game:GetService("Players").LocalPlayer
+                    local missionContainer = player.PlayerGui.ContractsUI.Main.Main.Frame.Outer.main.Scroll
+
+                    function findTextLabelByName(frame, name)
+                        for _, child in ipairs(frame:GetChildren()) do
+                            if child:IsA("TextLabel") and child.Name == name then
+                                return child
+                            end
+                            local result = findTextLabelByName(child, name)
+                            if result then
+                                return result
+                            end
+                        end
+                        return nil
+                    end
+
+                    local missionFrames = {}
+                    for _, frame in ipairs(missionContainer:GetChildren()) do
+                        if frame:IsA("Frame") then
+                            table.insert(missionFrames, frame)
+                        end
+                    end
+
+                    table.sort(missionFrames, function(a, b)
+                        return a.AbsolutePosition.X < b.AbsolutePosition.X
+                    end)
+
+                    for i, frame in ipairs(missionFrames) do
+
+                        local challenge = findTextLabelByName(frame, "Challenge")
+                        local difficulty = findTextLabelByName(frame, "Difficulty")
+
+                        if challenge and difficulty then
+
+                            local difficultyText = difficulty.Text:match("%d+")
+                            local challengeText = challenge.Text:lower():gsub(" ", "_")
+
+								for _, map in pairs(selectedTierContract) do
+									for _, diff in pairs(selectedIgnoreContractChallenge) do
+										if difficultyText == tostring(map) and challengeText ~= tostring(diff) and not remoteSent then
+											if getgenv().FriendsOnly == true then
+												local args = {
+													[1] = tostring(i),
+													[2] = {
+														["friends_only"] = true
+													}
+												}
+												
+												game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("open_event_contract_portal"):InvokeServer(unpack(args))                                
+											else
+												local args = {
+													[1] = tostring(i)
+												}
+							
+												game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("open_event_contract_portal"):InvokeServer(unpack(args))
+											end
+										remoteSent = true
+									end
+								end
+							end
+                        end
+                    end
+                end
+            end
+        end
+        wait(1)
+    end
+end
+
+function autoEquipTeam()
+	while getgenv().autoEquipTeam == true do
+		local levelDataRemote = workspace._MAP_CONFIG:FindFirstChild("GetLevelData")
+		local levelData = levelDataRemote:InvokeServer()
 		
-		local missionFrame = player.PlayerGui.ContractsUI.Main.Main.Frame.Outer.main.Scroll.MissionFrame
-		local cleared = missionFrame.Main.Cleared
-		local difficulty = missionFrame.Main.Difficulty
-
-		local missionItems = missionFrame:GetChildren()
-
-		local validItems = {}
-		for _, item in ipairs(missionItems) do
-			if item:IsA("Frame") then
-				table.insert(validItems, item)
+		if typeof(levelData) == "table" then
+			for k, v in pairs(levelData) do
+				if typeof(v) == "string" and string.match(v, "^__EVENT_CONTRACT_Sakamoto:%d$") then
+					if type(levelData._daily_challenge_weak_against) == "table" then
+						for k, v in pairs(levelData._daily_challenge_weak_against) do
+							if v == "physical" then
+								local args = {
+									[1] = selectedTeamPhysicContract
+								}
+								
+								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("load_team_loadout"):InvokeServer(unpack(args))
+							else
+								local args = {
+									[1] = selectedTeamMagicContract
+								}
+								
+								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("load_team_loadout"):InvokeServer(unpack(args))
+							end
+						end
+					end					
+				elseif v == "challenge" then
+					if type(levelData._daily_challenge_weak_against) == "table" then
+						for k, v in pairs(levelData._daily_challenge_weak_against) do
+							if v == "physical" then
+								local args = {
+									[1] = selectedTeamPhysicChallengeDailyChallenge
+								}
+								
+								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("load_team_loadout"):InvokeServer(unpack(args))
+							elseif v == "magic" then
+								local args = {
+									[1] = selectedTeamMagicChallengeDailyChallenge
+								}
+								
+								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("load_team_loadout"):InvokeServer(unpack(args))
+							else 
+								local args = {
+									[1] = selectedTeamChallengeDailyChallenge
+								}
+								
+								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("load_team_loadout"):InvokeServer(unpack(args))
+							end
+						end
+					end							
+				elseif v == "raid" then
+					local args = {
+						[1] = selectedTeamRaid
+					}
+					
+					game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("load_team_loadout"):InvokeServer(unpack(args))					
+				elseif v == "infinite_tower" then
+					local args = {
+						[1] = selectedTeamInfTower
+					}
+					
+					game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("load_team_loadout"):InvokeServer(unpack(args))					
+				elseif v == "infinite" or v == "story" then
+					local args = {
+						[1] = selectedTeamStoryInf
+					}
+					
+					game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("load_team_loadout"):InvokeServer(unpack(args))					
+				end
 			end
 		end
+		wait()
+	end
+end
 
-		table.sort(validItems, function(a, b)
-			return a.Position.X.Offset < b.Position.X.Offset
-		end)
+function autoRollPassive()
+	while getgenv().autoRollPassive == true do
+        local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+		upvalues = debug.getupvalues(Loader.init)
+		local Modules = {
+			["CORE_CLASS"] = upvalues[6],
+			["CORE_SERVICE"] = upvalues[7],
+			["SERVER_CLASS"] = upvalues[8],
+			["SERVER_SERVICE"] = upvalues[9],
+			["CLIENT_CLASS"] = upvalues[10],
+			["CLIENT_SERVICE"] = upvalues[11],
+		}
 
-		for i = 1, math.min(5, #validItems) do
-			local itemToOpen = validItems[i]
+		local ownedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.owned_units
 
-			if cleared.Visible == false and difficulty.Text == selectedTierContract[i] then
-				local args = {
-					[1] = i
-				}
-		
-				game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("open_event_contract_portal"):InvokeServer(unpack(args))
+		local trait, tier
+
+		for id, unit in pairs(ownedUnits) do
+			if type(unit) == "table" then
+				if unit.traits and type(unit.traits) == "table" then
+					if unit.traits[1] and type(unit.traits[1]) == "table" then
+						for subKey, subValue in pairs(unit.traits[1]) do
+							if subKey == "trait" then
+								trait = subValue
+							elseif subKey == "tier" then
+								tier = subValue
+							end
+						end
+						if trait and tier then
+							local traitCheck = trait .. " " .. tier
+							if selectedUnitToRoll == id then
+								for _, passive in pairs(selectedPassiveToRoll) do
+									if passive == traitCheck then
+										print("A unidade pegou a passiva desejada:", traitCheck)
+										return
+									end
+								end
+								local args = {
+									[1] = tostring(selectedUnitToRoll)
+								}
+								
+								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_token_trait_reroll"):InvokeServer(unpack(args))								
+							end
+						end
+					end
+				end
 			end
 		end
 		wait()
@@ -2521,6 +2823,20 @@ else
     print("O módulo não contém uma tabela de níveis.")
 end
 
+local levelsModule = require(game:GetService("ReplicatedStorage").src.Data.Levels)
+local PortalMapValues = {}
+
+if type(levelsModule) == "table" then
+    for levelName, levelData in pairs(levelsModule) do
+        if levelData.id and string.find(levelName:lower(), "portal") then
+            table.insert(PortalMapValues, tostring(levelData.id))
+        end
+    end
+else
+    print("O módulo não contém uma tabela de níveis.")
+end
+
+
 local capsules = game:GetService("ReplicatedStorage").packages.assets:FindFirstChild("ItemModels")
 local ValuesCapsules = {}
 if capsules then
@@ -2568,6 +2884,17 @@ if fxCache then
         if v.Name == "CollectionUnitFrame" then
             local collectionUnitFrame = v
             table.insert(ValuesUnitId,collectionUnitFrame.name.Text .. " | Level: " .. collectionUnitFrame.Main.Level.Text .. " | " .. collectionUnitFrame._uuid.Value)
+        end
+    end
+end
+
+local namePortal = game:GetService("ReplicatedStorage").packages.assets:FindFirstChild("ItemModels")
+local ValuesPortalName = {}
+
+if namePortal then
+    for i, v in pairs(namePortal:GetChildren()) do
+        if string.find(v.Name:lower(), "portal") then  -- Verifica se "portal" está no nome do item
+            table.insert(ValuesPortalName,v.Name)
         end
     end
 end
@@ -2788,31 +3115,12 @@ Tab2:AddToggle("AutoJoinCursedWomb", {
 	end,
 })
 
-Tab2:AddToggle("AutoJoinHalloweenEvent", {
-	Text = "Auto Join Halloween Event",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoJoinHalloweenEvent = Value
-		autoJoinHalloweenEvent()
-	end,
-})
-
 Tab2:AddToggle("AutoJoinHolidayEvent", {
 	Text = "Auto Join Holiday Event",
 	Default = false,
 	Callback = function(Value)
 		getgenv().autoJoinHolidayEvent = Value
 		autoJoinHolidayEvent()
-	end,
-})
-
-
-Tab2:AddToggle("AutoMatchmakingHalloweenEvent", {
-	Text = "Auto Matchmaking Halloween Event",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoJoinHalloweenEvent = Value
-		autoJoinHalloweenEvent()
 	end,
 })
 
@@ -2879,7 +3187,35 @@ local TabBox = Tabs.Main:AddRightTabbox()
 
 local Tab1 = TabBox:AddTab("Passive")
 
-Tab1:AddLabel("W.I.P")
+Tab1:AddDropdown("RollUnit", {
+	Values = ValuesUnitId,
+	Default = "None",
+	Multi = false,
+	Text = "Select Unit",
+
+	Callback = function(value)
+		selectedUnitToRoll = value:match(".* | .* | (.+)")
+	end,
+})
+
+Tab1:AddDropdown("dropdownSelectPassiveToRoll", {
+	Values = passivesValues,
+	Default = "None",
+	Multi = true,
+	Text = "Select Passive",
+	Callback = function(Value)
+		selectedPassiveToRoll = Value
+	end,
+})
+
+Tab1:AddToggle("autoRoll", {
+	Text = "Auto Roll",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoRollPassive = Value
+		autoRollPassive()
+	end,
+})
 
 local Tab2 = TabBox:AddTab("Feed")
 
@@ -2917,50 +3253,50 @@ local Tabs = {
 	Farm = Window:AddTab("Farm"),
 }
 
-local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Story")
+local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Portal")
 
-LeftGroupBox:AddDropdown("dropdownStoryMap", {
-	Values = storyMapValues,
+LeftGroupBox:AddDropdown("dropdownPortalMap", {
+	Values = PortalMapValues,
 	Default = "None",
 	Multi = false,
 
-	Text = "Select Story Map",
+	Text = "Select Portal",
 
 	Callback = function(Value)
-		selectedMap = Value
+		selectedPortalMap = Value
 	end,
 })
 
-LeftGroupBox:AddDropdown("dropdownSelectDifficultyStory", {
-	Values = { "Normal", "Hard" },
-	Default = "None",
-	Multi = false,
+LeftGroupBox:AddDropdown("dropdownTierPortal", {
+	Values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"},
+	Default = "0",
+	Multi = true,
 
-	Text = "Select Difficulty",
+	Text = "Select Tier",
 
 	Callback = function(Values)
-		selectedDifficulty = Values
+		selectedTierPortal = Values
 	end,
 })
 
-LeftGroupBox:AddDropdown("dropdownSelectActStory", {
-	Values = { "1", "2", "3", "4", "5", "6", "Infinite" },
+LeftGroupBox:AddDropdown("dropdownIgnoreDmgBonusPortal", {
+	Values = dmgBonus,
 	Default = "None",
-	Multi = false,
+	Multi = true,
 
-	Text = "Select Act",
+	Text = "Select Ignore Dmg bonus",
 
-	Callback = function(Value)
-		selectedAct = Value
+	Callback = function(Values)
+		selectedIgnoreDmgBonus = Values
 	end,
 })
 
-LeftGroupBox:AddToggle("AutoEnter", {
-	Text = "Auto Enter",
+LeftGroupBox:AddToggle("AutoEnterPortal", {
+	Text = "Auto Open Portal",
 	Default = false,
 	Callback = function(Value)
-		getgenv().autoEnter = Value
-		autoEnter()
+		getgenv().autoEnterPortal = Value
+		autoEnterPortal()
 	end,
 })
 
@@ -2990,32 +3326,106 @@ LeftGroupBox:AddToggle("AutoMatchmaking", {
 local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Contract")
 
 LeftGroupBox:AddDropdown("dropdownSelectActStory", {
-	Values = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"},
-	Default = "None",
-	Multi = true,
+    Values = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" },
+    Default = "None",
+    Multi = true,
+    Text = "Select Tier",
+    Callback = function(Value)
+        selectedTierContract = Value
+    end,
+})
 
-	Text = "Select Tier",
-
-	Callback = function(Value)
-		selectedTierContract = Value
-	end,
+LeftGroupBox:AddDropdown("dropdownSelectActStory", {
+    Values = challengeValues,
+    Default = "None",
+    Multi = true,
+    Text = "Select Ignore Challenge",
+    Callback = function(Value)
+        selectedIgnoreContractChallenge = Value
+    end,
 })
 
 LeftGroupBox:AddToggle("AutoMatchmakingContract", {
-	Text = "Auto Matchmaking Contract",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoContractMatchmaking = Value
-		autoContractMatchmaking()
-	end,
+    Text = "Auto Matchmaking Contract",
+    Default = false,
+    Callback = function(Value)
+        getgenv().autoContractMatchmaking = Value
+        autoContractMatchmaking()
+    end,
 })
 
 LeftGroupBox:AddToggle("autoContract", {
-	Text = "Auto Contract",
+    Text = "Auto Contract",
+    Default = false,
+    Callback = function(Value)
+        getgenv().autoContract = Value
+        autoContract()
+    end,
+})
+
+local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Infinite Castle")
+
+LeftGroupBox:AddToggle("HardInfCastle", {
+	Text = "Hard Inf Castle",
 	Default = false,
 	Callback = function(Value)
-		getgenv().autoContract = Value
-		autoContract()
+		getgenv().selectedHardInfCastle = Value
+	end,
+})
+
+LeftGroupBox:AddToggle("AutoEnterInfCastle", {
+	Text = "Auto Enter Inf Caslte",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoEnterInfiniteCastle = Value
+		autoEnterInfiniteCastle()
+	end,
+})
+
+local RightGroupbox = Tabs.Farm:AddRightGroupbox("Story")
+
+RightGroupbox:AddDropdown("dropdownStoryMap", {
+	Values = storyMapValues,
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Story Map",
+
+	Callback = function(Value)
+		selectedMap = Value
+	end,
+})
+
+RightGroupbox:AddDropdown("dropdownSelectDifficultyStory", {
+	Values = { "Normal", "Hard" },
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Difficulty",
+
+	Callback = function(Values)
+		selectedDifficulty = Values
+	end,
+})
+
+RightGroupbox:AddDropdown("dropdownSelectActStory", {
+	Values = { "1", "2", "3", "4", "5", "6", "Infinite" },
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Act",
+
+	Callback = function(Value)
+		selectedAct = Value
+	end,
+})
+
+RightGroupbox:AddToggle("AutoEnter", {
+	Text = "Auto Enter",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoEnter = Value
+		autoEnter()
 	end,
 })
 
@@ -3051,6 +3461,24 @@ RightGroupbox:AddToggle("AutoEnterChallenge", {
     Callback = function(Value)
         getgenv().autoEnterChallenge = Value
         autoEnterChallenge()
+    end,
+})
+
+RightGroupbox:AddToggle("AutoEnterDailyChallenge", {
+    Text = "Auto Enter Daily Challenge",
+    Default = false,
+    Callback = function(Value)
+        getgenv().autoEnterDailyChallenge = Value
+        autoEnterDailyChallenge()
+    end,
+})
+
+RightGroupbox:AddToggle("AutoMatchmakingDailyChallenge", {
+    Text = "Auto Matchmaking Daily Challenge",
+    Default = false,
+    Callback = function(Value)
+        getgenv().autoMatchmakingDailyChallenge = Value
+        autoMatchmakingDailyChallenge()
     end,
 })
 
@@ -3100,24 +3528,159 @@ RightGroupbox:AddToggle("AutoEnterLegendStage", {
     end,
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Infinite Castle")
+local Tabs = {
+	Teams = Window:AddTab("Teams"),
+}
 
-RightGroupbox:AddToggle("HardInfCastle", {
-	Text = "Hard Inf Castle",
-	Default = false,
+local LeftGroupBox = Tabs.Teams:AddLeftGroupbox("Story & Infinite")
+
+LeftGroupBox:AddDropdown("dropdownSelectStoryInfiniteMagic", {
+	Values = {'1', '2', '3', '4', '5', '6'},
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Team",
+
 	Callback = function(Value)
-		getgenv().selectedHardInfCastle = Value
+		selectedTeamStoryInf = Value
+		if selectedTeamStoryInf then
+			getgenv().autoEquipTeam = true
+			autoEquipTeam()
+		end
 	end,
 })
 
-RightGroupbox:AddToggle("AutoEnterInfCastle", {
-	Text = "Auto Enter Inf Caslte",
-	Default = false,
+local LeftGroupBox = Tabs.Teams:AddLeftGroupbox("Infinite Tower")
+
+LeftGroupBox:AddDropdown("dropdownSelectInfTowerMagic", {
+	Values = {'1', '2', '3', '4', '5', '6'},
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Team",
+
 	Callback = function(Value)
-		getgenv().autoEnterInfiniteCastle = Value
-		autoEnterInfiniteCastle()
+		selectedTeamInfTower = Value
+		if selectedTeamInfTower then
+			getgenv().autoEquipTeam = true
+			autoEquipTeam()
+		end
 	end,
 })
+
+local LeftGroupBox = Tabs.Teams:AddLeftGroupbox("Contract")
+
+LeftGroupBox:AddDropdown("dropdownSelectContractPhysic", {
+	Values = {'1', '2', '3', '4', '5', '6'},
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Physic Team",
+
+	Callback = function(Value)
+		selectedTeamPhysicContract = Value
+		if selectedTeamPhysicContract then
+			getgenv().autoEquipTeam = true
+			autoEquipTeam()
+		end
+	end,
+})
+
+LeftGroupBox:AddDropdown("dropdownSelectContractMagic", {
+	Values = {'1', '2', '3', '4', '5', '6'},
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Magic Team",
+
+	Callback = function(Value)
+		selectedTeamMagicContract = Value
+		if selectedTeamMagicContract then
+			getgenv().autoEquipTeam = true
+			autoEquipTeam()
+		end
+	end,
+})
+
+local RightGroupbox = Tabs.Teams:AddRightGroupbox("Challenge & Daily Challenge")
+
+RightGroupbox:AddDropdown("dropdownSelectDailyChallengeChallengePhysic", {
+	Values = {'1', '2', '3', '4', '5', '6'},
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Physic Team",
+
+	Callback = function(Value)
+		selectedTeamPhysicChallengeDailyChallenge = Value
+		if selectedTeamPhysicChallengeDailyChallenge then
+			getgenv().autoEquipTeam = true
+			autoEquipTeam()
+		end
+	end,
+})
+
+RightGroupbox:AddDropdown("dropdownSelectDailyChallengeChallengeMagic", {
+	Values = {'1', '2', '3', '4', '5', '6'},
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Magic Team",
+
+	Callback = function(Value)
+		selectedTeamMagicChallengeDailyChallenge = Value
+		if selectedTeamMagicChallengeDailyChallenge then
+			getgenv().autoEquipTeam = true
+			autoEquipTeam()
+		end
+	end,
+})
+
+RightGroupbox:AddDropdown("dropdownSelectDailyChallengeChallenge", {
+	Values = {'1', '2', '3', '4', '5', '6'},
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Team For Normal Challenge",
+
+	Callback = function(Value)
+		selectedTeamChallengeDailyChallenge = Value
+		if selectedTeamChallengeDailyChallenge then
+			getgenv().autoEquipTeam = true
+			autoEquipTeam()
+		end
+	end,
+})
+
+local RightGroupbox = Tabs.Teams:AddRightGroupbox("Raid")
+
+RightGroupbox:AddDropdown("dropdownSelectRaidMagic", {
+	Values = {'1', '2', '3', '4', '5', '6'},
+	Default = "None",
+	Multi = false,
+
+	Text = "Select Team",
+
+	Callback = function(Value)
+		selectedTeamRaid = Value
+		if selectedTeamRaid then
+			getgenv().autoEquipTeam = true
+			autoEquipTeam()
+		end
+	end,
+})
+
+local Tabs = {
+	Card = Window:AddTab("Card"),
+}
+
+local LeftGroupBox = Tabs.Card:AddLeftGroupbox("Coming Soon")
+
+local Tabs = {
+	Macro = Window:AddTab("Macro"),
+}
+
+local LeftGroupBox = Tabs.Macro:AddLeftGroupbox("Coming Soon")
 
 local Tabs = {
 	Others = Window:AddTab("Others"),
