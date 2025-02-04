@@ -39,9 +39,39 @@ local selectedTierContract = {}
 local selectedIgnoreContractChallenge = {}
 local selectedIgnoreDmgBonus = {}
 local selectedTierPortal = {}
+local selectedPortalDiff = {}
 local selectedPassiveToRoll = {}
 local dmgBonus = {"None", "air", "physical", "light", "fire", "storm", "dark", "magic", "aqua"}
 local passivesValues = {"superior 1", "range 1", "nimble 1", "superior 2", "range 2", "nimble 2", "superior 3", "range 3", "nimble 3", "adept 1", "culling 1", "sniper 1", "godspeed 1", "reaper 1", "celestial 1", "divine 1", "golden 1", "unique 1"}
+local shardsValues = {"nagumo_shard", "madoka_portal_shard", "dazai_shard", "relic_shard"}
+local chosenCard = nil
+local selectedPriorities = {
+    Buff = {},
+    Debuff = {}
+}
+local Cards = {
+    Buff = {
+        "+ Attack I", "+ Attack II", "+ Attack III",
+        "+ Boss Damage I", "+ Boss Damage II", "+ Boss Damage III",
+        "+ Gain 2 Random Effects Tier 1", "+ Gain 2 Random Effects Tier 2", "+ Gain 2 Random Effects Tier 3",
+        "+ Range I", "+ Range II", "+ Range III",
+        "+ Random Blessings I", "+ Random Blessings II", "+ Random Blessings III",
+        "+ Yen I", "+ Yen II", "+ Yen III",
+        "- Cooldown I", "- Cooldown II", "- Cooldown III",
+        "- Active Cooldown I", "- Active Cooldown II", "- Active Cooldown III",
+        "+ Double Attack, Half Range", "+ Double Attack, Double Cooldown",
+        "+ Double Attack", "+ Double Range"
+    },
+    Debuff = {
+        "+ Enemy Health I", "+ Enemy Health II", "+ Enemy Health III",
+        "+ Enemy Shield I", "+ Enemy Shield II", "+ Enemy Shield III",
+        "+ Enemy Speed I", "+ Enemy Speed II", "+ Enemy Speed III",
+        "+ Enemy Regen I", "+ Enemy Regen II", "+ Enemy Regen III",
+        "+ Explosive Deaths I", "+ Explosive Deaths II", "+ Explosive Deaths III",
+        "+ New Path",
+        "+ Random Curses I", "+ Random Curses II", "+ Random Curses III"
+    }
+}
 
 --START OF FUNCTIONS
 
@@ -764,6 +794,92 @@ function InfRange()
 	end
 end
 
+function UpdatePriorityList(category, selectedList)
+    selectedPriorities[category] = selectedList
+end
+
+function autoChooseCard()
+    while getgenv().autoChooseCard == true do
+        local player = game:GetService("Players").LocalPlayer
+        local itemsFrame = player.PlayerGui.RoguelikeSelect.Main.Main.Items
+        local foundCards = {}
+        local cardPositions = {}
+        local index = 1
+        for _, frame in ipairs(itemsFrame:GetChildren()) do
+            if frame:IsA("Frame") and frame:FindFirstChild("bg") and frame.bg:FindFirstChild("Main") and frame.bg.Main:FindFirstChild("Title") and frame.bg.Main.Title:FindFirstChild("TextLabel") then
+                local cardName = frame.bg.Main.Title.TextLabel.Text
+                foundCards[index] = cardName
+                cardPositions[cardName] = index
+                index = index + 1
+            end
+        end
+
+        local chosenCard = nil
+        local chosenCardPosition = nil
+
+        if getgenv().focusBuff then
+            for pos, availableCard in pairs(foundCards) do
+                for _, priorityBuff in ipairs(selectedPriorities.Buff) do
+                    if availableCard == priorityBuff then
+                        chosenCard = availableCard
+                        chosenCardPosition = pos
+                        break
+                    end
+                end
+                if chosenCard then break end
+            end
+        end
+
+        if not chosenCard and getgenv().focusDebuff then
+            for pos, availableCard in pairs(foundCards) do
+                for _, priorityDebuff in ipairs(selectedPriorities.Debuff) do
+                    if availableCard == priorityDebuff then
+                        chosenCard = availableCard
+                        chosenCardPosition = pos
+                        break
+                    end
+                end
+                if chosenCard then break end
+            end
+        end
+
+        if not chosenCard then
+            for pos, availableCard in pairs(foundCards) do
+                for _, priorityBuff in ipairs(selectedPriorities.Buff) do
+                    if availableCard == priorityBuff then
+                        chosenCard = availableCard
+                        chosenCardPosition = pos
+                        break
+                    end
+                end
+                if chosenCard then break end
+            end
+        end
+
+        if not chosenCard then
+            for pos, availableCard in pairs(foundCards) do
+                for _, priorityDebuff in ipairs(selectedPriorities.Debuff) do
+                    if availableCard == priorityDebuff then
+                        chosenCard = availableCard
+                        chosenCardPosition = pos
+                        break
+                    end
+                end
+                if chosenCard then break end
+            end
+        end
+
+        if chosenCard then
+            local args = {
+                [1] = tostring(chosenCardPosition)
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("select_roguelike_option"):InvokeServer(unpack(args))            
+        end
+        wait()
+    end
+end
+
 function autoGetQuest()
 	while getgenv().autoGetQuest == true do
 		local quests = {
@@ -990,7 +1106,7 @@ function autoEnterRaid()
 			
 			game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_lock_level"):InvokeServer(unpack(args))
 			local args = {
-				[1] = "_lobbytemplategreen1",
+				[1] = "_lobbytemplate210",
 			}
 	
 			game:GetService("ReplicatedStorage")
@@ -1015,7 +1131,7 @@ function autoEnterRaid()
 			game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_lock_level"):InvokeServer(unpack(args))
 			wait(1)
 			local args = {
-				[1] = "_lobbytemplategreen1",
+				[1] = "_lobbytemplate210",
 			}
 	
 			game:GetService("ReplicatedStorage")
@@ -1089,7 +1205,6 @@ function autoEnterPortal()
         local save_notifications_state = client_to_server:WaitForChild("save_notifications_state")
 
         local args = { [1] = "Items", [2] = 0 }
-        print("Sending notification state with args:", args)
         save_notifications_state:InvokeServer(unpack(args))
 
         wait(1)
@@ -1117,29 +1232,50 @@ function autoEnterPortal()
                         
                         if portalData.level_id and portalData.portal_depth and portalData._weak_against and portalData._weak_against[1] and portalData._weak_against[1].damage_type then
                             for _, tier in pairs(selectedTierPortal) do
-                                tier = tostring(tier) -- Garantir que o valor seja string
+                                tier = tostring(tier)
                                 for _, IgnoreDmgBonus in pairs(selectedIgnoreDmgBonus) do
-                                    IgnoreDmgBonus = tostring(IgnoreDmgBonus) -- Garantir que o valor seja string
-                                    
-									if IgnoreDmgBonus == "" or IgnoreDmgBonus == nil or IgnoreDmgBonus  ==  "None" then
-                                        if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier then
-                                            local args = {
-                                                [1] = tostring(item.uuid),
-                                                [2] = (getgenv().FriendsOnly and {["friends_only"] = true}) or nil
-                                            }
-                                            print("Portal data matches (no IgnoreDmgBonus), invoking server with args:", args)
-                                            client_to_server:WaitForChild("use_portal"):InvokeServer(unpack(args))
-                                        end
-                                    else
-                                        if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier and tostring(portalData._weak_against[1].damage_type) ~= IgnoreDmgBonus then
-                                            local args = {
-                                                [1] = tostring(item.uuid),
-                                                [2] = (getgenv().FriendsOnly and {["friends_only"] = true}) or nil
-                                            }
-                                            print("Portal data matches, invoking server with args:", args)
-                                            client_to_server:WaitForChild("use_portal"):InvokeServer(unpack(args))
-                                        end
-                                    end
+                                    IgnoreDmgBonus = tostring(IgnoreDmgBonus)
+										for _, IgnoreChallenge in pairs(selectedPortalDiff) do
+										IgnoreChallenge = tostring(IgnoreChallenge)
+                                        
+										if IgnoreChallenge == "" or IgnoreChallenge == nil or IgnoreChallenge == "None" then
+											if IgnoreDmgBonus == "" or IgnoreDmgBonus == nil or IgnoreDmgBonus == "None" then
+												if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier then
+													local args = {
+														[1] = tostring(item.uuid),
+														[2] = (getgenv().FriendsOnly and {["friends_only"] = true}) or nil
+													}
+													client_to_server:WaitForChild("use_portal"):InvokeServer(unpack(args))
+												end
+											else
+												if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier and tostring(portalData._weak_against[1].damage_type) ~= IgnoreDmgBonus then
+													local args = {
+														[1] = tostring(item.uuid),
+														[2] = (getgenv().FriendsOnly and {["friends_only"] = true}) or nil
+													}
+													client_to_server:WaitForChild("use_portal"):InvokeServer(unpack(args))
+												end
+											end
+										else
+											if IgnoreDmgBonus == "" or IgnoreDmgBonus == nil or IgnoreDmgBonus == "None" then
+												if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier then
+													local args = {
+														[1] = tostring(item.uuid),
+														[2] = (getgenv().FriendsOnly and {["friends_only"] = true}) or nil
+													}
+													client_to_server:WaitForChild("use_portal"):InvokeServer(unpack(args))
+												end
+											else
+												if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier and tostring(portalData._weak_against[1].damage_type) ~= IgnoreDmgBonus then
+													local args = {
+														[1] = tostring(item.uuid),
+														[2] = (getgenv().FriendsOnly and {["friends_only"] = true}) or nil
+													}
+													client_to_server:WaitForChild("use_portal"):InvokeServer(unpack(args))
+												end
+											end
+										end										
+									end
                                 end
                             end
                         end
@@ -1149,6 +1285,194 @@ function autoEnterPortal()
         end
         wait()
     end
+end
+
+function autoNextContrato()
+	while getgenv().autoNextContrato == true do
+		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
+		if resultUI and resultUI.Enabled == true then
+			local scroll = game:GetService("Players").LocalPlayer.PlayerGui.ContractsUI.Main.Main.Frame.Outer.main.Scroll
+			local remoteSent = false
+
+			for _, v in pairs(scroll:GetChildren()) do
+				if v.Name == "MissionFrame" then
+
+					if v.Main.Cleared.Visible ~= true then
+						local player = game:GetService("Players").LocalPlayer
+						local missionContainer = player.PlayerGui.ContractsUI.Main.Main.Frame.Outer.main.Scroll
+
+						function findTextLabelByName(frame, name)
+							for _, child in ipairs(frame:GetChildren()) do
+								if child:IsA("TextLabel") and child.Name == name then
+									return child
+								end
+								local result = findTextLabelByName(child, name)
+								if result then
+									return result
+								end
+							end
+							return nil
+						end
+
+						local missionFrames = {}
+						for _, frame in ipairs(missionContainer:GetChildren()) do
+							if frame:IsA("Frame") then
+								table.insert(missionFrames, frame)
+							end
+						end
+
+						table.sort(missionFrames, function(a, b)
+							return a.AbsolutePosition.X < b.AbsolutePosition.X
+						end)
+
+						for i, frame in ipairs(missionFrames) do
+
+							local challenge = findTextLabelByName(frame, "Challenge")
+							local difficulty = findTextLabelByName(frame, "Difficulty")
+
+							if challenge and difficulty then
+
+								local difficultyText = difficulty.Text:match("%d+")
+								local challengeText = challenge.Text:lower():gsub(" ", "_")
+
+									for _, map in pairs(selectedTierContract) do
+										for _, diff in pairs(selectedIgnoreContractChallenge) do
+											if difficultyText == tostring(map) and challengeText ~= tostring(diff) and not remoteSent then
+												local args = {
+													[1] = "eventcontract",
+													[2] = {
+														["_eventcontractslot"] = tostring(i)
+													}
+												}
+												
+												game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("set_game_finished_vote"):InvokeServer(unpack(args))
+											remoteSent = true
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+		wait()
+	end
+end
+
+function autoNextPortal()
+	while getgenv().autoNextPortal == true do
+		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
+		if resultUI and resultUI.Enabled == true then
+			local ReplicatedStorage = game:GetService("ReplicatedStorage")
+			local endpoints = ReplicatedStorage:WaitForChild("endpoints")
+			local client_to_server = endpoints:WaitForChild("client_to_server")
+			local save_notifications_state = client_to_server:WaitForChild("save_notifications_state")
+	
+			local args = { [1] = "Items", [2] = 0 }
+			save_notifications_state:InvokeServer(unpack(args))
+	
+			wait(1)
+	
+			local Loader = require(ReplicatedStorage.src.Loader)
+			local upvalues = debug.getupvalues(Loader.init)
+	
+			local Modules = {
+				["CORE_CLASS"] = upvalues[6],
+				["CORE_SERVICE"] = upvalues[7],
+				["SERVER_CLASS"] = upvalues[8],
+				["SERVER_SERVICE"] = upvalues[9],
+				["CLIENT_CLASS"] = upvalues[10],
+				["CLIENT_SERVICE"] = upvalues[11],
+			}
+	
+			local uniqueItems = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.inventory.inventory_profile_data.unique_items
+	
+			if type(uniqueItems) == "table" then
+				for _, item in pairs(uniqueItems) do
+					if item.uuid then
+						local uniqueItemData = item._unique_item_data
+						if uniqueItemData and uniqueItemData._unique_portal_data then
+							local portalData = uniqueItemData._unique_portal_data
+							
+							if portalData.level_id and portalData.portal_depth and portalData._weak_against and portalData._weak_against[1] and portalData._weak_against[1].damage_type then
+								for _, tier in pairs(selectedTierPortal) do
+									tier = tostring(tier)
+									for _, IgnoreDmgBonus in pairs(selectedIgnoreDmgBonus) do
+										IgnoreDmgBonus = tostring(IgnoreDmgBonus)
+											for _, IgnoreChallenge in pairs(selectedPortalDiff) do
+											IgnoreChallenge = tostring(IgnoreChallenge)
+											
+											if IgnoreChallenge == "" or IgnoreChallenge == nil or IgnoreChallenge == "None" then
+												if IgnoreDmgBonus == "" or IgnoreDmgBonus == nil or IgnoreDmgBonus == "None" then
+													if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier then
+														local args = {
+															[1] = "replay",
+															[2] = {
+																["item_uuid"] = tostring(item.uuid)
+															}
+														}
+														game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("set_game_finished_vote"):InvokeServer(unpack(args))
+													end
+												else
+													if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier and tostring(portalData._weak_against[1].damage_type) ~= IgnoreDmgBonus then
+														local args = {
+															[1] = "replay",
+															[2] = {
+																["item_uuid"] = tostring(item.uuid)
+															}
+														}
+														game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("set_game_finished_vote"):InvokeServer(unpack(args))
+													end
+												end
+											else
+												if IgnoreDmgBonus == "" or IgnoreDmgBonus == nil or IgnoreDmgBonus == "None" then
+													if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier then
+														local args = {
+															[1] = "replay",
+															[2] = {
+																["item_uuid"] = tostring(item.uuid)
+															}
+														}
+														game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("set_game_finished_vote"):InvokeServer(unpack(args))
+													end
+												else
+													if tostring(portalData.level_id) == tostring(selectedPortalMap) and tostring(portalData.portal_depth) == tier and tostring(portalData._weak_against[1].damage_type) ~= IgnoreDmgBonus and tostring(portalData.challenge) ~= IgnoreChallenge then
+														local args = {
+															[1] = "replay",
+															[2] = {
+																["item_uuid"] = tostring(item.uuid)
+															}
+														}
+														game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("set_game_finished_vote"):InvokeServer(unpack(args))
+													end
+												end
+											end										
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+		wait()
+	end
+end
+
+function autoCraftShard()
+	while getgenv().autoCraftShard == true do
+		local args = {
+			[1] = selectedShardtoCraft,
+			[2] = {
+				["use10"] = false
+			}
+		}
+		
+		game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_item"):InvokeServer(unpack(args))		
+		wait()
+	end
 end
 
 function CheckErwinCount(erwin1)
@@ -1999,11 +2323,7 @@ function universalSkill()
                         end
                     end
                 end
-            else
-                print("Erro ao carregar a tabela.")
             end
-        else
-            print("Erro ao obter o arquivo.")
         end
         wait()
     end
@@ -2767,16 +3087,79 @@ function webhook()
 	end
 end
 
+function testWebhook()
+    local discordWebhookUrl = urlwebhook
+    local pingContent = ""
+    
+    if getgenv().pingUser and getgenv().pingUserId then
+        pingContent = "<@" .. getgenv().pingUserId .. ">"
+    elseif getgenv().pingUser then
+        pingContent = "@"
+    end
+
+    local payload = {
+        content = pingContent,
+        embeds = {
+            {
+                description = "Test Webhook LMAO\n\n```REWARDS:\n+AIZEN (999)\n```",
+                color = 8716543,
+                author = {
+                    name = "Anime Adventures"
+                }
+            }
+        },
+        attachments = {}
+    }
+
+    local payloadJson = HttpService:JSONEncode(payload)
+
+    if syn and syn.request then
+        local response = syn.request({
+            Url = discordWebhookUrl,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = payloadJson
+        })
+
+        if response.Success then
+            print("Webhook sent successfully")
+        else
+            warn("Error sending message to Discord with syn.request:", response.StatusCode, response.Body)
+        end
+    elseif http_request then
+        local response = http_request({
+            Url = discordWebhookUrl,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = payloadJson
+        })
+
+        if response.Success then
+            print("Webhook sent successfully")
+        else
+            warn("Error sending message to Discord with http_request:", response.StatusCode, response.Body)
+        end
+    else
+        print("Synchronization not supported on this device.")
+    end
+end
+
+
 -- Get Informations for Dropdown or other things
 
 function printChallenges(module)
-	local challengesKeys = {}
-	if module.challenges then
-		for key, value in pairs(module.challenges) do
-			table.insert(challengesKeys, key)
-		end
-		return challengesKeys
-	end
+    local challengesKeys = {}
+    if module.challenges then
+        for key, _ in pairs(module.challenges) do
+            table.insert(challengesKeys, key .. "None")
+        end
+        table.insert(challengesKeys, "None")
+        return challengesKeys
+    end
 end
 
 local module = require(game:GetService("ReplicatedStorage").src.Data.ChallengeAndRewards)
@@ -2819,8 +3202,6 @@ if type(levelsModule) == "table" then
             table.insert(ChallengeMapValues, tostring(levelData.id))
         end
     end
-else
-    print("O módulo não contém uma tabela de níveis.")
 end
 
 local levelsModule = require(game:GetService("ReplicatedStorage").src.Data.Levels)
@@ -2832,8 +3213,6 @@ if type(levelsModule) == "table" then
             table.insert(PortalMapValues, tostring(levelData.id))
         end
     end
-else
-    print("O módulo não contém uma tabela de níveis.")
 end
 
 
@@ -2893,7 +3272,7 @@ local ValuesPortalName = {}
 
 if namePortal then
     for i, v in pairs(namePortal:GetChildren()) do
-        if string.find(v.Name:lower(), "portal") then  -- Verifica se "portal" está no nome do item
+        if string.find(v.Name:lower(), "portal") then
             table.insert(ValuesPortalName,v.Name)
         end
     end
@@ -2980,6 +3359,24 @@ LeftGroupBox:AddToggle("AutoNext", {
 	Callback = function(Value)
 		getgenv().autonext = Value
 		autonext()
+	end,
+})
+
+LeftGroupBox:AddToggle("AutoNextPortal", {
+	Text = "Auto Next Portal",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoNextPortal = Value
+		autoNextPortal()
+	end,
+})
+
+LeftGroupBox:AddToggle("AutoNext", {
+	Text = "Auto Next Contract",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoNextContrato = Value
+		autoNextContrato()
 	end,
 })
 
@@ -3104,6 +3501,44 @@ Tab1:AddToggle("AutoOpenCapsule", {
 	end,
 })
 
+Tab1:AddDropdown("dropdownSelectCapsule", {
+	Values = shardsValues,
+	Default = "None",
+	Multi = false,
+	Text = "Select Shard to Craft",
+	Callback = function(Value)
+		selectedShardtoCraft = Value
+	end,
+})
+
+Tab1:AddToggle("autoCraftShards", {
+	Text = "Auto Craft Shards",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoCraftShard = Value
+		autoCraftShard()
+	end,
+})
+
+local MyButton2 = Tab1:AddButton({
+    Text = 'Reedem Codes',
+    Func = function()
+        local codes = {
+			"ASSASSIN"
+        }        
+        
+        for _, code in ipairs(codes) do
+            local args = {
+                [1] = codes
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimCode"):InvokeServer(unpack(args))            
+            wait()
+        end               
+    end,
+    DoubleClick = false,
+})
+
 local Tab2 = TabBox2:AddTab("Event")
 
 Tab2:AddToggle("AutoJoinCursedWomb", {
@@ -3181,6 +3616,14 @@ LeftGroupBox:AddToggle("pingUser", {
     Callback = function(Value)
         getgenv().pingUser = Value
     end,
+})
+
+local MyButton2 = LeftGroupBox:AddButton({
+    Text = 'Test Webhook',
+    Func = function()
+        testWebhook()            
+    end,
+    DoubleClick = false,
 })
 
 local TabBox = Tabs.Main:AddRightTabbox()
@@ -3277,6 +3720,18 @@ LeftGroupBox:AddDropdown("dropdownTierPortal", {
 	Callback = function(Values)
 		selectedTierPortal = Values
 	end,
+})
+
+LeftGroupBox:AddDropdown("dropdownSelectChallengePortal", {
+    Values = challengeValues,
+    Default = "None",
+    Multi = true,
+
+    Text = "Select Ignore Difficulty",
+
+    Callback = function(Value)
+        selectedPortalDiff = Value
+    end,
 })
 
 LeftGroupBox:AddDropdown("dropdownIgnoreDmgBonusPortal", {
@@ -3674,7 +4129,54 @@ local Tabs = {
 	Card = Window:AddTab("Card"),
 }
 
-local LeftGroupBox = Tabs.Card:AddLeftGroupbox("Coming Soon")
+local LeftGroupBox = Tabs.Card:AddLeftGroupbox("Card Picker")
+
+LeftGroupBox:AddDropdown("dropdownBuffPriority", {
+    Values = Cards.Buff,
+    Default = {},
+    Multi = true,
+    Text = "Select Buff Priority",
+    Callback = function(selectedList)
+        UpdatePriorityList("Buff", selectedList)
+    end,
+})
+
+LeftGroupBox:AddDropdown("dropdownDebuffPriority", {
+    Values = Cards.Debuff,
+    Default = {},
+    Multi = true,
+    Text = "Select Debuff Priority",
+    Callback = function(selectedList)
+        UpdatePriorityList("Debuff", selectedList)
+    end,
+})
+
+LeftGroupBox:AddToggle("AutoCard", {
+    Text = "Auto Card",
+    Default = false,
+    Callback = function(Value)
+        getgenv().autoChooseCard = Value
+        if Value then
+            autoChooseCard()
+        end
+    end,
+})
+
+LeftGroupBox:AddToggle("FocusBuff", {
+    Text = "Focus Buff",
+    Default = false,
+    Callback = function(Value)
+        getgenv().focusBuff = Value
+    end,
+})
+
+LeftGroupBox:AddToggle("FocusDebuff", {
+    Text = "Focus Debuff",
+    Default = false,
+    Callback = function(Value)
+        getgenv().focusDebuff = Value
+    end,
+})
 
 local Tabs = {
 	Macro = Window:AddTab("Macro"),
