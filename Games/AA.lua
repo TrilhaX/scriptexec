@@ -1673,13 +1673,6 @@ function AutoMatchmaking()
     end
 end
 
-function autoMatchmakingHalloweenEvent()
-    while getgenv().matchmakingHalloween == true do
-		game:GetService("ReplicatedStorage").endpoints.client_to_server.request_matchmaking:InvokeServer("halloween2_event")
-        wait()
-    end
-end
-
 function autoMatchmakingHolidayEvent()
     while getgenv().matchmakingHoliday == true do
         game:GetService("ReplicatedStorage").endpoints.client_to_server.request_matchmaking:InvokeServer("christmas_event")
@@ -2569,10 +2562,9 @@ function autoContractMatchmaking()
 									local args = {
 										[1] = "__EVENT_CONTRACT_Sakamoto:" .. tostring(i)
 									}
-				
-									game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("open_event_contract_portal"):InvokeServer(unpack(args))
+									
+									game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_matchmaking"):InvokeServer(unpack(args))									
 									remoteSent = true
-									break
 								end
 							end
 						end
@@ -3152,14 +3144,13 @@ end
 -- Get Informations for Dropdown or other things
 
 function printChallenges(module)
-    local challengesKeys = {}
-    if module.challenges then
-        for key, _ in pairs(module.challenges) do
-            table.insert(challengesKeys, key .. "None")
-        end
-        table.insert(challengesKeys, "None")
-        return challengesKeys
-    end
+	local challengesKeys = {}
+	if module.challenges then
+		for key, value in pairs(module.challenges) do
+			table.insert(challengesKeys, key)
+		end
+		return challengesKeys
+	end
 end
 
 local module = require(game:GetService("ReplicatedStorage").src.Data.ChallengeAndRewards)
