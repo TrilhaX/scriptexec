@@ -2562,8 +2562,8 @@ function autoContractMatchmaking()
 									local args = {
 										[1] = "__EVENT_CONTRACT_Sakamoto:" .. tostring(i)
 									}
-				
-									game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("open_event_contract_portal"):InvokeServer(unpack(args))
+									
+									game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_matchmaking"):InvokeServer(unpack(args))									
 									remoteSent = true
 								end
 							end
