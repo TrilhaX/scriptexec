@@ -1,24 +1,136 @@
 repeat task.wait() until game:IsLoaded()
 warn("[TEMPEST HUB] Loading Ui")
 wait()
-local repo = "https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/"
 
---Loading UI Library
-local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
-local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
-local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
-Library:Notify("Welcome to Tempest Hub", 5)
+local MacLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/maclibTempestHubUI/main/maclib.lua"))()
 
---Configuring UI Library
-local Window = Library:CreateWindow({
-	Title = "Tempest Hub | Anime Adventures",
-	Center = true,
-	AutoShow = true,
-	TabPadding = 8,
-	MenuFadeTime = 0.2,
+local isMobile = game:GetService("UserInputService").TouchEnabled
+
+local pcSize = UDim2.fromOffset(868, 650)
+local mobileSize = UDim2.fromOffset(700, 550)
+local currentSize = isMobile and mobileSize or pcSize
+
+local Window = MacLib:Window({
+    Title = "Tempest Hub",
+    Subtitle = "Anime Adventures",
+    Size = currentSize,
+    DragStyle = 1,
+    DisabledWindowControls = {},
+    ShowUserInfo = true,
+    Keybind = Enum.KeyCode.RightControl,
+    AcrylicBlur = true,
 })
 
-Library:Notify("Loading Anime Adventures Script", 5)
+function changeUISize(scale)
+    if Window then
+        if scale < 0.1 then
+            scale = 0.1
+        elseif scale > 1.5 then
+            scale = 1.5
+        end
+
+        local newWidth = pcSize.X.Offset * scale
+        local newHeight = pcSize.Y.Offset * scale
+
+        Window:SetSize(UDim2.fromOffset(newWidth, newHeight))
+        Window:Notify({
+            Title = "UI Resized",
+            Description = "New size scale: " .. scale,
+            Lifetime = 3
+        })
+    end
+end
+
+function hideUI()
+	local UICorner1 = Instance.new("UICorner")
+	local UICorner2 = Instance.new("UICorner")
+	local backgroundFrame = Instance.new("Frame")
+	local tempestButton = Instance.new("TextButton")
+	local UIPadding = Instance.new("UIPadding")
+
+	backgroundFrame.Name = "backgroundFrame"
+	backgroundFrame.Parent = game.CoreGui.RobloxGui.MaclibGui
+	backgroundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+	backgroundFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	backgroundFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	backgroundFrame.BorderSizePixel = 0
+	backgroundFrame.Position = UDim2.new(0.98, 0, 0.5, 0)
+	backgroundFrame.Size = UDim2.new(0, 100, 0, 100)
+
+	UICorner1.Parent = backgroundFrame
+	UICorner2.Parent = tempestButton
+
+	tempestButton.Name = "tempestButton"
+	tempestButton.Parent = backgroundFrame
+	tempestButton.AnchorPoint = Vector2.new(0.5, 0.5)
+	tempestButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	tempestButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	tempestButton.BorderSizePixel = 0
+	tempestButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+	tempestButton.Size = UDim2.new(1, 0, 1, 0)
+	tempestButton.Font = Enum.Font.PermanentMarker
+	tempestButton.Text = "Tempest Hub"
+	tempestButton.TextColor3 = Color3.fromRGB(75, 0, 130)
+	tempestButton.TextScaled = true
+	tempestButton.TextSize = 14.000
+	tempestButton.TextWrapped = true
+
+	UIPadding.Parent = backgroundFrame
+	UIPadding.PaddingTop = UDim.new(0.1, 0)
+	UIPadding.PaddingLeft = UDim.new(0.1, 0)
+	UIPadding.PaddingRight = UDim.new(0.1, 0)
+	UIPadding.PaddingBottom = UDim.new(0.1, 0)
+
+	tempestButton.Activated:Connect(function()
+		local coreGui = game:GetService("CoreGui")
+		local maclib = coreGui.RobloxGui:FindFirstChild("MaclibGui")
+		if maclib then
+			maclib.Base.Visible = not maclib.Base.Visible
+			maclib.Notifications.Visible = not maclib.Notifications.Visible
+		else
+			warn("MaclibGui not found in CoreGui.")
+		end
+	end)
+end
+
+local globalSettings = {
+	UIBlurToggle = Window:GlobalSetting({
+		Name = "UI Blur",
+		Default = Window:GetAcrylicBlurState(),
+		Callback = function(bool)
+			Window:SetAcrylicBlurState(bool)
+			Window:Notify({
+				Title = Window.Settings.Title,
+				Description = (bool and "Enabled" or "Disabled") .. " UI Blur",
+				Lifetime = 5
+			})
+		end,
+	}),
+	NotificationToggler = Window:GlobalSetting({
+		Name = "Notifications",
+		Default = Window:GetNotificationsState(),
+		Callback = function(bool)
+			Window:SetNotificationsState(bool)
+			Window:Notify({
+				Title = Window.Settings.Title,
+				Description = (bool and "Enabled" or "Disabled") .. " Notifications",
+				Lifetime = 5
+			})
+		end,
+	}),
+	ShowUserInfo = Window:GlobalSetting({
+		Name = "Show User Info",
+		Default = Window:GetUserInfoState(),
+		Callback = function(bool)
+			Window:SetUserInfoState(bool)
+			Window:Notify({
+				Title = Window.Settings.Title,
+				Description = (bool and "Showing" or "Redacted") .. " User Info",
+				Lifetime = 5
+			})
+		end,
+	})
+}
 warn("[TEMPEST HUB] Loading Function")
 wait()
 warn("[TEMPEST HUB] Loading Toggles")
@@ -3271,250 +3383,234 @@ end
 
 --Start of UI
 
-local Tabs = {
-	Main = Window:AddTab("Main"),
+local tabGroups = {
+	TabGroup1 = Window:TabGroup()
 }
 
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Player")
+local tabs = {
+	Main = tabGroups.TabGroup1:Tab({ Name = "Main", Image = "rbxassetid://18821914323" }),
+	Farm = tabGroups.TabGroup1:Tab({ Name = "Farm", Image = "rbxassetid://4391741908" }),
+	Freemium = tabGroups.TabGroup1:Tab({ Name = "Freemium", Image = "rbxassetid://11322089619" }),
+	Teams = tabGroups.TabGroup1:Tab({ Name = "Teams", Image = "rbxassetid://15443966088" }),
+	Cards = tabGroups.TabGroup1:Tab({ Name = "Cards", Image = "rbxassetid://5296816629" }),
+	Others = tabGroups.TabGroup1:Tab({ Name = "Others", Image = "rbxassetid://11769203629" }),
+	Macro = tabGroups.TabGroup1:Tab({ Name = "Macro", Image = "rbxassetid://5081210075" }),
+	Shop = tabGroups.TabGroup1:Tab({ Name = "Shop", Image = "rbxassetid://6908632627" }),
+	Settings = tabGroups.TabGroup1:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" })
+}
 
-LeftGroupBox:AddToggle("HidePlayerInfo", {
-	Text = "Hide Player Info",
+local sections = {
+	MainSection1 = tabs.Main:Section({ Side = "Left" }),
+    MainSection2 = tabs.Main:Section({ Side = "Right" }),
+	MainSection3 = tabs.Main:Section({ Side = "Left" }),
+	MainSection4 = tabs.Main:Section({ Side = "Right" }),
+	MainSection5 = tabs.Main:Section({ Side = "Right" }),
+	MainSection6 = tabs.Farm:Section({ Side = "Left" }),
+    MainSection7 = tabs.Farm:Section({ Side = "Left" }),
+	MainSection8 = tabs.Farm:Section({ Side = "Left" }),
+	MainSection9 = tabs.Farm:Section({ Side = "Left" }),
+	MainSection10 = tabs.Farm:Section({ Side = "Right" }),
+	MainSection11 = tabs.Farm:Section({ Side = "Right" }),
+	MainSection12 = tabs.Farm:Section({ Side = "Right" }),
+	MainSection13 = tabs.Farm:Section({ Side = "Right" }),
+	MainSection14 = tabs.Teams:Section({ Side = "Left" }),
+	MainSection15 = tabs.Teams:Section({ Side = "Left" }),
+	MainSection16 = tabs.Teams:Section({ Side = "Left" }),
+	MainSection17 = tabs.Teams:Section({ Side = "Right" }),
+	MainSection18 = tabs.Teams:Section({ Side = "Right" }),
+	MainSection19 = tabs.Freemium:Section({ Side = "Left" }),
+	MainSection20 = tabs.Cards:Section({ Side = "Left" }),
+	MainSection21 = tabs.Others:Section({ Side = "Left" }),
+	MainSection22 = tabs.Others:Section({ Side = "Right" }),
+	MainSection23 = tabs.Macro:Section({ Side = "Right" }),
+	MainSection24 = tabs.Shop:Section({ Side = "Left" }),
+	MainSection25 = tabs.Settings:Section({ Side = "Left" }),
+}
+
+sections.MainSection1:Header({
+	Name = "Player"
+})
+
+sections.MainSection1:Toggle({
+	Name = "Hide Player Info",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().hideInfoPlayer = Value
 		hideInfoPlayer()
 	end,
-})
+}, "HidePlayerInfo")
 
-LeftGroupBox:AddToggle("AutoWalk", {
-	Text = "Auto Walk",
+sections.MainSection1:Toggle({
+	Name = "Auto Walk",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoWalk = Value
 		autoWalk()
 	end,
-})
+}, "AutoWalk")
 
-
-LeftGroupBox:AddDropdown("dropdownSelectActStory", {
-	Values = {2, 3, 4, 5, 6},
-	Default = "None",
+local Dropdown = sections.MainSection1:Dropdown({
+	Name = "Select Quantity of Player",
 	Multi = false,
-
-	Text = "Select Quantity of people",
-
-	Callback = function(Value)
+	Required = true,
+	Options = {2, 3, 4, 5, 6},
+	Default = None,
+	Callback = function(value)
 		selecteQuantityPlayer = Value
 	end,
-})
+}, "dropdownSelectPlayer")
 
-LeftGroupBox:AddToggle("SecurityMode", {
-	Text = "Security Mode",
+sections.MainSection1:Toggle({
+	Name = "Security Mode",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().securityMode = Value
 		securityMode()
 	end,
-})
+}, "SecurityMode")
 
-LeftGroupBox:AddToggle("DeleteMap", {
-	Text = "Delete Map",
+sections.MainSection1:Toggle({
+	Name = "Delete Map",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().deletemap = Value
 		deletemap()
 	end,
-})
+}, "DeleteMap")
 
-LeftGroupBox:AddToggle("AutoLeave", {
-	Text = "Auto Leave",
+sections.MainSection1:Toggle({
+	Name = "Auto Leave",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoleave = Value
 		autoleave()
 	end,
-})
+}, "AutoLeave")
 
-LeftGroupBox:AddToggle("AutoReplay", {
-	Text = "Auto Replay",
+sections.MainSection1:Toggle({
+	Name = "Auto Replay",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoreplay = Value
 		autoreplay()
 	end,
-})
+}, "AutoReplay")
 
-LeftGroupBox:AddToggle("AutoNext", {
-	Text = "Auto Next",
+sections.MainSection1:Toggle({
+	Name = "Auto Next",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autonext = Value
 		autonext()
 	end,
-})
+}, "AutoNext")
 
-LeftGroupBox:AddToggle("AutoNextPortal", {
-	Text = "Auto Next Portal",
+sections.MainSection1:Toggle({
+	Name = "Auto Next Portal",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoNextPortal = Value
 		autoNextPortal()
 	end,
-})
+}, "AutoNextPortal")
 
-LeftGroupBox:AddToggle("AutoNext", {
-	Text = "Auto Next Contract",
+sections.MainSection1:Toggle({
+	Name = "Auto Next Contract",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoNextContrato = Value
 		autoNextContrato()
 	end,
-})
+}, "AutoNextContract")
 
-LeftGroupBox:AddToggle("AutoStart", {
-	Text = "Auto Start",
+sections.MainSection1:Toggle({
+	Name = "Auto Start",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autostart = Value
 		autostart()
 	end,
-})
+}, "AutoStart")
 
-LeftGroupBox:AddToggle("AutoSkipWave", {
-	Text = "Auto Skip Wave",
+sections.MainSection1:Toggle({
+	Name = "Auto Skip Wave",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoskipwave = Value
 		autoskipwave()
 	end,
+}, "AutoSkipWave")
+
+sections.MainSection2:Header({
+	Name = "Extra"
 })
 
-local TabBox2 = Tabs.Main:AddRightTabbox()
-
-local Tab1 = TabBox2:AddTab("Extra")
-
-Tab1:AddToggle("autoGetBattlepass", {
-	Text = "Auto Get Battlepass",
+sections.MainSection2:Toggle({
+	Name = "Auto Get Battlepass",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoGetBattlepass = Value
 		autoGetBattlepass()
 	end,
-})
+}, "autoGetBattlepass")
 
-Tab1:AddToggle("autoGetQuest", {
-	Text = "Auto Get Quest",
+sections.MainSection2:Toggle({
+	Name = "Auto Get Quest",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoGetQuest = Value
 		autoGetQuest()
 	end,
-})
+}, "autoGetQuest")
 
-Tab1:AddToggle("DisableNotifications", {
-	Text = "Disable Notifications",
+sections.MainSection2:Toggle({
+	Name = "Disable Notifications",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().disableNotifications = Value
 		disableNotifications()
 	end,
-})
+}, "DisableNotifications")
 
-Tab1:AddToggle("PlaceInRedZones", {
-	Text = "Place In Red Zones",
+sections.MainSection2:Toggle({
+	Name = "Place In Red Zones",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().placeInRedZones = Value
 		placeInRedZones()
 	end,
-})
+}, "PlaceInRedZones")
 
-Tab1:AddToggle("ShowInfoUnits", {
-	Text = "Show Info Units",
+sections.MainSection2:Toggle({
+	Name = "Show Info Units",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().showInfoUnits = Value
 		showInfoUnits()
 	end,
-})
+}, "ShowInfoUnits")
 
-Tab1:AddToggle("DupeVegeto", {
-	Text = "Dupe Griffith",
+sections.MainSection2:Toggle({
+	Name = "Friends Only",
 	Default = false,
-	Callback = function(Value)
-		getgenv().dupeGriffith = Value
-		dupeGriffith()
-	end,
-})
-
-Tab1:AddToggle("DupeVegeto", {
-	Text = "Dupe Vegeto",
-	Default = false,
-	Callback = function(Value)
-		getgenv().dupeVegeto = Value
-		dupeVegeto()
-	end,
-})
-
-Tab1:AddToggle("InfRange", {
-	Text = "Inf Range",
-	Default = false,
-	Callback = function(Value)
-		getgenv().InfRange = Value
-		InfRange()
-	end,
-})
-
-Tab1:AddToggle("FriendsOnly", {
-	Text = "Friends Only",
-	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		selectedFriendsOnly = Value
 	end,
-})
+}, "FriendsOnly")
 
-Tab1:AddDropdown("dropdownSelectCapsule", {
-	Values = ValuesCapsules,
-	Default = "None",
-	Multi = false,
-	Text = "Select Capsule to Open",
-	Callback = function(Value)
-		selectedCapsule = Value
-	end,
-})
-
-Tab1:AddToggle("AutoOpenCapsule", {
-	Text = "Auto Open Capsule",
+sections.MainSection2:Toggle({
+	Name = "Auto Give Presents",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoOpenCapsule = Value
-		autoOpenCapsule()
+	Callback = function(value)
+		getgenv().autoGivePresents = Value
+		autoGivePresents()
 	end,
-})
+}, "AutoGivePresents")
 
-Tab1:AddDropdown("dropdownSelectCapsule", {
-	Values = shardsValues,
-	Default = "None",
-	Multi = false,
-	Text = "Select Shard to Craft",
-	Callback = function(Value)
-		selectedShardtoCraft = Value
-	end,
-})
-
-Tab1:AddToggle("autoCraftShards", {
-	Text = "Auto Craft Shards",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoCraftShard = Value
-		autoCraftShard()
-	end,
-})
-
-local MyButton2 = Tab1:AddButton({
-    Text = 'Reedem Codes',
-    Func = function()
-        local codes = {
+sections.MainSection2:Button({
+	Name = "Reedem Codes",
+	Callback = function()
+		local codes = {
 			"ASSASSIN"
         }        
         
@@ -3525,1048 +3621,1036 @@ local MyButton2 = Tab1:AddButton({
             
             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimCode"):InvokeServer(unpack(args))            
             wait()
-        end               
-    end,
-    DoubleClick = false,
-})
-
-local Tab2 = TabBox2:AddTab("Event")
-
-Tab2:AddToggle("AutoJoinCursedWomb", {
-	Text = "Auto Join Cursed Womb",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoJoinCursedWomb = Value
-		autoJoinCursedWomb()
+        end
 	end,
 })
 
-Tab2:AddToggle("AutoJoinHolidayEvent", {
-	Text = "Auto Join Holiday Event",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoJoinHolidayEvent = Value
-		autoJoinHolidayEvent()
-	end,
+sections.MainSection4:Header({
+	Name = "Passiva"
 })
 
-Tab2:AddToggle("AutoMatchmakingHolidayEvent", {
-	Text = "Auto Matchmaking Holiday Event",
-	Default = false,
-	Callback = function(Value)
-		getgenv().matchmakingHoliday = Value
-		autoMatchmakingHolidayEvent()
-	end,
-})
-
-Tab2:AddToggle("AutoGivePresents", {
-	Text = "Auto Give Presents",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoGivePresents = Value
-		autoGivePresents()
-	end,
-})
-
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Webhook")
-
-LeftGroupBox:AddInput('WebhookURL', {
-    Default = '',
-    Text = "Webhook URL",
-    Numeric = false,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        urlwebhook = Value
-    end
-})
-
-LeftGroupBox:AddInput('pingUser@', {
-    Default = '',
-    Text = "User ID",
-    Numeric = false,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        getgenv().pingUserId = Value
-    end
-})
-
-LeftGroupBox:AddToggle("WebhookFinishGame", {
-    Text = "Send Webhook when finish game",
-    Default = false,
-    Callback = function(Value)
-        getgenv().webhook = Value
-        webhook()
-    end,
-})
-
-LeftGroupBox:AddToggle("pingUser", {
-    Text = "Ping user",
-    Default = false,
-    Callback = function(Value)
-        getgenv().pingUser = Value
-    end,
-})
-
-local MyButton2 = LeftGroupBox:AddButton({
-    Text = 'Test Webhook',
-    Func = function()
-        testWebhook()            
-    end,
-    DoubleClick = false,
-})
-
-local TabBox = Tabs.Main:AddRightTabbox()
-
-local Tab1 = TabBox:AddTab("Passive")
-
-Tab1:AddDropdown("RollUnit", {
-	Values = ValuesUnitId,
-	Default = "None",
+local Dropdown = sections.MainSection4:Dropdown({
+	Name = "Select Unit",
 	Multi = false,
-	Text = "Select Unit",
-
+	Required = true,
+	Options = ValuesUnitId,
+	Default = None,
 	Callback = function(value)
 		selectedUnitToRoll = value:match(".* | .* | (.+)")
 	end,
-})
+}, "RollUnit")
 
-Tab1:AddDropdown("dropdownSelectPassiveToRoll", {
-	Values = passivesValues,
-	Default = "None",
+local Dropdown = sections.MainSection4:Dropdown({
+	Name = "Select Passive",
 	Multi = true,
-	Text = "Select Passive",
+	Required = true,
+	Options = passivesValues,
+	Default = None,
 	Callback = function(Value)
 		selectedPassiveToRoll = Value
 	end,
-})
+}, "dropdownSelectPassiveToRoll")
 
-Tab1:AddToggle("autoRoll", {
-	Text = "Auto Roll",
+sections.MainSection4:Toggle({
+	Name = "Auto Roll",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoRollPassive = Value
 		autoRollPassive()
 	end,
+}, "autoRoll")
+
+sections.MainSection5:Header({
+	Name = "Feed"
 })
 
-local Tab2 = TabBox:AddTab("Feed")
-
-Tab2:AddDropdown("FeedUnit", {
-	Values = ValuesUnitId,
-	Default = "None",
+local Dropdown = sections.MainSection5:Dropdown({
+	Name = "Select Unit",
 	Multi = false,
-	Text = "Select Unit",
-
+	Required = true,
+	Options = ValuesUnitId,
+	Default = None,
 	Callback = function(value)
-		selectedUnitToFeed = value:match(".* | .* | (.+)")
+		selectedUnitToRoll = value:match(".* | .* | (.+)")
 	end,
-})
+}, "FeedUnit")
 
-Tab2:AddDropdown("dropdownSelectItemsToFeed", {
-	Values = ValuesItemsToFeed,
-	Default = "None",
-	Multi = false,
-	Text = "Select Unit to Feed",
+local Dropdown = sections.MainSection5:Dropdown({
+	Name = "Select Unit to Feed",
+	Multi = true,
+	Required = true,
+	Options = ValuesItemsToFeed,
+	Default = None,
 	Callback = function(Value)
 		selectedFeed = Value
 	end,
-})
+}, "dropdownSelectItemsToFeed")
 
-Tab2:AddToggle("AutoFeed", {
-	Text = "Auto Feed",
+sections.MainSection5:Toggle({
+	Name = "Auto Feed",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoFeed = Value
 		autoFeed()
 	end,
+}, "AutoFeed")
+
+sections.MainSection3:Header({
+	Name = "Webhook"
 })
 
-local Tabs = {
-	Farm = Window:AddTab("Farm"),
-}
+sections.MainSection3:Input({
+	Name = "Webhook URL",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "All",
+	Callback = function(input)
+		urlwebhook = Value
+	end,
+	onChanged = function(input)
+        urlwebhook = Value
+	end,
+}, "WebhookURL")
 
-local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Portal")
+sections.MainSection3:Input({
+	Name = "User ID",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "Number",
+	Callback = function(input)
+		urlwebhook = Value
+	end,
+	onChanged = function(input)
+        urlwebhook = Value
+	end,
+}, "pingUser@")
 
-LeftGroupBox:AddDropdown("dropdownPortalMap", {
-	Values = PortalMapValues,
-	Default = "None",
+sections.MainSection3:Toggle({
+	Name = "Send Webhook when finish game",
+	Default = false,
+	Callback = function(value)
+        getgenv().webhook = Value
+        webhook()
+	end,
+}, "WebhookFinishGame")
+
+sections.MainSection3:Toggle({
+	Name = "Ping user",
+	Default = false,
+	Callback = function(value)
+        getgenv().pingUser = Value
+	end,
+}, "pingUser")
+
+sections.MainSection3:Button({
+	Name = "Test Webhook",
+	Callback = function()
+        testWebhook()
+	end,
+})
+
+sections.MainSection6:Header({
+	Name = "Portal"
+})
+
+local Dropdown = sections.MainSection6:Dropdown({
+	Name = "Select Portal",
 	Multi = false,
-
-	Text = "Select Portal",
-
-	Callback = function(Value)
+	Required = true,
+	Options = PortalMapValues,
+	Default = None,
+	Callback = function(value)
 		selectedPortalMap = Value
 	end,
-})
+}, "dropdownPortalMap")
 
-LeftGroupBox:AddDropdown("dropdownTierPortal", {
-	Values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"},
-	Default = "0",
+local Dropdown = sections.MainSection6:Dropdown({
+	Name = "Select Tier",
 	Multi = true,
-
-	Text = "Select Tier",
-
-	Callback = function(Values)
+	Required = true,
+	Options = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"},
+	Default = None,
+	Callback = function(value)
 		selectedTierPortal = Values
 	end,
-})
+}, "dropdownTierPortal")
 
-LeftGroupBox:AddDropdown("dropdownSelectChallengePortal", {
-    Values = challengeValues,
-    Default = "None",
-    Multi = true,
-
-    Text = "Select Ignore Difficulty",
-
-    Callback = function(Value)
-        selectedPortalDiff = Value
-    end,
-})
-
-LeftGroupBox:AddDropdown("dropdownIgnoreDmgBonusPortal", {
-	Values = dmgBonus,
-	Default = "None",
+local Dropdown = sections.MainSection6:Dropdown({
+	Name = "Select Ignore Difficulty",
 	Multi = true,
+	Required = true,
+	Options = challengeValues,
+	Default = None,
+	Callback = function(value)
+        selectedPortalDiff = Value
+	end,
+}, "dropdownSelectChallengePortal")
 
-	Text = "Select Ignore Dmg bonus",
-
-	Callback = function(Values)
+local Dropdown = sections.MainSection6:Dropdown({
+	Name = "Select Ignore Dmg bonus",
+	Multi = true,
+	Required = true,
+	Options = dmgBonus,
+	Default = None,
+	Callback = function(value)
 		selectedIgnoreDmgBonus = Values
 	end,
-})
+}, "dropdownIgnoreDmgBonusPortal")
 
-LeftGroupBox:AddToggle("AutoEnterPortal", {
-	Text = "Auto Open Portal",
+sections.MainSection6:Toggle({
+	Name = "Auto Open Portal",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoEnterPortal = Value
 		autoEnterPortal()
 	end,
+}, "AutoEnterPortal")
+
+sections.MainSection7:Header({
+	Name = "Matchmaking"
 })
 
-local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Matchmaking")
-
-LeftGroupBox:AddDropdown("dropdownMatchmakingMap", {
-	Values = ChallengeMapValues,
-	Default = "None",
+local Dropdown = sections.MainSection7:Dropdown({
+	Name = "Select Map",
 	Multi = false,
-
-	Text = "Select Map",
-
-	Callback = function(Value)
+	Required = true,
+	Options = ChallengeMapValues,
+	Default = None,
+	Callback = function(value)
 		selectedMatchmakingMap = Value
 	end,
-})
+}, "dropdownMatchmakingMap")
 
-LeftGroupBox:AddToggle("AutoMatchmaking", {
-	Text = "Auto Matchmaking",
+sections.MainSection7:Toggle({
+	Name = "Auto Matchmaking",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().AutoMatchmaking = Value
 		AutoMatchmaking()
 	end,
+}, "AutoMatchmaking")
+
+sections.MainSection8:Header({
+	Name = "Contract"
 })
 
-local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Contract")
-
-LeftGroupBox:AddDropdown("dropdownSelectActStory", {
-    Values = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" },
-    Default = "None",
-    Multi = true,
-    Text = "Select Tier",
-    Callback = function(Value)
+local Dropdown = sections.MainSection8:Dropdown({
+	Name = "Select Tier",
+	Multi = true,
+	Required = true,
+	Options = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" },
+	Default = None,
+	Callback = function(value)
         selectedTierContract = Value
-    end,
-})
+	end,
+}, "dropdownSelectTierContract")
 
-LeftGroupBox:AddDropdown("dropdownSelectActStory", {
-    Values = challengeValues,
-    Default = "None",
-    Multi = true,
-    Text = "Select Ignore Challenge",
-    Callback = function(Value)
+local Dropdown = sections.MainSection8:Dropdown({
+	Name = "Select Ignore Challenge",
+	Multi = true,
+	Required = true,
+	Options = challengeValues,
+	Default = None,
+	Callback = function(value)
         selectedIgnoreContractChallenge = Value
-    end,
-})
+	end,
+}, "dropdownSelectIgnoreChallengeContract")
 
-LeftGroupBox:AddToggle("AutoMatchmakingContract", {
-    Text = "Auto Matchmaking Contract",
-    Default = false,
-    Callback = function(Value)
+
+sections.MainSection8:Toggle({
+	Name = "Auto Matchmaking Contract",
+	Default = false,
+	Callback = function(value)
         getgenv().autoContractMatchmaking = Value
         autoContractMatchmaking()
-    end,
-})
+	end,
+}, "AutoMatchmakingContract")
 
-LeftGroupBox:AddToggle("autoContract", {
-    Text = "Auto Contract",
-    Default = false,
-    Callback = function(Value)
+sections.MainSection8:Toggle({
+	Name = "Auto Contract",
+	Default = false,
+	Callback = function(value)
         getgenv().autoContract = Value
         autoContract()
-    end,
+	end,
+}, "autoContract")
+
+sections.MainSection9:Header({
+	Name = "Others"
 })
 
-local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Infinite Castle")
-
-LeftGroupBox:AddToggle("HardInfCastle", {
-	Text = "Hard Inf Castle",
+sections.MainSection9:Toggle({
+	Name = "Hard Inf Castle",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().selectedHardInfCastle = Value
 	end,
-})
+}, "HardInfCastle")
 
-LeftGroupBox:AddToggle("AutoEnterInfCastle", {
-	Text = "Auto Enter Inf Caslte",
+sections.MainSection9:Toggle({
+	Name = "Auto Enter Inf Castle",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoEnterInfiniteCastle = Value
 		autoEnterInfiniteCastle()
 	end,
+}, "AutoEnterInfCastle")
+
+
+sections.MainSection9:Toggle({
+	Name = "Auto Join Cursed Womb",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoJoinCursedWomb = Value
+		autoJoinCursedWomb()
+	end,
+}, "AutoJoinCursedWomb")
+
+sections.MainSection10:Header({
+	Name = "Story"
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Story")
-
-RightGroupbox:AddDropdown("dropdownStoryMap", {
-	Values = storyMapValues,
-	Default = "None",
+local Dropdown = sections.MainSection10:Dropdown({
+	Name = "Select Story Map",
 	Multi = false,
-
-	Text = "Select Story Map",
-
-	Callback = function(Value)
+	Required = true,
+	Options = storyMapValues,
+	Default = None,
+	Callback = function(value)
 		selectedMap = Value
 	end,
-})
+}, "dropdownStoryMap")
 
-RightGroupbox:AddDropdown("dropdownSelectDifficultyStory", {
-	Values = { "Normal", "Hard" },
-	Default = "None",
+local Dropdown = sections.MainSection10:Dropdown({
+	Name = "Select Difficulty",
 	Multi = false,
-
-	Text = "Select Difficulty",
-
-	Callback = function(Values)
+	Required = true,
+	Options = {"Normal", "Hard"},
+	Default = None,
+	Callback = function(value)
 		selectedDifficulty = Values
 	end,
-})
+}, "dropdownSelectDifficultyStory")
 
-RightGroupbox:AddDropdown("dropdownSelectActStory", {
-	Values = { "1", "2", "3", "4", "5", "6", "Infinite" },
-	Default = "None",
+local Dropdown = sections.MainSection10:Dropdown({
+	Name = "Select Act",
 	Multi = false,
-
-	Text = "Select Act",
-
-	Callback = function(Value)
+	Required = true,
+	Options = {"1", "2", "3", "4", "5", "6", "Infinite"},
+	Default = None,
+	Callback = function(value)
 		selectedAct = Value
 	end,
-})
+}, "dropdownSelectActStory")
 
-RightGroupbox:AddToggle("AutoEnter", {
-	Text = "Auto Enter",
+sections.MainSection10:Toggle({
+	Name = "Auto Enter",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoEnter = Value
 		autoEnter()
 	end,
+}, "AutoEnter")
+
+sections.MainSection11:Header({
+	Name = "Challenge"
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Challenge")
-
-RightGroupbox:AddDropdown("dropdownChallengeMap", {
-    Values = ChallengeMapValues,
-    Default = "None",
-    Multi = true,
-
-    Text = "Select Map",
-
-    Callback = function(Values)
+local Dropdown = sections.MainSection11:Dropdown({
+	Name = "Select Map",
+	Multi = true,
+	Required = true,
+	Options = ChallengeMapValues,
+	Default = None,
+	Callback = function(value)
         selectedMapChallenges = Values
-    end,
-})
+	end,
+}, "dropdownChallengeMap")
 
-RightGroupbox:AddDropdown("dropdownSelectChallenge", {
-    Values = challengeValues,
-    Default = "None",
-    Multi = true,
-
-    Text = "Select Difficulty",
-
-    Callback = function(Value)
+local Dropdown = sections.MainSection11:Dropdown({
+	Name = "Select Difficulty",
+	Multi = true,
+	Required = true,
+	Options = challengeValues,
+	Default = None,
+	Callback = function(value)
         selectedChallengesDiff = Value
-    end,
-})
+	end,
+}, "dropdownSelectChallenge")
 
-RightGroupbox:AddToggle("AutoEnterChallenge", {
-    Text = "Auto Enter Challenge",
-    Default = false,
-    Callback = function(Value)
+sections.MainSection11:Toggle({
+	Name = "Auto Enter Challenge",
+	Default = false,
+	Callback = function(value)
         getgenv().autoEnterChallenge = Value
         autoEnterChallenge()
-    end,
-})
+	end,
+}, "AutoEnterChallenge")
 
-RightGroupbox:AddToggle("AutoEnterDailyChallenge", {
-    Text = "Auto Enter Daily Challenge",
-    Default = false,
-    Callback = function(Value)
+sections.MainSection11:Toggle({
+	Name = "Auto Enter Daily Challenge",
+	Default = false,
+	Callback = function(value)
         getgenv().autoEnterDailyChallenge = Value
         autoEnterDailyChallenge()
-    end,
-})
+	end,
+}, "AutoEnterDailyChallenge")
 
-RightGroupbox:AddToggle("AutoMatchmakingDailyChallenge", {
-    Text = "Auto Matchmaking Daily Challenge",
-    Default = false,
-    Callback = function(Value)
+sections.MainSection11:Toggle({
+	Name = "Auto Matchmaking Daily Challenge",
+	Default = false,
+	Callback = function(value)
         getgenv().autoMatchmakingDailyChallenge = Value
         autoMatchmakingDailyChallenge()
-    end,
+	end,
+}, "AutoMatchmakingDailyChallenge")
+
+sections.MainSection12:Header({
+	Name = "Raid"
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Raid")
-
-RightGroupbox:AddDropdown("dropdownSelectRaid", {
-    Values = ChallengeMapValues,
-    Default = "None",
-    Multi = false,
-
-    Text = "Select Map",
-
-    Callback = function(Value)
+local Dropdown = sections.MainSection12:Dropdown({
+	Name = "Select Map",
+	Multi = false,
+	Required = true,
+	Options = ChallengeMapValues,
+	Default = None,
+	Callback = function(value)
         selectedRaidMap = Value
-    end,
-})
+	end,
+}, "dropdownSelectRaid")
 
-RightGroupbox:AddToggle("AutoEnterRaid", {
-    Text = "Auto Enter Raid",
-    Default = false,
-    Callback = function(Value)
+sections.MainSection12:Toggle({
+	Name = "Auto Enter Raid",
+	Default = false,
+	Callback = function(value)
         getgenv().autoEnterRaid = Value
         autoEnterRaid()
-    end,
+	end,
+}, "AutoEnterRaid")
+
+sections.MainSection13:Header({
+	Name = "Legend Stage"
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Legend Stage")
-
-RightGroupbox:AddDropdown("dropdownSelectLegendStage", {
-    Values = ChallengeMapValues,
-    Default = "None",
-    Multi = false,
-
-    Text = "Select Map",
-
-    Callback = function(Value)
+local Dropdown = sections.MainSection13:Dropdown({
+	Name = "Select Map",
+	Multi = false,
+	Required = true,
+	Options = ChallengeMapValues,
+	Default = None,
+	Callback = function(value)
         selectedLegendStageMap = Value
-    end,
-})
+	end,
+}, "dropdownSelectLegendStage")
 
-RightGroupbox:AddToggle("AutoEnterLegendStage", {
-    Text = "Auto Enter Legend Stage",
-    Default = false,
-    Callback = function(Value)
+sections.MainSection13:Toggle({
+	Name = "Auto Enter Legend Stage",
+	Default = false,
+	Callback = function(value)
         getgenv().autoEnterLegendStage = Value
         autoEnterLegendStage()
-    end,
+	end,
+}, "AutoEnterLegendStage")
+
+sections.MainSection14:Header({
+	Name = "Story & Infinite"
 })
 
-local Tabs = {
-	Teams = Window:AddTab("Teams"),
-}
-
-local LeftGroupBox = Tabs.Teams:AddLeftGroupbox("Story & Infinite")
-
-LeftGroupBox:AddDropdown("dropdownSelectStoryInfiniteMagic", {
-	Values = {'1', '2', '3', '4', '5', '6'},
-	Default = "None",
+local Dropdown = sections.MainSection14:Dropdown({
+	Name = "Select Team",
 	Multi = false,
-
-	Text = "Select Team",
-
-	Callback = function(Value)
+	Required = true,
+	Options = {'1', '2', '3', '4', '5', '6'},
+	Default = None,
+	Callback = function(value)
 		selectedTeamStoryInf = Value
 		if selectedTeamStoryInf then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
 		end
 	end,
+}, "dropdownSelectStoryInfiniteMagic")
+
+sections.MainSection15:Header({
+	Name = "Infinite Tower"
 })
 
-local LeftGroupBox = Tabs.Teams:AddLeftGroupbox("Infinite Tower")
-
-LeftGroupBox:AddDropdown("dropdownSelectInfTowerMagic", {
-	Values = {'1', '2', '3', '4', '5', '6'},
-	Default = "None",
+local Dropdown = sections.MainSection15:Dropdown({
+	Name = "Select Team",
 	Multi = false,
-
-	Text = "Select Team",
-
-	Callback = function(Value)
+	Required = true,
+	Options = {'1', '2', '3', '4', '5', '6'},
+	Default = None,
+	Callback = function(value)
 		selectedTeamInfTower = Value
 		if selectedTeamInfTower then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
 		end
 	end,
+}, "dropdownSelectInfTowerMagic")
+
+sections.MainSection16:Header({
+	Name = "Contract"
 })
 
-local LeftGroupBox = Tabs.Teams:AddLeftGroupbox("Contract")
-
-LeftGroupBox:AddDropdown("dropdownSelectContractPhysic", {
-	Values = {'1', '2', '3', '4', '5', '6'},
-	Default = "None",
+local Dropdown = sections.MainSection16:Dropdown({
+	Name = "Select Physic Team",
 	Multi = false,
-
-	Text = "Select Physic Team",
-
-	Callback = function(Value)
+	Required = true,
+	Options = {'1', '2', '3', '4', '5', '6'},
+	Default = None,
+	Callback = function(value)
 		selectedTeamPhysicContract = Value
 		if selectedTeamPhysicContract then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
 		end
 	end,
-})
+}, "dropdownSelectContractPhysic")
 
-LeftGroupBox:AddDropdown("dropdownSelectContractMagic", {
-	Values = {'1', '2', '3', '4', '5', '6'},
-	Default = "None",
+local Dropdown = sections.MainSection16:Dropdown({
+	Name = "Select Magic Team",
 	Multi = false,
-
-	Text = "Select Magic Team",
-
-	Callback = function(Value)
+	Required = true,
+	Options = {'1', '2', '3', '4', '5', '6'},
+	Default = None,
+	Callback = function(value)
 		selectedTeamMagicContract = Value
 		if selectedTeamMagicContract then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
 		end
 	end,
+}, "dropdownSelectContractMagic")
+
+sections.MainSection17:Header({
+	Name = "Challenge & Daily Challenge"
 })
 
-local RightGroupbox = Tabs.Teams:AddRightGroupbox("Challenge & Daily Challenge")
-
-RightGroupbox:AddDropdown("dropdownSelectDailyChallengeChallengePhysic", {
-	Values = {'1', '2', '3', '4', '5', '6'},
-	Default = "None",
+local Dropdown = sections.MainSection17:Dropdown({
+	Name = "Select Physic Team",
 	Multi = false,
-
-	Text = "Select Physic Team",
-
-	Callback = function(Value)
+	Required = true,
+	Options = {'1', '2', '3', '4', '5', '6'},
+	Default = None,
+	Callback = function(value)
 		selectedTeamPhysicChallengeDailyChallenge = Value
 		if selectedTeamPhysicChallengeDailyChallenge then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
 		end
 	end,
-})
+}, "dropdownSelectDailyChallengeChallengePhysic")
 
-RightGroupbox:AddDropdown("dropdownSelectDailyChallengeChallengeMagic", {
-	Values = {'1', '2', '3', '4', '5', '6'},
-	Default = "None",
+local Dropdown = sections.MainSection17:Dropdown({
+	Name = "Select Magic Team",
 	Multi = false,
-
-	Text = "Select Magic Team",
-
-	Callback = function(Value)
+	Required = true,
+	Options = {'1', '2', '3', '4', '5', '6'},
+	Default = None,
+	Callback = function(value)
 		selectedTeamMagicChallengeDailyChallenge = Value
 		if selectedTeamMagicChallengeDailyChallenge then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
 		end
 	end,
-})
+}, "dropdownSelectDailyChallengeChallengeMagic")
 
-RightGroupbox:AddDropdown("dropdownSelectDailyChallengeChallenge", {
-	Values = {'1', '2', '3', '4', '5', '6'},
-	Default = "None",
+local Dropdown = sections.MainSection17:Dropdown({
+	Name = "Select Team For Normal Challenge",
 	Multi = false,
-
-	Text = "Select Team For Normal Challenge",
-
-	Callback = function(Value)
+	Required = true,
+	Options = {'1', '2', '3', '4', '5', '6'},
+	Default = None,
+	Callback = function(value)
 		selectedTeamChallengeDailyChallenge = Value
 		if selectedTeamChallengeDailyChallenge then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
 		end
 	end,
+}, "dropdownSelectDailyChallengeChallenge")
+
+sections.MainSection18:Header({
+	Name = "Raid"
 })
 
-local RightGroupbox = Tabs.Teams:AddRightGroupbox("Raid")
-
-RightGroupbox:AddDropdown("dropdownSelectRaidMagic", {
-	Values = {'1', '2', '3', '4', '5', '6'},
-	Default = "None",
+local Dropdown = sections.MainSection18:Dropdown({
+	Name = "Select Team",
 	Multi = false,
-
-	Text = "Select Team",
-
-	Callback = function(Value)
+	Required = true,
+	Options = {'1', '2', '3', '4', '5', '6'},
+	Default = None,
+	Callback = function(value)
 		selectedTeamRaid = Value
 		if selectedTeamRaid then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
 		end
 	end,
+}, "dropdownSelectRaidMagic")
+
+sections.MainSection19:Header({
+	Name = "Freemium"
 })
 
-local Tabs = {
-	Card = Window:AddTab("Card"),
-}
+sections.MainSection19:Toggle({
+	Name = "Dupe Griffith",
+	Default = false,
+	Callback = function(value)
+		getgenv().dupeGriffith = Value
+		dupeGriffith()
+	end,
+}, "DupeGriffith")
 
-local LeftGroupBox = Tabs.Card:AddLeftGroupbox("Card Picker")
+sections.MainSection19:Toggle({
+	Name = "Dupe Vegeto",
+	Default = false,
+	Callback = function(value)
+		getgenv().dupeVegeto = Value
+		dupeVegeto()
+	end,
+}, "DupeVegeto")
 
-LeftGroupBox:AddDropdown("dropdownBuffPriority", {
-    Values = Cards.Buff,
-    Default = {},
-    Multi = true,
-    Text = "Select Buff Priority",
-    Callback = function(selectedList)
+sections.MainSection19:Toggle({
+	Name = "Inf Range",
+	Default = false,
+	Callback = function(value)
+		getgenv().InfRange = Value
+		InfRange()
+	end,
+}, "InfRange")
+
+sections.MainSection20:Header({
+	Name = "Card Picker"
+})
+
+local Dropdown = sections.MainSection20:Dropdown({
+	Name = "Select Buff Priority",
+	Multi = true,
+	Required = true,
+	Options = Cards.Buff,
+	Default = None,
+	Callback = function(value)
         UpdatePriorityList("Buff", selectedList)
-    end,
-})
+	end,
+}, "dropdownBuffPriority")
 
-LeftGroupBox:AddDropdown("dropdownDebuffPriority", {
-    Values = Cards.Debuff,
-    Default = {},
-    Multi = true,
-    Text = "Select Debuff Priority",
-    Callback = function(selectedList)
+local Dropdown = sections.MainSection20:Dropdown({
+	Name = "Select Debuff Priority",
+	Multi = true,
+	Required = true,
+	Options = Cards.Debuff,
+	Default = None,
+	Callback = function(value)
         UpdatePriorityList("Debuff", selectedList)
-    end,
-})
+	end,
+}, "dropdownDebuffPriority")
 
-LeftGroupBox:AddToggle("AutoCard", {
-    Text = "Auto Card",
-    Default = false,
-    Callback = function(Value)
+sections.MainSection20:Toggle({
+	Name = "Auto Card",
+	Default = false,
+	Callback = function(value)
         getgenv().autoChooseCard = Value
         if Value then
             autoChooseCard()
         end
-    end,
-})
+	end,
+}, "AutoCard")
 
-LeftGroupBox:AddToggle("FocusBuff", {
-    Text = "Focus Buff",
-    Default = false,
-    Callback = function(Value)
-        getgenv().focusBuff = Value
-    end,
-})
-
-LeftGroupBox:AddToggle("FocusDebuff", {
-    Text = "Focus Debuff",
-    Default = false,
-    Callback = function(Value)
-        getgenv().focusDebuff = Value
-    end,
-})
-
-local Tabs = {
-	Macro = Window:AddTab("Macro"),
-}
-
-local LeftGroupBox = Tabs.Macro:AddLeftGroupbox("Coming Soon")
-
-local Tabs = {
-	Others = Window:AddTab("Others"),
-}
-
-local LeftGroupBox = Tabs.Others:AddLeftGroupbox("Unit")
-
-LeftGroupBox:AddInput('inputAutoPlaceWaveX', {
-    Default = '',
-    Text = "Start Place at x Wave",
-    Numeric = true,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        selectedWaveToPlace = Value
-    end
-})
-
-LeftGroupBox:AddSlider('distancePercentage', {
-	Text = 'Distance Percentage',
-	Default = 0,
-	Min = 0,
-	Max = 100,
-	Rounding = 0,
-	Compact = false,
-	Callback = function(Value)
-		selectedDistance = Value
-	end
-})
-
-LeftGroupBox:AddSlider('GroundPercentage', {
-	Text = 'Ground Percentage',
-	Default = 0,
-	Min = 0,
-	Max = 100,
-	Rounding = 0,
-	Compact = false,
-	Callback = function(Value)
-		selectedGroundDistance = Value
-	end
-})
-
-LeftGroupBox:AddSlider('HillPercentage', {
-	Text = 'Hill Percentage',
-	Default = 0,
-	Min = 0,
-	Max = 100,
-	Rounding = 0,
-	Compact = false,
-	Callback = function(Value)
-		selectedHillDistance = Value
-	end
-})
-
-LeftGroupBox:AddToggle("AutoPlace", {
-	Text = "Auto Place",
+sections.MainSection20:Toggle({
+	Name = "Focus Buff",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
+        getgenv().focusBuff = Value
+	end,
+}, "FocusBuff")
+
+sections.MainSection20:Toggle({
+	Name = "Focus Debuff",
+	Default = false,
+	Callback = function(value)
+        getgenv().focusDebuff = Value
+	end,
+}, "FocusDebuff")
+
+sections.MainSection21:Header({
+	Name = "Unit"
+})
+
+sections.MainSection21:Input({
+	Name = "Start Place at x Wave",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "Number",
+	Callback = function(input)
+        selectedWaveToPlace = Value
+	end,
+	onChanged = function(input)
+        selectedWaveToPlace = Value
+	end,
+}, "inputAutoPlaceWaveX")
+
+sections.MainSection21:Slider({
+	Name = "Distance Percentage",
+	Default = 0,
+	Minimum = 0,
+	Maximum = 100,
+	DisplayMethod = "Round",
+	Precision = 0,
+	Callback = function(value)
+		selectedDistance = Value
+	end,
+}, "distancePercentage")
+
+sections.MainSection21:Slider({
+	Name = "Ground Percentage",
+	Default = 0,
+	Minimum = 0,
+	Maximum = 100,
+	DisplayMethod = "Round",
+	Precision = 0,
+	Callback = function(value)
+		selectedGroundDistance = Value
+	end,
+}, "GroundPercentage")
+
+sections.MainSection21:Slider({
+	Name = "Hill Percentage",
+	Default = 0,
+	Minimum = 0,
+	Maximum = 100,
+	DisplayMethod = "Round",
+	Precision = 0,
+	Callback = function(value)
+		selectedHillDistance = Value
+	end,
+}, "HillPercentage")
+
+sections.MainSection21:Toggle({
+	Name = "Auto Place",
+	Default = false,
+	Callback = function(value)
 		getgenv().autoPlace = Value
 		if Value then
 			autoPlace()
 		end
 	end,
-})
+}, "AutoPlace")
 
-LeftGroupBox:AddToggle("OnlyStartPlaceInXWave", {
-	Text = "Only Start Place in X Wave",
+sections.MainSection21:Toggle({
+	Name = "Only Start Place in X Wave",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().OnlyautoPlace = Value
 	end,
-})
+}, "OnlyStartPlaceInXWave")
 
-LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
-    Default = '',
-    Text = "Start Upgrade at x Wave",
-    Numeric = true,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
+sections.MainSection21:Input({
+	Name = "Start Upgrade at x Wave",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "Number",
+	Callback = function(input)
         selectedWaveToUpgrade = Value
-    end
-})
+	end,
+	onChanged = function(input)
+        selectedWaveToUpgrade = Value
+	end,
+}, "inputAutoUpgradeWaveX")
 
-
-LeftGroupBox:AddToggle("FocusInFarm", {
-	Text = "Focus Farm",
+sections.MainSection21:Toggle({
+	Name = "Focus Farm",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().focusFarm = Value
 	end,
-})
+}, "FocusInFarm")
 
-LeftGroupBox:AddToggle("FocusInGriffith", {
-	Text = "Focus Griffith",
+sections.MainSection21:Toggle({
+	Name = "Focus Griffith",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().focusGriffith = Value
 	end,
-})
+}, "FocusInGriffith")
 
-LeftGroupBox:AddToggle("AutoUpgrade", {
-	Text = "Auto Upgrade",
+sections.MainSection21:Toggle({
+	Name = "Auto Upgrade",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoUpgrade = Value
 		autoUpgrade()
 	end,
-})
+}, "AutoUpgrade")
 
-LeftGroupBox:AddToggle("OnlyUpgradeInXWave", {
-	Text = "Only Upgrade in X Wave",
+sections.MainSection21:Toggle({
+	Name = "Only Upgrade in X Wave",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().onlyupgradeinXwave = Value
 	end,
-})
+}, "OnlyUpgradeInXWave")
 
-LeftGroupBox:AddInput('inputAutoSellWaveX', {
-    Default = '',
-    Text = "Start Sell at x Wave",
-    Numeric = true,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
+sections.MainSection21:Input({
+	Name = "Start Sell at x Wave",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "Number",
+	Callback = function(input)
         selectedWaveToSell = Value
-    end
-})
+	end,
+	onChanged = function(input)
+        selectedWaveToSell = Value
+	end,
+}, "inputAutoSellWaveX")
 
-LeftGroupBox:AddToggle("AutoSell", {
-	Text = "Auto Sell",
+sections.MainSection21:Toggle({
+	Name = "Auto Sell",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoSell = Value
 		autoSell()
 	end,
-})
+}, "AutoSell")
 
-LeftGroupBox:AddToggle("OnlySellInXWave", {
-	Text = "Only Sell in X Wave",
+sections.MainSection21:Toggle({
+	Name = "Only Sell in X Wave",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().onlysellinXwave = Value
 	end,
+}, "OnlySellInXWave")
+
+sections.MainSection22:Header({
+	Name = "Skill"
 })
 
-local RightGroupbox = Tabs.Others:AddRightGroupbox("Skill")
-
-RightGroupbox:AddInput('inputAutoPlaceWaveX', {
-    Default = '',
-    Text = "Start Skill at x Wave",
-    Numeric = true,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
+sections.MainSection22:Input({
+	Name = "Start Skill at x Wave",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "Number",
+	Callback = function(input)
         selectedWaveToUniversalSkill = Value
-    end
-})
+	end,
+	onChanged = function(input)
+        selectedWaveToUniversalSkill = Value
+	end,
+}, "inputAutoSkillWaveX")
 
-RightGroupbox:AddToggle("AutoBuffErwin", {
-	Text = "Auto Universal Skill",
+sections.MainSection22:Toggle({
+	Name = "Auto Universal Skill",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().universalSkill = Value
 		universalSkill()
 	end,
-})
+}, "AutoUniversalSkill")
 
-RightGroupbox:AddToggle("AutoUpgrade", {
-	Text = "Only Universal Skill in X Wave",
+sections.MainSection22:Toggle({
+	Name = "Only Universal Skill in X Wave",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().universalSkillinXWave = Value
 	end,
-})
+}, "OnlyUniversalSkillinXWave")
 
-RightGroupbox:AddToggle("AutoSacrificeGriffith", {
-	Text = "Auto Sacrifice Griffith",
+sections.MainSection22:Toggle({
+	Name = "Auto Sacrifice Griffith",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoSacrificeGriffith = Value
 		autoSacrificeGriffith()
 	end,
-})
+}, "AutoSacrificeGriffith")
 
-RightGroupbox:AddToggle("AutoBuffErwin", {
-	Text = "Auto Buff Erwin",
+sections.MainSection22:Toggle({
+	Name = "Auto Buff Erwin",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		toggle = Value
 		if toggle then
 			UseActiveAttackE()
 		end
 	end,
-})
+}, "AutoBuffErwin")
 
-RightGroupbox:AddToggle("AutoBuffWenda", {
-	Text = "Auto Buff Wenda",
+sections.MainSection22:Toggle({
+	Name = "Auto Buff Wenda",
 	Default = false,
-	Tooltip = "Auto Buff Wenda",
-
-	Callback = function(Value)
+	Callback = function(value)
 		toggle2 = Value
 		if toggle2 then
 			UseActiveAttackW()
 		end
 	end,
-})
+}, "AutoBuffWenda")
 
-RightGroupbox:AddToggle("AutoBuffLeafy", {
-	Text = "Auto Buff Leafy",
+sections.MainSection22:Toggle({
+	Name = "Auto Buff Leafy",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		toggle3 = Value
 		if toggle3 then
 			UseActiveAttackL()
 		end
 	end,
+}, "AutoBuffLeafy")
+
+sections.MainSection23:Header({
+	Name = "Macro (Coming soon)"
 })
 
-local Tabs = {
-	Shop = Window:AddTab("Shop"),
-}
+sections.MainSection24:Header({
+	Name = "Shop"
+})
 
-local LeftGroupBox = Tabs.Shop:AddLeftGroupbox("Shop")
-
-LeftGroupBox:AddDropdown("dropdownSelectItemToBuy", {
-	Values = ValuesItemsToFeed,
-	Default = "None",
+local Dropdown = sections.MainSection24:Dropdown({
+	Name = "Select Capsule to Open",
 	Multi = false,
+	Required = true,
+	Options = ValuesCapsules,
+	Default = None,
+	Callback = function(value)
+		selectedCapsule = Value
+	end,
+}, "dropdownSelectCapsule")
 
-	Text = "Select Item",
+sections.MainSection24:Toggle({
+	Name = "Auto Open Capsule",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoOpenCapsule = Value
+		autoOpenCapsule()
+	end,
+}, "AutoOpenCapsule")
 
-	Callback = function(Value)
+local Dropdown = sections.MainSection24:Dropdown({
+	Name = "Select Shard to Craft",
+	Multi = false,
+	Required = true,
+	Options = shardsValues,
+	Default = None,
+	Callback = function(value)
+		selectedShardtoCraft = Value
+	end,
+}, "dropdownSelectShardToCraft")
+
+sections.MainSection24:Toggle({
+	Name = "Auto Craft Shards",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoCraftShard = Value
+		autoCraftShard()
+	end,
+}, "autoCraftShards")
+
+local Dropdown = sections.MainSection24:Dropdown({
+	Name = "Select Item",
+	Multi = false,
+	Required = true,
+	Options = ValuesItemsToFeed,
+	Default = None,
+	Callback = function(value)
 		selectedItemToBuy = Value
 	end,
-})
+}, "dropdownSelectItemToBuy")
 
-LeftGroupBox:AddToggle("AutoBuy", {
-	Text = "Auto Buy",
+sections.MainSection24:Toggle({
+	Name = "Auto Buy",
 	Default = false,
-
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().autoBuy = Value
 		autoBuy()
 	end,
-})
+}, "AutoBuy")
 
 --UI IMPORTANT THINGS
-Library:SetWatermarkVisibility(true)
 
-local FrameTimer = tick()
-local FrameCounter = 0
-local FPS = 60
-local StartTime = tick()
+MacLib:SetFolder("Maclib")
+tabs.Settings:InsertConfigSection("Left")
 
-local WatermarkConnection
-
-local function FormatTime(seconds)
-	local hours = math.floor(seconds / 3600)
-	local minutes = math.floor((seconds % 3600) / 60)
-	local seconds = math.floor(seconds % 60)
-	return string.format("%02d:%02d:%02d", hours, minutes, seconds)
-end
-
-local function UpdateWatermark()
-	FrameCounter = FrameCounter + 1
-
-	if (tick() - FrameTimer) >= 1 then
-		FPS = FrameCounter
-		FrameTimer = tick()
-		FrameCounter = 0
-	end
-
-	local activeTime = tick() - StartTime
-
-	Library:SetWatermark(
-		("Tempest Hub | %s fps | %s ms | %s"):format(
-			math.floor(FPS),
-			math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()),
-			FormatTime(activeTime)
-		)
-	)
-end
-
-WatermarkConnection = game:GetService("RunService").RenderStepped:Connect(UpdateWatermark)
-
-local TabsUI = {
-	["UI Settings"] = Window:AddTab("UI Settings"),
-}
-
-local function Unload()
-	WatermarkConnection:Disconnect()
-	print("Unloaded!")
-	Library.Unloaded = true
-end
-
-local MenuGroup = TabsUI["UI Settings"]:AddLeftGroupbox("Menu")
-
-MenuGroup:AddToggle("HideUiWhenExecute", {
-	Text = "Hide UI When Execute",
+sections.MainSection25:Toggle({
+	Name = "Hide UI when Execute",
 	Default = false,
-	Callback = function(Value)
-		getgenv().hideUIExec = Value
+	Callback = function(value)
+		getgenv().hideUIExec = value
 		hideUIExec()
 	end,
-})
+}, "HideUiWhenExecute")
 
-MenuGroup:AddToggle("AutoExecute", {
-	Text = "Auto Execute",
+sections.MainSection25:Toggle({
+	Name = "Auto Execute",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().aeuat = Value
 		aeuat()
 	end,
-})
+}, "AutoExecute")
 
-MenuGroup:AddToggle("BlackScreen", {
-	Text = "Blackscreen",
+sections.MainSection25:Toggle({
+	Name = "Blackscreen",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		blackScreen()
 	end,
-})
+}, "BlackScreen")
 
-MenuGroup:AddToggle("FPSBoost", {
-	Text = "FPS Boost",
+sections.MainSection25:Toggle({
+	Name = "FPS Boost",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
         getgenv().fpsBoost = Value
 		fpsBoost()
 	end,
-})
+}, "FPSBoost")
 
-MenuGroup:AddToggle("FPSBoost", {
-	Text = "Better FPS Boost",
+sections.MainSection25:Toggle({
+	Name = "Better FPS Boost",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
         getgenv().betterFpsBoost = Value
 		betterFpsBoost()
 	end,
-})
+}, "BetterFPSBoost")
 
-MenuGroup:AddToggle("FPSBoost", {
-	Text = "REALLY Better FPS Boost",
+sections.MainSection25:Toggle({
+	Name = "REALLY Better FPS Boost",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
         getgenv().extremeFpsBoost = Value
 		extremeFpsBoost()
 	end,
-})
+}, "REALLYBetterFPSBoost")
 
-MenuGroup:AddButton("Unload", function()
-	Library:Unload()
+sections.MainSection25:Slider({
+    Name = "Change UI Size",
+    Default = 0.8,
+    Minimum = 0.1,
+    Maximum = 1.5,
+    Increment = 0.05,
+    DisplayMethod = "Round", 
+    Precision = 1,
+    Callback = function(value)
+        changeUISize(value)
+    end
+}, "changeUISize")
+
+Window.onUnloaded(function()
+	print("Unloaded!")
 end)
-MenuGroup:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", { Default = "End", NoUI = true, Text = "Menu keybind" })
 
-Library.ToggleKeybind = Options.MenuKeybind
+tabs.Main:Select()
 
-ThemeManager:SetLibrary(Library)
-SaveManager:SetLibrary(Library)
-
---Save Settings
-ThemeManager:SetFolder("Tempest Hub")
-SaveManager:SetFolder("Tempest Hub/_AA_")
-
-SaveManager:BuildConfigSection(TabsUI["UI Settings"])
-
-ThemeManager:ApplyToTab(TabsUI["UI Settings"])
-
-SaveManager:LoadAutoloadConfig()
-
-local GameConfigName = "_AA_"
+MacLib:SetFolder("Tempest Hub")
+MacLib:SetFolder("Tempest Hub/_JJI_1")
+local GameConfigName = "_JJI_1"
 local player = game.Players.LocalPlayer
-SaveManager:Load(player.Name .. GameConfigName)
+MacLib:LoadConfig(player.Name .. GameConfigName)
 spawn(function()
 	while task.wait(1) do
-		if Library.Unloaded then
+		if Window.Unloaded then
 			break
 		end
-		SaveManager:Save(player.Name .. GameConfigName)
+		MacLib:SaveConfig(player.Name .. GameConfigName)
 	end
 end)
 
