@@ -233,6 +233,19 @@ sections.MainSection4:Toggle({
 	end,
 }, "AutoExecute")
 
+sections.MainSection1:Slider({
+	Name = "Change UI Size",
+	Default = 80,
+	Minimum = 10,
+	Maximum = 150,
+	Increment = 5,
+	DisplayMethod = "Percent",
+	Precision = 0,
+	Callback = function(value)
+		changeUISize(value)
+	end
+}, "changeUISize")
+
 Window.onUnloaded(function()
 	print("Unloaded!")
 end)
