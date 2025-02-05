@@ -11,35 +11,36 @@ local mobileSize = UDim2.fromOffset(600, 450)
 local currentSize = isMobile and mobileSize or pcSize
 
 local Window = MacLib:Window({
-	Title = "Tempest Hub",
-	Subtitle = "Anime Adventures",
-	Size = currentSize,
-	DragStyle = 1,
-	DisabledWindowControls = {},
-	ShowUserInfo = true,
-	Keybind = Enum.KeyCode.RightControl,
-	AcrylicBlur = true,
+    Title = "Tempest Hub",
+    Subtitle = "Anime Adventures",
+    Size = currentSize,
+    DragStyle = 1,
+    DisabledWindowControls = {},
+    ShowUserInfo = true,
+    Keybind = Enum.KeyCode.RightControl,
+    AcrylicBlur = true,
 })
 
-function changeUISize(percent)
-	if Window then
-		local scale = percent / 100
+function changeUISize(scale)
+    if Window then
+        if scale < 0.1 then
+            scale = 0.1
+        elseif scale > 1.5 then
+            scale = 1.5
+        end
 
-		if scale < 0.1 then
-			scale = 0.1
-		end
+        local newWidth = pcSize.X.Offset * scale
+        local newHeight = pcSize.Y.Offset * scale
 
-		local newWidth = pcSize.X.Offset * scale
-		local newHeight = pcSize.Y.Offset * scale
-
-		Window:SetSize(UDim2.fromOffset(newWidth, newHeight))
-		Window:Notify({
-			Title = "UI Resized",
-			Description = "New size: " .. math.floor(percent) .. "%",
-			Lifetime = 3
-		})
-	end
+        Window:SetSize(UDim2.fromOffset(newWidth, newHeight))
+        Window:Notify({
+            Title = "UI Resized",
+            Description = "New size scale: " .. scale,
+            Lifetime = 3
+        })
+    end
 end
+
 local globalSettings = {
 	UIBlurToggle = Window:GlobalSetting({
 		Name = "UI Blur",
@@ -233,17 +234,17 @@ sections.MainSection4:Toggle({
 	end,
 }, "AutoExecute")
 
-sections.MainSection1:Slider({
-	Name = "Change UI Size",
-	Default = 80,
-	Minimum = 10,
-	Maximum = 150,
-	Increment = 5,
-	DisplayMethod = "Percent",
-	Precision = 0,
-	Callback = function(value)
-		changeUISize(value)
-	end
+sections.MainSection4:Slider({
+    Name = "Change UI Size",
+    Default = 0.8,
+    Minimum = 0.1,
+    Maximum = 1.5,
+    Increment = 0.05,
+    DisplayMethod = "Round", 
+    Precision = 1,
+    Callback = function(value)
+        changeUISize(value)
+    end
 }, "changeUISize")
 
 Window.onUnloaded(function()
