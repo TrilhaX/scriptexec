@@ -958,7 +958,7 @@ function InfRange()
 				if ownedUnit and ownedUnit.unit_id then
 					for _, unit in pairs(unitsFolder:GetChildren()) do
 						local baseName = getBaseName(ownedUnit.unit_id)
-						if baseName:lower() ~= "bulma" and baseName:lower() ~= "speedwagon" then
+						if baseName:lower() ~= "bulma" and baseName:lower() ~= "speedwagon" and baseName:lower() ~= "erwin" and baseName:lower() ~= "wendy" and baseName:lower() ~= "elfy"then
 							if getBaseName(unit.Name) == baseName then
 								local humanoidRootPart = unit:WaitForChild("HumanoidRootPart", 5)
 								if humanoidRootPart then
