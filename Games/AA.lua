@@ -1159,6 +1159,40 @@ function autonext()
 	end
 end
 
+function autoJoinPlayer()
+	while getgenv().autoJoinPlayer == true do
+        local ownerStory = workspace:FindFirstChild("_LOBBIES"):FindFirstChild("Story")
+		local ownerRaid = workspace._RAID.Raid
+		local ownerDungeon = workspace._DUNGEONS.Lobbies
+		local ownerChallenge = workspace._CHALLENGES.Challenges
+		local ownerDailyChallenge = workspace._CHALLENGES.DailyChallenge
+		local ownerEvent = workspace._EVENT_CHALLENGES.Lobbies
+		local TempestGpo2 = game.Players:FindFirstChild("TempestGpo2")  -- Definindo o jogador TempestGpo2
+		
+		function checkOwner(owner)
+			if owner then
+				for i, v in pairs(owner:GetChildren()) do
+					if v:FindFirstChild("Owner") and v.Owner.Value == TempestGpo2 then
+						local args = {
+							[1] = v
+						}
+						
+						game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_join_lobby"):InvokeServer(unpack(args))	
+					end
+				end
+			end
+		end
+
+		checkOwner(ownerStory)
+		checkOwner(ownerRaid)
+		checkOwner(ownerDungeon)
+		checkOwner(ownerChallenge)
+		checkOwner(ownerDailyChallenge)
+		checkOwner(ownerEvent)
+		wait()
+	end
+end
+
 function autoEnter()
 	while getgenv().autoEnter == true do
 		local args = {
@@ -3370,9 +3404,10 @@ end
 
 -- Get Informations for Dropdown or other things
 
+-- Função para obter os desafios
 function printChallenges(module)
 	local challengesKeys = {}
-	if module.challenges then
+	if module and module.challenges then
 		for key, value in pairs(module.challenges) do
 			table.insert(challengesKeys, key)
 		end
@@ -3380,10 +3415,11 @@ function printChallenges(module)
 	end
 end
 
-local module = require(game:GetService("ReplicatedStorage").src.Data.ChallengeAndRewards)
+-- Substituindo o require por request para carregar módulos
+local module = game:GetService("ReplicatedStorage"):WaitForChild("src"):WaitForChild("Data"):WaitForChild("ChallengeAndRewards")
 local challengeValues = printChallenges(module)
 
-local Module2 = require(game:GetService("ReplicatedStorage").src.Data.Maps)
+local Module2 = game:GetService("ReplicatedStorage"):WaitForChild("src"):WaitForChild("Data"):WaitForChild("Maps")
 function getStoryMapValues(module)
 	local seen = {}
 	local values = {}
@@ -3391,7 +3427,7 @@ function getStoryMapValues(module)
 	for key, value in pairs(module) do
 		local firstPart = key:match("([^_]+)")
 
-		if not seen[firstPart] then
+		if firstPart and not seen[firstPart] then
 			seen[firstPart] = true
 			table.insert(values, firstPart)
 		end
@@ -3402,27 +3438,26 @@ end
 
 local storyMapValues = getStoryMapValues(Module2)
 
-local portals = game:GetService("ReplicatedStorage").LOBBY_ASSETS:FindFirstChild("_portal_templates")
+local portals = game:GetService("ReplicatedStorage"):WaitForChild("LOBBY_ASSETS"):FindFirstChild("_portal_templates")
 local ValuesPortalsMaps = {}
 if portals then
-	for i, v in pairs(portals:GetChildren()) do
+	for _, v in pairs(portals:GetChildren()) do
 		local nameWithoutUnderscore = string.sub(v.Name, 2)
 		table.insert(ValuesPortalsMaps, nameWithoutUnderscore)
 	end
 end
 
-local levelsModule = require(game:GetService("ReplicatedStorage").src.Data.Levels)
+local levelsModule = game:GetService("ReplicatedStorage"):WaitForChild("src"):WaitForChild("Data"):WaitForChild("Levels")
 local ChallengeMapValues = {}
 
 if type(levelsModule) == "table" then
-    for levelName, levelData in pairs(levelsModule) do
+    for _, levelData in pairs(levelsModule) do
         if levelData.id then
             table.insert(ChallengeMapValues, tostring(levelData.id))
         end
     end
 end
 
-local levelsModule = require(game:GetService("ReplicatedStorage").src.Data.Levels)
 local PortalMapValues = {}
 
 if type(levelsModule) == "table" then
@@ -3433,19 +3468,17 @@ if type(levelsModule) == "table" then
     end
 end
 
-
-local capsules = game:GetService("ReplicatedStorage").packages.assets:FindFirstChild("ItemModels")
+local capsules = game:GetService("ReplicatedStorage"):WaitForChild("packages"):WaitForChild("assets"):FindFirstChild("ItemModels")
 local ValuesCapsules = {}
 if capsules then
-	for i, v in pairs(capsules:GetChildren()) do
+	for _, v in pairs(capsules:GetChildren()) do
 		if string.find(v.Name:lower(), "capsule") then
 			table.insert(ValuesCapsules, v.Name)
 		end
 	end
 end
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ShopItemsModule = ReplicatedStorage.src.Data:FindFirstChild("ShopItems")
+local ShopItemsModule = game:GetService("ReplicatedStorage"):WaitForChild("src"):WaitForChild("Data"):FindFirstChild("ShopItems")
 local ValuesItemShop = {}
 if ShopItemsModule then
 	local ShopItems = require(ShopItemsModule)
@@ -3457,21 +3490,11 @@ if ShopItemsModule then
 			and not string.find(tostring(value), "bundle")
 			and not string.find(tostring(value), "gift")
 		then
-			table.insert(ValuesItemShop, key.Name)
+			table.insert(ValuesItemShop, key)
 		end
 	end
 else
 	warn("Módulo ShopItems não encontrado.")
-end
-
-local itemModels = game:GetService("ReplicatedStorage"):WaitForChild("packages"):WaitForChild("assets"):FindFirstChild("ItemModels")
-local ValuesItemsToFeed = {}
-if itemModels then
-    for i, v in pairs(itemModels:GetChildren()) do
-        table.insert(ValuesItemsToFeed, v.Name)
-    end
-else
-    warn("ItemModels not found!")
 end
 
 local fxCache = game:GetService("ReplicatedStorage"):FindFirstChild("_FX_CACHE")
@@ -3480,19 +3503,28 @@ if fxCache then
     for _, v in pairs(fxCache:GetChildren()) do
         if v.Name == "CollectionUnitFrame" then
             local collectionUnitFrame = v
-            table.insert(ValuesUnitId,collectionUnitFrame.name.Text .. " | Level: " .. collectionUnitFrame.Main.Level.Text .. " | " .. collectionUnitFrame._uuid.Value)
+            table.insert(ValuesUnitId, collectionUnitFrame.name.Text .. " | Level: " .. collectionUnitFrame.Main.Level.Text .. " | " .. collectionUnitFrame._uuid.Value)
         end
     end
 end
 
-local namePortal = game:GetService("ReplicatedStorage").packages.assets:FindFirstChild("ItemModels")
+local namePortal = game:GetService("ReplicatedStorage"):WaitForChild("packages"):WaitForChild("assets"):FindFirstChild("ItemModels")
 local ValuesPortalName = {}
 
 if namePortal then
-    for i, v in pairs(namePortal:GetChildren()) do
+    for _, v in pairs(namePortal:GetChildren()) do
         if string.find(v.Name:lower(), "portal") then
-            table.insert(ValuesPortalName,v.Name)
+            table.insert(ValuesPortalName, v.Name)
         end
+    end
+end
+
+local Players = game.Players
+local ValuesPlayersName = {}
+
+for _, v in pairs(Players:GetChildren()) do
+    if v.Name ~= game.Players.LocalPlayer.Name then
+        table.insert(ValuesPlayersName, v.Name)
     end
 end
 
@@ -4019,6 +4051,26 @@ sections.MainSection9:Toggle({
 		autoJoinCursedWomb()
 	end,
 }, "AutoJoinCursedWomb")
+
+local Dropdown = sections.MainSection8:Dropdown({
+	Name = "Select Player",
+	Multi = true,
+	Required = true,
+	Options = ValuesPlayersName,
+	Default = None,
+	Callback = function(Value)
+        selectedPlayerToJoin = Value
+	end,
+}, "drodpownPlayerToJoin")
+
+sections.MainSection9:Toggle({
+	Name = "Auto Join Player",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoJoinPlayer = Value
+		autoJoinPlayer()
+	end,
+}, "AutoJoinPlayer")
 
 sections.MainSection10:Header({
 	Name = "Story"
@@ -4646,90 +4698,14 @@ sections.MainSection22:Toggle({
 }, "AutoBuffLeafy")
 
 sections.MainSection23:Header({
-	Name = "Auto Place Cap"
-})
-
-sections.MainSection23:Slider({
-	Name = "Slot 1",
-	Default = 1,
-	Minimum = 1,
-	Maximum = 6,
-	DisplayMethod = "Round",
-	Precision = 0,
-	Callback = function(Value)
-		selectedPlaceCapSlot1 = Value
-	end,
-}, "Slot1PlaceCap")
-
-sections.MainSection23:Slider({
-	Name = "Slot 2",
-	Default = 1,
-	Minimum = 1,
-	Maximum = 6,
-	DisplayMethod = "Round",
-	Precision = 0,
-	Callback = function(Value)
-		selectedPlaceCapSlot2 = Value
-	end,
-}, "Slot2PlaceCap")
-
-sections.MainSection23:Slider({
-	Name = "Slot 3",
-	Default = 1,
-	Minimum = 1,
-	Maximum = 6,
-	DisplayMethod = "Round",
-	Precision = 0,
-	Callback = function(Value)
-		selectedPlaceCapSlot3 = Value
-	end,
-}, "Slot3PlaceCap")
-
-sections.MainSection23:Slider({
-	Name = "Slot 4",
-	Default = 1,
-	Minimum = 1,
-	Maximum = 6,
-	DisplayMethod = "Round",
-	Precision = 0,
-	Callback = function(Value)
-		selectedPlaceCapSlot4 = Value
-	end,
-}, "Slot4PlaceCap")
-
-sections.MainSection23:Slider({
-	Name = "Slot 5",
-	Default = 1,
-	Minimum = 1,
-	Maximum = 6,
-	DisplayMethod = "Round",
-	Precision = 0,
-	Callback = function(Value)
-		selectedPlaceCapSlot5 = Value
-	end,
-}, "Slot5PlaceCap")
-
-sections.MainSection23:Slider({
-	Name = "Slot 6",
-	Default = 1,
-	Minimum = 1,
-	Maximum = 6,
-	DisplayMethod = "Round",
-	Precision = 0,
-	Callback = function(Value)
-		selectedPlaceCapSlot6 = Value
-	end,
-}, "Slot6PlaceCap")
-
-sections.MainSection24:Header({
 	Name = "Macro (Coming soon)"
 })
 
-sections.MainSection25:Header({
+sections.MainSection24:Header({
 	Name = "Shop"
 })
 
-local Dropdown = sections.MainSection25:Dropdown({
+local Dropdown = sections.MainSection24:Dropdown({
 	Name = "Select Capsule to Open",
 	Multi = false,
 	Required = true,
@@ -4740,7 +4716,7 @@ local Dropdown = sections.MainSection25:Dropdown({
 	end,
 }, "dropdownSelectCapsule")
 
-sections.MainSection25:Toggle({
+sections.MainSection24:Toggle({
 	Name = "Auto Open Capsule",
 	Default = false,
 	Callback = function(Value)
@@ -4749,7 +4725,7 @@ sections.MainSection25:Toggle({
 	end,
 }, "AutoOpenCapsule")
 
-local Dropdown = sections.MainSection25:Dropdown({
+local Dropdown = sections.MainSection24:Dropdown({
 	Name = "Select Shard to Craft",
 	Multi = false,
 	Required = true,
@@ -4760,7 +4736,7 @@ local Dropdown = sections.MainSection25:Dropdown({
 	end,
 }, "dropdownSelectShardToCraft")
 
-sections.MainSection25:Toggle({
+sections.MainSection24:Toggle({
 	Name = "Auto Craft Shards",
 	Default = false,
 	Callback = function(Value)
@@ -4769,7 +4745,7 @@ sections.MainSection25:Toggle({
 	end,
 }, "autoCraftShards")
 
-local Dropdown = sections.MainSection25:Dropdown({
+local Dropdown = sections.MainSection24:Dropdown({
 	Name = "Select Item",
 	Multi = false,
 	Required = true,
@@ -4780,7 +4756,7 @@ local Dropdown = sections.MainSection25:Dropdown({
 	end,
 }, "dropdownSelectItemToBuy")
 
-sections.MainSection25:Toggle({
+sections.MainSection24:Toggle({
 	Name = "Auto Buy",
 	Default = false,
 	Callback = function(Value)
@@ -4789,7 +4765,7 @@ sections.MainSection25:Toggle({
 	end,
 }, "AutoBuy")
 
-sections.MainSection25:Toggle({
+sections.MainSection24:Toggle({
 	Name = "Auto Roll Sakamoto Event",
 	Default = false,
 	Callback = function(Value)
@@ -4803,7 +4779,7 @@ sections.MainSection25:Toggle({
 MacLib:SetFolder("Maclib")
 tabs.Settings:InsertConfigSection("Left")
 
-sections.MainSection26:Toggle({
+sections.MainSection25:Toggle({
 	Name = "Hide UI when Execute",
 	Default = false,
 	Callback = function(Value)
@@ -4812,7 +4788,7 @@ sections.MainSection26:Toggle({
 	end,
 }, "HideUiWhenExecute")
 
-sections.MainSection26:Toggle({
+sections.MainSection25:Toggle({
 	Name = "Auto Execute",
 	Default = false,
 	Callback = function(Value)
@@ -4821,7 +4797,7 @@ sections.MainSection26:Toggle({
 	end,
 }, "AutoExecute")
 
-sections.MainSection26:Toggle({
+sections.MainSection25:Toggle({
 	Name = "Blackscreen",
 	Default = false,
 	Callback = function(Value)
@@ -4829,7 +4805,7 @@ sections.MainSection26:Toggle({
 	end,
 }, "BlackScreen")
 
-sections.MainSection26:Toggle({
+sections.MainSection25:Toggle({
 	Name = "FPS Boost",
 	Default = false,
 	Callback = function(Value)
@@ -4838,7 +4814,7 @@ sections.MainSection26:Toggle({
 	end,
 }, "FPSBoost")
 
-sections.MainSection26:Toggle({
+sections.MainSection25:Toggle({
 	Name = "Better FPS Boost",
 	Default = false,
 	Callback = function(Value)
@@ -4847,7 +4823,7 @@ sections.MainSection26:Toggle({
 	end,
 }, "BetterFPSBoost")
 
-sections.MainSection26:Toggle({
+sections.MainSection25:Toggle({
 	Name = "REALLY Better FPS Boost",
 	Default = false,
 	Callback = function(Value)
@@ -4856,7 +4832,7 @@ sections.MainSection26:Toggle({
 	end,
 }, "REALLYBetterFPSBoost")
 
-sections.MainSection26:Slider({
+sections.MainSection25:Slider({
     Name = "Change UI Size",
     Default = 0.8,
     Minimum = 0.1,
