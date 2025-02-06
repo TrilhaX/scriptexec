@@ -3252,6 +3252,18 @@ function testWebhook()
     end
 end
 
+function autoRollSakamotoBanner()
+	while getgenv().autoRollSakamotoBanner == true do
+		local args = {
+			[1] = "SakamotoEvent",
+			[2] = "gems"
+		}
+		
+		game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("buy_from_banner"):InvokeServer(unpack(args))		
+		wait()
+	end
+end
+
 
 -- Get Informations for Dropdown or other things
 
@@ -4562,6 +4574,15 @@ sections.MainSection24:Toggle({
 		autoBuy()
 	end,
 }, "AutoBuy")
+
+sections.MainSection24:Toggle({
+	Name = "Auto Roll Sakamoto Event",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoRollSakamotoBanner = Value
+		autoRollSakamotoBanner()
+	end,
+}, "autoRollSakamotoBanner")
 
 --UI IMPORTANT THINGS
 
