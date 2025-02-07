@@ -5,11 +5,9 @@ wait()
 local MacLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/maclibTempestHubUI/main/maclib.lua"))()
 
 local isMobile = game:GetService("UserInputService").TouchEnabled
-
 local pcSize = UDim2.fromOffset(868, 650)
 local mobileSize = UDim2.fromOffset(800, 550)
 local currentSize = isMobile and mobileSize or pcSize
-
 getgenv().hideInfoPlayer = false
 getgenv().autoWalk = false
 getgenv().securityMode = false
@@ -306,7 +304,7 @@ function aeuat()
                 ]])
 
 				getgenv().executed = true
-				wait(10)
+				wait(1)
 				teleportQueued = false
 			end
 		end)
@@ -771,7 +769,7 @@ function hideInfoPlayer()
 			local resources = gui.spawn_units.Lives.Frame:FindFirstChild("Resource")
 			local limitBreak = gui.spawn_units.Lives.Frame:FindFirstChild("LimitBreaks")
 			local levelGui = gui.spawn_units.Lives:FindFirstChild("Main")
-			local petInGame = workspace.TRILHA_444:FindFirstChild("_pets_folder")
+			local petInGame = workspace:FindFirstChild(player)
 		
 			if overhead then
 				overhead.Frame.Visible = false
@@ -1992,6 +1990,8 @@ end
 
 function autoPlace()
 	while getgenv().autoPlace == true do
+		local distancePercentage = distancePercentage or 100
+		local GroundPercentage = GroundPercentage or 100
 		if getgenv().OnlyautoPlace == true then
 			local wave = workspace:FindFirstChild("_wave_num")
 			if selectedWaveToPlace == wave then
@@ -2146,8 +2146,8 @@ function autoPlace()
 					local radiusStep = radiusMax / 100
 				
 					for _, unitID in pairs(unitQueue) do
-						local selectedWaypointIndex = math.clamp(math.floor(selectedDistance * waypointStep), 1, totalWaypoints)
-						local selectedRadius = math.clamp(selectedGroundDistance * radiusStep, 1, radiusMax)
+						local selectedWaypointIndex = math.clamp(math.floor(distancePercentage * waypointStep), 1, totalWaypoints)
+						local selectedRadius = math.clamp(GroundPercentage * radiusStep, 1, radiusMax)
 						local waypoint = waypoints[selectedWaypointIndex]
 						placeUnit(unitID, waypoint, selectedRadius)
 					end
@@ -2313,8 +2313,8 @@ function autoPlace()
 				local radiusStep = radiusMax / 100
 			
                 for _, unitID in pairs(unitQueue) do
-                    local selectedWaypointIndex = math.clamp(math.floor(selectedDistance * waypointStep), 1, totalWaypoints)
-                    local selectedRadius = math.clamp(selectedGroundDistance * radiusStep, 1, radiusMax)
+                    local selectedWaypointIndex = math.clamp(math.floor(distancePercentage * waypointStep), 1, totalWaypoints)
+                    local selectedRadius = math.clamp(GroundPercentage * radiusStep, 1, radiusMax)
                     local waypoint = waypoints[selectedWaypointIndex]
                     placeUnit(unitID, waypoint, selectedRadius)
                 end
@@ -3393,14 +3393,13 @@ function autoRollSakamotoBanner()
 	while getgenv().autoRollSakamotoBanner == true do
 		local args = {
 			[1] = "SakamotoEvent",
-			[2] = "gems"
+			[2] = "gems10"
 		}
 		
-		game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("buy_from_banner"):InvokeServer(unpack(args))		
+		game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("buy_from_banner"):InvokeServer(unpack(args))			
 		wait()
 	end
 end
-
 
 -- Get Informations for Dropdown or other things
 
@@ -3593,8 +3592,8 @@ sections.MainSection1:Header({
 sections.MainSection1:Toggle({
 	Name = "Hide Player Info",
 	Default = false,
-	Callback = function(Value)
-		getgenv().hideInfoPlayer = Value
+	Callback = function(value)
+		getgenv().hideInfoPlayer = value
 		hideInfoPlayer()
 	end,
 }, "HidePlayerInfo")
@@ -3602,8 +3601,8 @@ sections.MainSection1:Toggle({
 sections.MainSection1:Toggle({
 	Name = "Auto Walk",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoWalk = Value
+	Callback = function(value)
+		getgenv().autoWalk = value
 		autoWalk()
 	end,
 }, "AutoWalk")
@@ -3614,16 +3613,16 @@ local Dropdown = sections.MainSection1:Dropdown({
 	Required = true,
 	Options = {2, 3, 4, 5, 6},
 	Default = None,
-	Callback = function(Value)
-		selecteQuantityPlayer = Value
+	Callback = function(value)
+		selecteQuantityPlayer = value
 	end,
 }, "dropdownSelectPlayer")
 
 sections.MainSection1:Toggle({
 	Name = "Security Mode",
 	Default = false,
-	Callback = function(Value)
-		getgenv().securityMode = Value
+	Callback = function(value)
+		getgenv().securityMode = value
 		securityMode()
 	end,
 }, "SecurityMode")
@@ -3631,8 +3630,8 @@ sections.MainSection1:Toggle({
 sections.MainSection1:Toggle({
 	Name = "Delete Map",
 	Default = false,
-	Callback = function(Value)
-		getgenv().deletemap = Value
+	Callback = function(value)
+		getgenv().deletemap = value
 		deletemap()
 	end,
 }, "DeleteMap")
@@ -3640,8 +3639,8 @@ sections.MainSection1:Toggle({
 sections.MainSection1:Toggle({
 	Name = "Auto Leave",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoleave = Value
+	Callback = function(value)
+		getgenv().autoleave = value
 		autoleave()
 	end,
 }, "AutoLeave")
@@ -3649,8 +3648,8 @@ sections.MainSection1:Toggle({
 sections.MainSection1:Toggle({
 	Name = "Auto Replay",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoreplay = Value
+	Callback = function(value)
+		getgenv().autoreplay = value
 		autoreplay()
 	end,
 }, "AutoReplay")
@@ -3658,8 +3657,8 @@ sections.MainSection1:Toggle({
 sections.MainSection1:Toggle({
 	Name = "Auto Next",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autonext = Value
+	Callback = function(value)
+		getgenv().autonext = value
 		autonext()
 	end,
 }, "AutoNext")
@@ -3667,8 +3666,8 @@ sections.MainSection1:Toggle({
 sections.MainSection1:Toggle({
 	Name = "Auto Next Portal",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoNextPortal = Value
+	Callback = function(value)
+		getgenv().autoNextPortal = value
 		autoNextPortal()
 	end,
 }, "AutoNextPortal")
@@ -3676,8 +3675,8 @@ sections.MainSection1:Toggle({
 sections.MainSection1:Toggle({
 	Name = "Auto Next Contract",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoNextContrato = Value
+	Callback = function(value)
+		getgenv().autoNextContrato = value
 		autoNextContrato()
 	end,
 }, "AutoNextContract")
@@ -3685,8 +3684,8 @@ sections.MainSection1:Toggle({
 sections.MainSection1:Toggle({
 	Name = "Auto Start",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autostart = Value
+	Callback = function(value)
+		getgenv().autostart = value
 		autostart()
 	end,
 }, "AutoStart")
@@ -3694,8 +3693,8 @@ sections.MainSection1:Toggle({
 sections.MainSection1:Toggle({
 	Name = "Auto Skip Wave",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoskipwave = Value
+	Callback = function(value)
+		getgenv().autoskipwave = value
 		autoskipwave()
 	end,
 }, "AutoSkipWave")
@@ -3707,8 +3706,8 @@ sections.MainSection2:Header({
 sections.MainSection2:Toggle({
 	Name = "Auto Get Battlepass",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoGetBattlepass = Value
+	Callback = function(value)
+		getgenv().autoGetBattlepass = value
 		autoGetBattlepass()
 	end,
 }, "autoGetBattlepass")
@@ -3716,8 +3715,8 @@ sections.MainSection2:Toggle({
 sections.MainSection2:Toggle({
 	Name = "Auto Get Quest",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoGetQuest = Value
+	Callback = function(value)
+		getgenv().autoGetQuest = value
 		autoGetQuest()
 	end,
 }, "autoGetQuest")
@@ -3725,8 +3724,8 @@ sections.MainSection2:Toggle({
 sections.MainSection2:Toggle({
 	Name = "Disable Notifications",
 	Default = false,
-	Callback = function(Value)
-		getgenv().disableNotifications = Value
+	Callback = function(value)
+		getgenv().disableNotifications = value
 		disableNotifications()
 	end,
 }, "DisableNotifications")
@@ -3734,8 +3733,8 @@ sections.MainSection2:Toggle({
 sections.MainSection2:Toggle({
 	Name = "Place In Red Zones",
 	Default = false,
-	Callback = function(Value)
-		getgenv().placeInRedZones = Value
+	Callback = function(value)
+		getgenv().placeInRedZones = value
 		placeInRedZones()
 	end,
 }, "PlaceInRedZones")
@@ -3743,8 +3742,8 @@ sections.MainSection2:Toggle({
 sections.MainSection2:Toggle({
 	Name = "Show Info Units",
 	Default = false,
-	Callback = function(Value)
-		getgenv().showInfoUnits = Value
+	Callback = function(value)
+		getgenv().showInfoUnits = value
 		showInfoUnits()
 	end,
 }, "ShowInfoUnits")
@@ -3752,16 +3751,16 @@ sections.MainSection2:Toggle({
 sections.MainSection2:Toggle({
 	Name = "Friends Only",
 	Default = false,
-	Callback = function(Value)
-		selectedFriendsOnly = Value
+	Callback = function(value)
+		selectedFriendsOnly = value
 	end,
 }, "FriendsOnly")
 
 sections.MainSection2:Toggle({
 	Name = "Auto Give Presents",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoGivePresents = Value
+	Callback = function(value)
+		getgenv().autoGivePresents = value
 		autoGivePresents()
 	end,
 }, "AutoGivePresents")
@@ -3792,9 +3791,9 @@ local Dropdown = sections.MainSection4:Dropdown({
 	Name = "Select Unit",
 	Multi = false,
 	Required = true,
-	Options = ValuesUnitId,
+	Options = valuesUnitId,
 	Default = None,
-	Callback = function(Value)
+	Callback = function(value)
 		selectedUnitToRoll = value:match(".* | .* | (.+)")
 	end,
 }, "RollUnit")
@@ -3803,18 +3802,18 @@ local Dropdown = sections.MainSection4:Dropdown({
 	Name = "Select Passive",
 	Multi = true,
 	Required = true,
-	Options = passivesValues,
+	Options = passivesvalues,
 	Default = None,
-	Callback = function(Value)
-		selectedPassiveToRoll = Value
+	Callback = function(value)
+		selectedPassiveToRoll = value
 	end,
 }, "dropdownSelectPassiveToRoll")
 
 sections.MainSection4:Toggle({
 	Name = "Auto Roll",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoRollPassive = Value
+	Callback = function(value)
+		getgenv().autoRollPassive = value
 		autoRollPassive()
 	end,
 }, "autoRoll")
@@ -3827,9 +3826,9 @@ local Dropdown = sections.MainSection5:Dropdown({
 	Name = "Select Unit",
 	Multi = false,
 	Required = true,
-	Options = ValuesUnitId,
+	Options = valuesUnitId,
 	Default = None,
-	Callback = function(Value)
+	Callback = function(value)
 		selectedUnitToRoll = value:match(".* | .* | (.+)")
 	end,
 }, "FeedUnit")
@@ -3838,18 +3837,18 @@ local Dropdown = sections.MainSection5:Dropdown({
 	Name = "Select Unit to Feed",
 	Multi = true,
 	Required = true,
-	Options = ValuesItemsToFeed,
+	Options = valuesItemsToFeed,
 	Default = None,
-	Callback = function(Value)
-		selectedFeed = Value
+	Callback = function(value)
+		selectedFeed = value
 	end,
 }, "dropdownSelectItemsToFeed")
 
 sections.MainSection5:Toggle({
 	Name = "Auto Feed",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoFeed = Value
+	Callback = function(value)
+		getgenv().autoFeed = value
 		autoFeed()
 	end,
 }, "AutoFeed")
@@ -3862,11 +3861,11 @@ sections.MainSection3:Input({
 	Name = "Webhook URL",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "All",
-	Callback = function(Value)
-		urlwebhook = Value
+	Callback = function(value)
+		urlwebhook = value
 	end,
-	onChanged = function(Value)
-        urlwebhook = Value
+	onChanged = function(value)
+        urlwebhook = value
 	end,
 }, "WebhookURL")
 
@@ -3874,19 +3873,19 @@ sections.MainSection3:Input({
 	Name = "User ID",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "Number",
-	Callback = function(Value)
-		urlwebhook = Value
+	Callback = function(value)
+		urlwebhook = value
 	end,
-	onChanged = function(Value)
-        urlwebhook = Value
+	onChanged = function(value)
+        urlwebhook = value
 	end,
 }, "pingUser@")
 
 sections.MainSection3:Toggle({
 	Name = "Send Webhook when finish game",
 	Default = false,
-	Callback = function(Value)
-        getgenv().webhook = Value
+	Callback = function(value)
+        getgenv().webhook = value
         webhook()
 	end,
 }, "WebhookFinishGame")
@@ -3894,8 +3893,8 @@ sections.MainSection3:Toggle({
 sections.MainSection3:Toggle({
 	Name = "Ping user",
 	Default = false,
-	Callback = function(Value)
-        getgenv().pingUser = Value
+	Callback = function(value)
+        getgenv().pingUser = value
 	end,
 }, "pingUser")
 
@@ -3914,10 +3913,10 @@ local Dropdown = sections.MainSection6:Dropdown({
 	Name = "Select Portal",
 	Multi = false,
 	Required = true,
-	Options = PortalMapValues,
+	Options = PortalMapvalues,
 	Default = None,
-	Callback = function(Value)
-		selectedPortalMap = Value
+	Callback = function(value)
+		selectedPortalMap = value
 	end,
 }, "dropdownPortalMap")
 
@@ -3927,8 +3926,8 @@ local Dropdown = sections.MainSection6:Dropdown({
 	Required = true,
 	Options = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"},
 	Default = None,
-	Callback = function(Value)
-		selectedTierPortal = Value
+	Callback = function(value)
+		selectedTierPortal = value
 	end,
 }, "dropdownTierPortal")
 
@@ -3936,10 +3935,10 @@ local Dropdown = sections.MainSection6:Dropdown({
 	Name = "Select Ignore Difficulty",
 	Multi = true,
 	Required = true,
-	Options = challengeValues,
+	Options = challengevalues,
 	Default = None,
-	Callback = function(Value)
-        selectedPortalDiff = Value
+	Callback = function(value)
+        selectedPortalDiff = value
 	end,
 }, "dropdownSelectChallengePortal")
 
@@ -3949,16 +3948,16 @@ local Dropdown = sections.MainSection6:Dropdown({
 	Required = true,
 	Options = dmgBonus,
 	Default = None,
-	Callback = function(Value)
-		selectedIgnoreDmgBonus = Value
+	Callback = function(value)
+		selectedIgnoreDmgBonus = value
 	end,
 }, "dropdownIgnoreDmgBonusPortal")
 
 sections.MainSection6:Toggle({
 	Name = "Auto Open Portal",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoEnterPortal = Value
+	Callback = function(value)
+		getgenv().autoEnterPortal = value
 		autoEnterPortal()
 	end,
 }, "AutoEnterPortal")
@@ -3973,16 +3972,16 @@ local Dropdown = sections.MainSection7:Dropdown({
 	Required = true,
 	Options = ChallengeMapValues,
 	Default = None,
-	Callback = function(Value)
-		selectedMatchmakingMap = Value
+	Callback = function(value)
+		selectedMatchmakingMap = value
 	end,
 }, "dropdownMatchmakingMap")
 
 sections.MainSection7:Toggle({
 	Name = "Auto Matchmaking",
 	Default = false,
-	Callback = function(Value)
-		getgenv().AutoMatchmaking = Value
+	Callback = function(value)
+		getgenv().AutoMatchmaking = value
 		AutoMatchmaking()
 	end,
 }, "AutoMatchmaking")
@@ -3997,8 +3996,8 @@ local Dropdown = sections.MainSection8:Dropdown({
 	Required = true,
 	Options = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" },
 	Default = None,
-	Callback = function(Value)
-        selectedTierContract = Value
+	Callback = function(value)
+        selectedTierContract = value
 	end,
 }, "dropdownSelectTierContract")
 
@@ -4008,8 +4007,8 @@ local Dropdown = sections.MainSection8:Dropdown({
 	Required = true,
 	Options = challengeValues,
 	Default = None,
-	Callback = function(Value)
-        selectedIgnoreContractChallenge = Value
+	Callback = function(value)
+        selectedIgnoreContractChallenge = value
 	end,
 }, "dropdownSelectIgnoreChallengeContract")
 
@@ -4017,8 +4016,8 @@ local Dropdown = sections.MainSection8:Dropdown({
 sections.MainSection8:Toggle({
 	Name = "Auto Matchmaking Contract",
 	Default = false,
-	Callback = function(Value)
-        getgenv().autoContractMatchmaking = Value
+	Callback = function(value)
+        getgenv().autoContractMatchmaking = value
         autoContractMatchmaking()
 	end,
 }, "AutoMatchmakingContract")
@@ -4026,8 +4025,8 @@ sections.MainSection8:Toggle({
 sections.MainSection8:Toggle({
 	Name = "Auto Contract",
 	Default = false,
-	Callback = function(Value)
-        getgenv().autoContract = Value
+	Callback = function(value)
+        getgenv().autoContract = value
         autoContract()
 	end,
 }, "autoContract")
@@ -4039,16 +4038,16 @@ sections.MainSection9:Header({
 sections.MainSection9:Toggle({
 	Name = "Hard Inf Castle",
 	Default = false,
-	Callback = function(Value)
-		getgenv().selectedHardInfCastle = Value
+	Callback = function(value)
+		getgenv().selectedHardInfCastle = value
 	end,
 }, "HardInfCastle")
 
 sections.MainSection9:Toggle({
 	Name = "Auto Enter Inf Castle",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoEnterInfiniteCastle = Value
+	Callback = function(value)
+		getgenv().autoEnterInfiniteCastle = value
 		autoEnterInfiniteCastle()
 	end,
 }, "AutoEnterInfCastle")
@@ -4057,8 +4056,8 @@ sections.MainSection9:Toggle({
 sections.MainSection9:Toggle({
 	Name = "Auto Join Cursed Womb",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoJoinCursedWomb = Value
+	Callback = function(value)
+		getgenv().autoJoinCursedWomb = value
 		autoJoinCursedWomb()
 	end,
 }, "AutoJoinCursedWomb")
@@ -4069,16 +4068,16 @@ local Dropdown = sections.MainSection8:Dropdown({
 	Required = true,
 	Options = ValuesPlayersName,
 	Default = None,
-	Callback = function(Value)
-        selectedPlayerToJoin = Value
+	Callback = function(value)
+        selectedPlayerToJoin = value
 	end,
 }, "drodpownPlayerToJoin")
 
 sections.MainSection9:Toggle({
 	Name = "Auto Join Player",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoJoinPlayer = Value
+	Callback = function(value)
+		getgenv().autoJoinPlayer = value
 		autoJoinPlayer()
 	end,
 }, "AutoJoinPlayer")
@@ -4093,8 +4092,8 @@ local Dropdown = sections.MainSection10:Dropdown({
 	Required = true,
 	Options = storyMapValues,
 	Default = None,
-	Callback = function(Value)
-		selectedMap = Value
+	Callback = function(value)
+		selectedMap = value
 	end,
 }, "dropdownStoryMap")
 
@@ -4104,8 +4103,8 @@ local Dropdown = sections.MainSection10:Dropdown({
 	Required = true,
 	Options = {"Normal", "Hard"},
 	Default = None,
-	Callback = function(Value)
-		selectedDifficulty = Value
+	Callback = function(value)
+		selectedDifficulty = value
 	end,
 }, "dropdownSelectDifficultyStory")
 
@@ -4115,16 +4114,16 @@ local Dropdown = sections.MainSection10:Dropdown({
 	Required = true,
 	Options = {"1", "2", "3", "4", "5", "6", "Infinite"},
 	Default = None,
-	Callback = function(Value)
-		selectedAct = Value
+	Callback = function(value)
+		selectedAct = value
 	end,
 }, "dropdownSelectActStory")
 
 sections.MainSection10:Toggle({
 	Name = "Auto Enter",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoEnter = Value
+	Callback = function(value)
+		getgenv().autoEnter = value
 		autoEnter()
 	end,
 }, "AutoEnter")
@@ -4139,8 +4138,8 @@ local Dropdown = sections.MainSection11:Dropdown({
 	Required = true,
 	Options = ChallengeMapValues,
 	Default = None,
-	Callback = function(Value)
-        selectedMapChallenges = Value
+	Callback = function(value)
+        selectedMapChallenges = value
 	end,
 }, "dropdownChallengeMap")
 
@@ -4150,16 +4149,16 @@ local Dropdown = sections.MainSection11:Dropdown({
 	Required = true,
 	Options = challengeValues,
 	Default = None,
-	Callback = function(Value)
-        selectedChallengesDiff = Value
+	Callback = function(value)
+        selectedChallengesDiff = value
 	end,
 }, "dropdownSelectChallenge")
 
 sections.MainSection11:Toggle({
 	Name = "Auto Enter Challenge",
 	Default = false,
-	Callback = function(Value)
-        getgenv().autoEnterChallenge = Value
+	Callback = function(value)
+        getgenv().autoEnterChallenge = value
         autoEnterChallenge()
 	end,
 }, "AutoEnterChallenge")
@@ -4167,8 +4166,8 @@ sections.MainSection11:Toggle({
 sections.MainSection11:Toggle({
 	Name = "Auto Enter Daily Challenge",
 	Default = false,
-	Callback = function(Value)
-        getgenv().autoEnterDailyChallenge = Value
+	Callback = function(value)
+        getgenv().autoEnterDailyChallenge = value
         autoEnterDailyChallenge()
 	end,
 }, "AutoEnterDailyChallenge")
@@ -4176,8 +4175,8 @@ sections.MainSection11:Toggle({
 sections.MainSection11:Toggle({
 	Name = "Auto Matchmaking Daily Challenge",
 	Default = false,
-	Callback = function(Value)
-        getgenv().autoMatchmakingDailyChallenge = Value
+	Callback = function(value)
+        getgenv().autoMatchmakingDailyChallenge = value
         autoMatchmakingDailyChallenge()
 	end,
 }, "AutoMatchmakingDailyChallenge")
@@ -4192,16 +4191,16 @@ local Dropdown = sections.MainSection12:Dropdown({
 	Required = true,
 	Options = ChallengeMapValues,
 	Default = None,
-	Callback = function(Value)
-        selectedRaidMap = Value
+	Callback = function(value)
+        selectedRaidMap = value
 	end,
 }, "dropdownSelectRaid")
 
 sections.MainSection12:Toggle({
 	Name = "Auto Enter Raid",
 	Default = false,
-	Callback = function(Value)
-        getgenv().autoEnterRaid = Value
+	Callback = function(value)
+        getgenv().autoEnterRaid = value
         autoEnterRaid()
 	end,
 }, "AutoEnterRaid")
@@ -4216,16 +4215,16 @@ local Dropdown = sections.MainSection13:Dropdown({
 	Required = true,
 	Options = ChallengeMapValues,
 	Default = None,
-	Callback = function(Value)
-        selectedLegendStageMap = Value
+	Callback = function(value)
+        selectedLegendStageMap = value
 	end,
 }, "dropdownSelectLegendStage")
 
 sections.MainSection13:Toggle({
 	Name = "Auto Enter Legend Stage",
 	Default = false,
-	Callback = function(Value)
-        getgenv().autoEnterLegendStage = Value
+	Callback = function(value)
+        getgenv().autoEnterLegendStage = value
         autoEnterLegendStage()
 	end,
 }, "AutoEnterLegendStage")
@@ -4240,8 +4239,8 @@ local Dropdown = sections.MainSection14:Dropdown({
 	Required = true,
 	Options = {'1', '2', '3', '4', '5', '6'},
 	Default = None,
-	Callback = function(Value)
-		selectedTeamStoryInf = Value
+	Callback = function(value)
+		selectedTeamStoryInf = value
 		if selectedTeamStoryInf then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
@@ -4259,8 +4258,8 @@ local Dropdown = sections.MainSection15:Dropdown({
 	Required = true,
 	Options = {'1', '2', '3', '4', '5', '6'},
 	Default = None,
-	Callback = function(Value)
-		selectedTeamInfTower = Value
+	Callback = function(value)
+		selectedTeamInfTower = value
 		if selectedTeamInfTower then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
@@ -4278,8 +4277,8 @@ local Dropdown = sections.MainSection16:Dropdown({
 	Required = true,
 	Options = {'1', '2', '3', '4', '5', '6'},
 	Default = None,
-	Callback = function(Value)
-		selectedTeamPhysicContract = Value
+	Callback = function(value)
+		selectedTeamPhysicContract = value
 		if selectedTeamPhysicContract then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
@@ -4293,8 +4292,8 @@ local Dropdown = sections.MainSection16:Dropdown({
 	Required = true,
 	Options = {'1', '2', '3', '4', '5', '6'},
 	Default = None,
-	Callback = function(Value)
-		selectedTeamMagicContract = Value
+	Callback = function(value)
+		selectedTeamMagicContract = value
 		if selectedTeamMagicContract then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
@@ -4312,8 +4311,8 @@ local Dropdown = sections.MainSection17:Dropdown({
 	Required = true,
 	Options = {'1', '2', '3', '4', '5', '6'},
 	Default = None,
-	Callback = function(Value)
-		selectedTeamPhysicChallengeDailyChallenge = Value
+	Callback = function(value)
+		selectedTeamPhysicChallengeDailyChallenge = value
 		if selectedTeamPhysicChallengeDailyChallenge then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
@@ -4327,8 +4326,8 @@ local Dropdown = sections.MainSection17:Dropdown({
 	Required = true,
 	Options = {'1', '2', '3', '4', '5', '6'},
 	Default = None,
-	Callback = function(Value)
-		selectedTeamMagicChallengeDailyChallenge = Value
+	Callback = function(value)
+		selectedTeamMagicChallengeDailyChallenge = value
 		if selectedTeamMagicChallengeDailyChallenge then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
@@ -4342,8 +4341,8 @@ local Dropdown = sections.MainSection17:Dropdown({
 	Required = true,
 	Options = {'1', '2', '3', '4', '5', '6'},
 	Default = None,
-	Callback = function(Value)
-		selectedTeamChallengeDailyChallenge = Value
+	Callback = function(value)
+		selectedTeamChallengeDailyChallenge = value
 		if selectedTeamChallengeDailyChallenge then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
@@ -4361,8 +4360,8 @@ local Dropdown = sections.MainSection18:Dropdown({
 	Required = true,
 	Options = {'1', '2', '3', '4', '5', '6'},
 	Default = None,
-	Callback = function(Value)
-		selectedTeamRaid = Value
+	Callback = function(value)
+		selectedTeamRaid = value
 		if selectedTeamRaid then
 			getgenv().autoEquipTeam = true
 			autoEquipTeam()
@@ -4377,8 +4376,8 @@ sections.MainSection19:Header({
 sections.MainSection19:Toggle({
 	Name = "Dupe Griffith",
 	Default = false,
-	Callback = function(Value)
-		getgenv().dupeGriffith = Value
+	Callback = function(value)
+		getgenv().dupeGriffith = value
 		dupeGriffith()
 	end,
 }, "DupeGriffith")
@@ -4386,8 +4385,8 @@ sections.MainSection19:Toggle({
 sections.MainSection19:Toggle({
 	Name = "Dupe Vegeto",
 	Default = false,
-	Callback = function(Value)
-		getgenv().dupeVegeto = Value
+	Callback = function(value)
+		getgenv().dupeVegeto = value
 		dupeVegeto()
 	end,
 }, "DupeVegeto")
@@ -4395,8 +4394,8 @@ sections.MainSection19:Toggle({
 sections.MainSection19:Toggle({
 	Name = "Inf Range",
 	Default = false,
-	Callback = function(Value)
-		getgenv().InfRange = Value
+	Callback = function(value)
+		getgenv().InfRange = value
 		InfRange()
 	end,
 }, "InfRange")
@@ -4411,7 +4410,7 @@ local Dropdown = sections.MainSection20:Dropdown({
 	Required = true,
 	Options = Cards.Buff,
 	Default = None,
-	Callback = function(Value)
+	Callback = function(value)
         UpdatePriorityList("Buff", selectedList)
 	end,
 }, "dropdownBuffPriority")
@@ -4422,7 +4421,7 @@ local Dropdown = sections.MainSection20:Dropdown({
 	Required = true,
 	Options = Cards.Debuff,
 	Default = None,
-	Callback = function(Value)
+	Callback = function(value)
         UpdatePriorityList("Debuff", selectedList)
 	end,
 }, "dropdownDebuffPriority")
@@ -4430,9 +4429,9 @@ local Dropdown = sections.MainSection20:Dropdown({
 sections.MainSection20:Toggle({
 	Name = "Auto Card",
 	Default = false,
-	Callback = function(Value)
-        getgenv().autoChooseCard = Value
-        if Value then
+	Callback = function(value)
+        getgenv().autoChooseCard = value
+        if value then
             autoChooseCard()
         end
 	end,
@@ -4441,16 +4440,16 @@ sections.MainSection20:Toggle({
 sections.MainSection20:Toggle({
 	Name = "Focus Buff",
 	Default = false,
-	Callback = function(Value)
-        getgenv().focusBuff = Value
+	Callback = function(value)
+        getgenv().focusBuff = value
 	end,
 }, "FocusBuff")
 
 sections.MainSection20:Toggle({
 	Name = "Focus Debuff",
 	Default = false,
-	Callback = function(Value)
-        getgenv().focusDebuff = Value
+	Callback = function(value)
+        getgenv().focusDebuff = value
 	end,
 }, "FocusDebuff")
 
@@ -4462,56 +4461,56 @@ sections.MainSection21:Input({
 	Name = "Start Place at x Wave",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "Number",
-	Callback = function(Value)
-        selectedWaveToPlace = Value
+	Callback = function(value)
+        selectedWaveToPlace = value
 	end,
-	onChanged = function(Value)
-        selectedWaveToPlace = Value
+	onChanged = function(value)
+        selectedWaveToPlace = value
 	end,
 }, "inputAutoPlaceWaveX")
 
 sections.MainSection21:Slider({
 	Name = "Distance Percentage",
-	Default = 0,
+	Default = distancePercentage or 50,
 	Minimum = 0,
 	Maximum = 100,
-	DisplayMethod = "Round",
-	Precision = 0,
+	DisplayMethod = "Percent",
+	Precision = 1,
 	Callback = function(Value)
-		selectedDistance = Value
-	end,
+		distancePercentage = Value
+	end
 }, "distancePercentage")
 
 sections.MainSection21:Slider({
 	Name = "Ground Percentage",
-	Default = 0,
+	Default = GroundPercentage or 50,
 	Minimum = 0,
 	Maximum = 100,
-	DisplayMethod = "Round",
-	Precision = 0,
+	DisplayMethod = "Percent",
+	Precision = 1,
 	Callback = function(Value)
-		selectedGroundDistance = Value
+		GroundPercentage = Value
 	end,
 }, "GroundPercentage")
 
 sections.MainSection21:Slider({
 	Name = "Hill Percentage",
-	Default = 0,
+	Default = HillPercentage or 50,
 	Minimum = 0,
 	Maximum = 100,
-	DisplayMethod = "Round",
-	Precision = 0,
+	DisplayMethod = "Percent",
+	Precision = 1,
 	Callback = function(Value)
-		selectedHillDistance = Value
+		HillPercentage = Value
 	end,
 }, "HillPercentage")
 
 sections.MainSection21:Toggle({
 	Name = "Auto Place",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoPlace = Value
-		if Value then
+	Callback = function(value)
+		getgenv().autoPlace = value
+		if value then
 			autoPlace()
 		end
 	end,
@@ -4520,8 +4519,8 @@ sections.MainSection21:Toggle({
 sections.MainSection21:Toggle({
 	Name = "Only Start Place in X Wave",
 	Default = false,
-	Callback = function(Value)
-		getgenv().OnlyautoPlace = Value
+	Callback = function(value)
+		getgenv().OnlyautoPlace = value
 	end,
 }, "OnlyStartPlaceInXWave")
 
@@ -4529,35 +4528,35 @@ sections.MainSection21:Input({
 	Name = "Start Upgrade at x Wave",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "Number",
-	Callback = function(Value)
-        selectedWaveToUpgrade = Value
+	Callback = function(value)
+        selectedWaveToUpgrade = value
 	end,
-	onChanged = function(Value)
-        selectedWaveToUpgrade = Value
+	onChanged = function(value)
+        selectedWaveToUpgrade = value
 	end,
 }, "inputAutoUpgradeWaveX")
 
 sections.MainSection21:Toggle({
 	Name = "Focus Farm",
 	Default = false,
-	Callback = function(Value)
-		getgenv().focusFarm = Value
+	Callback = function(value)
+		getgenv().focusFarm = value
 	end,
 }, "FocusInFarm")
 
 sections.MainSection21:Toggle({
 	Name = "Focus Griffith",
 	Default = false,
-	Callback = function(Value)
-		getgenv().focusGriffith = Value
+	Callback = function(value)
+		getgenv().focusGriffith = value
 	end,
 }, "FocusInGriffith")
 
 sections.MainSection21:Toggle({
 	Name = "Auto Upgrade",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoUpgrade = Value
+	Callback = function(value)
+		getgenv().autoUpgrade = value
 		autoUpgrade()
 	end,
 }, "AutoUpgrade")
@@ -4565,8 +4564,8 @@ sections.MainSection21:Toggle({
 sections.MainSection21:Toggle({
 	Name = "Only Upgrade in X Wave",
 	Default = false,
-	Callback = function(Value)
-		getgenv().onlyupgradeinXwave = Value
+	Callback = function(value)
+		getgenv().onlyupgradeinXwave = value
 	end,
 }, "OnlyUpgradeInXWave")
 
@@ -4574,19 +4573,19 @@ sections.MainSection21:Input({
 	Name = "Start Sell at x Wave",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "Number",
-	Callback = function(Value)
-        selectedWaveToSell = Value
+	Callback = function(value)
+        selectedWaveToSell = value
 	end,
-	onChanged = function(Value)
-        selectedWaveToSell = Value
+	onChanged = function(value)
+        selectedWaveToSell = value
 	end,
 }, "inputAutoSellWaveX")
 
 sections.MainSection21:Toggle({
 	Name = "Auto Sell",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoSell = Value
+	Callback = function(value)
+		getgenv().autoSell = value
 		autoSell()
 	end,
 }, "AutoSell")
@@ -4595,19 +4594,19 @@ sections.MainSection21:Input({
 	Name = "Only Sell Farm in X Wavee",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "Number",
-	Callback = function(Value)
-        onlysellFarminXwave = Value
+	Callback = function(value)
+        onlysellFarminXwave = value
 	end,
-	onChanged = function(Value)
-        onlysellFarminXwave = Value
+	onChanged = function(value)
+        onlysellFarminXwave = value
 	end,
 }, "OnlySellFarmInXWave")
 
 sections.MainSection21:Toggle({
 	Name = "Auto Sell Farm",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoSellFarmWaveX = Value
+	Callback = function(value)
+		getgenv().autoSellFarmWaveX = value
 		autoSellFarmWaveX()
 	end,
 }, "autoSellFarmWaveX")
@@ -4616,19 +4615,19 @@ sections.MainSection21:Input({
 	Name = "Auto Leave at x Wave",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "Number",
-	Callback = function(Value)
-        selectedWaveToLeave = Value
+	Callback = function(value)
+        selectedWaveToLeave = value
 	end,
-	onChanged = function(Value)
-        selectedWaveToLeave = Value
+	onChanged = function(value)
+        selectedWaveToLeave = value
 	end,
 }, "inputAutoSellWaveX")
 
 sections.MainSection21:Toggle({
 	Name = "Auto Leave",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoLeaveInXWave = Value
+	Callback = function(value)
+		getgenv().autoLeaveInXWave = value
 		autoLeaveInXWave()
 	end,
 }, "AutoLeaveInXWave")
@@ -4641,19 +4640,19 @@ sections.MainSection22:Input({
 	Name = "Start Skill at x Wave",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "Number",
-	Callback = function(Value)
-        selectedWaveToUniversalSkill = Value
+	Callback = function(value)
+        selectedWaveToUniversalSkill = value
 	end,
-	onChanged = function(Value)
-        selectedWaveToUniversalSkill = Value
+	onChanged = function(value)
+        selectedWaveToUniversalSkill = value
 	end,
 }, "inputAutoSkillWaveX")
 
 sections.MainSection22:Toggle({
 	Name = "Auto Universal Skill",
 	Default = false,
-	Callback = function(Value)
-		getgenv().universalSkill = Value
+	Callback = function(value)
+		getgenv().universalSkill = value
 		universalSkill()
 	end,
 }, "AutoUniversalSkill")
@@ -4661,16 +4660,16 @@ sections.MainSection22:Toggle({
 sections.MainSection22:Toggle({
 	Name = "Only Universal Skill in X Wave",
 	Default = false,
-	Callback = function(Value)
-		getgenv().universalSkillinXWave = Value
+	Callback = function(value)
+		getgenv().universalSkillinXWave = value
 	end,
 }, "OnlyUniversalSkillinXWave")
 
 sections.MainSection22:Toggle({
 	Name = "Auto Sacrifice Griffith",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoSacrificeGriffith = Value
+	Callback = function(value)
+		getgenv().autoSacrificeGriffith = value
 		autoSacrificeGriffith()
 	end,
 }, "AutoSacrificeGriffith")
@@ -4678,8 +4677,8 @@ sections.MainSection22:Toggle({
 sections.MainSection22:Toggle({
 	Name = "Auto Buff Erwin",
 	Default = false,
-	Callback = function(Value)
-		toggle = Value
+	Callback = function(value)
+		toggle = value
 		if toggle then
 			UseActiveAttackE()
 		end
@@ -4689,8 +4688,8 @@ sections.MainSection22:Toggle({
 sections.MainSection22:Toggle({
 	Name = "Auto Buff Wenda",
 	Default = false,
-	Callback = function(Value)
-		toggle2 = Value
+	Callback = function(value)
+		toggle2 = value
 		if toggle2 then
 			UseActiveAttackW()
 		end
@@ -4700,8 +4699,8 @@ sections.MainSection22:Toggle({
 sections.MainSection22:Toggle({
 	Name = "Auto Buff Leafy",
 	Default = false,
-	Callback = function(Value)
-		toggle3 = Value
+	Callback = function(value)
+		toggle3 = value
 		if toggle3 then
 			UseActiveAttackL()
 		end
@@ -4722,16 +4721,16 @@ local Dropdown = sections.MainSection24:Dropdown({
 	Required = true,
 	Options = ValuesCapsules,
 	Default = None,
-	Callback = function(Value)
-		selectedCapsule = Value
+	Callback = function(value)
+		selectedCapsule = value
 	end,
 }, "dropdownSelectCapsule")
 
 sections.MainSection24:Toggle({
 	Name = "Auto Open Capsule",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoOpenCapsule = Value
+	Callback = function(value)
+		getgenv().autoOpenCapsule = value
 		autoOpenCapsule()
 	end,
 }, "AutoOpenCapsule")
@@ -4742,16 +4741,16 @@ local Dropdown = sections.MainSection24:Dropdown({
 	Required = true,
 	Options = shardsValues,
 	Default = None,
-	Callback = function(Value)
-		selectedShardtoCraft = Value
+	Callback = function(value)
+		selectedShardtoCraft = value
 	end,
 }, "dropdownSelectShardToCraft")
 
 sections.MainSection24:Toggle({
 	Name = "Auto Craft Shards",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoCraftShard = Value
+	Callback = function(value)
+		getgenv().autoCraftShard = value
 		autoCraftShard()
 	end,
 }, "autoCraftShards")
@@ -4762,16 +4761,16 @@ local Dropdown = sections.MainSection24:Dropdown({
 	Required = true,
 	Options = ValuesItemsToFeed,
 	Default = None,
-	Callback = function(Value)
-		selectedItemToBuy = Value
+	Callback = function(value)
+		selectedItemToBuy = value
 	end,
 }, "dropdownSelectItemToBuy")
 
 sections.MainSection24:Toggle({
 	Name = "Auto Buy",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoBuy = Value
+	Callback = function(value)
+		getgenv().autoBuy = value
 		autoBuy()
 	end,
 }, "AutoBuy")
@@ -4779,8 +4778,8 @@ sections.MainSection24:Toggle({
 sections.MainSection24:Toggle({
 	Name = "Auto Roll Sakamoto Event",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoRollSakamotoBanner = Value
+	Callback = function(value)
+		getgenv().autoRollSakamotoBanner = value
 		autoRollSakamotoBanner()
 	end,
 }, "autoRollSakamotoBanner")
@@ -4793,7 +4792,7 @@ tabs.Settings:InsertConfigSection("Left")
 sections.MainSection25:Toggle({
 	Name = "Hide UI when Execute",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		getgenv().hideUIExec = value
 		hideUIExec()
 	end,
@@ -4802,8 +4801,8 @@ sections.MainSection25:Toggle({
 sections.MainSection25:Toggle({
 	Name = "Auto Execute",
 	Default = false,
-	Callback = function(Value)
-		getgenv().aeuat = Value
+	Callback = function(value)
+		getgenv().aeuat = value
 		aeuat()
 	end,
 }, "AutoExecute")
@@ -4811,7 +4810,7 @@ sections.MainSection25:Toggle({
 sections.MainSection25:Toggle({
 	Name = "Blackscreen",
 	Default = false,
-	Callback = function(Value)
+	Callback = function(value)
 		blackScreen()
 	end,
 }, "BlackScreen")
@@ -4819,8 +4818,8 @@ sections.MainSection25:Toggle({
 sections.MainSection25:Toggle({
 	Name = "FPS Boost",
 	Default = false,
-	Callback = function(Value)
-        getgenv().fpsBoost = Value
+	Callback = function(value)
+        getgenv().fpsBoost = value
 		fpsBoost()
 	end,
 }, "FPSBoost")
@@ -4828,8 +4827,8 @@ sections.MainSection25:Toggle({
 sections.MainSection25:Toggle({
 	Name = "Better FPS Boost",
 	Default = false,
-	Callback = function(Value)
-        getgenv().betterFpsBoost = Value
+	Callback = function(value)
+        getgenv().betterFpsBoost = value
 		betterFpsBoost()
 	end,
 }, "BetterFPSBoost")
@@ -4837,8 +4836,8 @@ sections.MainSection25:Toggle({
 sections.MainSection25:Toggle({
 	Name = "REALLY Better FPS Boost",
 	Default = false,
-	Callback = function(Value)
-        getgenv().extremeFpsBoost = Value
+	Callback = function(value)
+        getgenv().extremeFpsBoost = value
 		extremeFpsBoost()
 	end,
 }, "REALLYBetterFPSBoost")
@@ -4851,7 +4850,7 @@ sections.MainSection25:Slider({
     Increment = 0.05,
     DisplayMethod = "Round", 
     Precision = 1,
-    Callback = function(Value)
+    Callback = function(value)
         changeUISize(value)
     end
 }, "changeUISize")
@@ -4869,9 +4868,6 @@ local player = game.Players.LocalPlayer
 MacLib:LoadConfig(player.Name .. GameConfigName)
 spawn(function()
 	while task.wait(1) do
-		if Window.Unloaded then
-			break
-		end
 		MacLib:SaveConfig(player.Name .. GameConfigName)
 	end
 end)
