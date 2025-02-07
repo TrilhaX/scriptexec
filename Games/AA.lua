@@ -195,7 +195,7 @@ local globalSettings = {
 		Name = "Show User Info",
 		Default = Window:GetUserInfoState(),
 		Callback = function(bool)
-			Window:SetUserInfoState(bool)
+			Window:SetUserInfoState(false)
 			Window:Notify({
 				Title = Window.Settings.Title,
 				Description = (bool and "Showing" or "Redacted") .. " User Info",
@@ -3404,10 +3404,9 @@ end
 
 -- Get Informations for Dropdown or other things
 
--- Função para obter os desafios
 function printChallenges(module)
 	local challengesKeys = {}
-	if module and module.challenges then
+	if module.challenges then
 		for key, value in pairs(module.challenges) do
 			table.insert(challengesKeys, key)
 		end
@@ -3415,11 +3414,10 @@ function printChallenges(module)
 	end
 end
 
--- Substituindo o require por request para carregar módulos
-local module = game:GetService("ReplicatedStorage"):WaitForChild("src"):WaitForChild("Data"):WaitForChild("ChallengeAndRewards")
+local module = require(game:GetService("ReplicatedStorage").src.Data.ChallengeAndRewards)
 local challengeValues = printChallenges(module)
 
-local Module2 = game:GetService("ReplicatedStorage"):WaitForChild("src"):WaitForChild("Data"):WaitForChild("Maps")
+local Module2 = require(game:GetService("ReplicatedStorage").src.Data.Maps)
 function getStoryMapValues(module)
 	local seen = {}
 	local values = {}
@@ -3427,7 +3425,7 @@ function getStoryMapValues(module)
 	for key, value in pairs(module) do
 		local firstPart = key:match("([^_]+)")
 
-		if firstPart and not seen[firstPart] then
+		if not seen[firstPart] then
 			seen[firstPart] = true
 			table.insert(values, firstPart)
 		end
@@ -3438,26 +3436,27 @@ end
 
 local storyMapValues = getStoryMapValues(Module2)
 
-local portals = game:GetService("ReplicatedStorage"):WaitForChild("LOBBY_ASSETS"):FindFirstChild("_portal_templates")
+local portals = game:GetService("ReplicatedStorage").LOBBY_ASSETS:FindFirstChild("_portal_templates")
 local ValuesPortalsMaps = {}
 if portals then
-	for _, v in pairs(portals:GetChildren()) do
+	for i, v in pairs(portals:GetChildren()) do
 		local nameWithoutUnderscore = string.sub(v.Name, 2)
 		table.insert(ValuesPortalsMaps, nameWithoutUnderscore)
 	end
 end
 
-local levelsModule = game:GetService("ReplicatedStorage"):WaitForChild("src"):WaitForChild("Data"):WaitForChild("Levels")
+local levelsModule = require(game:GetService("ReplicatedStorage").src.Data.Levels)
 local ChallengeMapValues = {}
 
 if type(levelsModule) == "table" then
-    for _, levelData in pairs(levelsModule) do
+    for levelName, levelData in pairs(levelsModule) do
         if levelData.id then
             table.insert(ChallengeMapValues, tostring(levelData.id))
         end
     end
 end
 
+local levelsModule = require(game:GetService("ReplicatedStorage").src.Data.Levels)
 local PortalMapValues = {}
 
 if type(levelsModule) == "table" then
@@ -3468,17 +3467,19 @@ if type(levelsModule) == "table" then
     end
 end
 
-local capsules = game:GetService("ReplicatedStorage"):WaitForChild("packages"):WaitForChild("assets"):FindFirstChild("ItemModels")
+
+local capsules = game:GetService("ReplicatedStorage").packages.assets:FindFirstChild("ItemModels")
 local ValuesCapsules = {}
 if capsules then
-	for _, v in pairs(capsules:GetChildren()) do
+	for i, v in pairs(capsules:GetChildren()) do
 		if string.find(v.Name:lower(), "capsule") then
 			table.insert(ValuesCapsules, v.Name)
 		end
 	end
 end
 
-local ShopItemsModule = game:GetService("ReplicatedStorage"):WaitForChild("src"):WaitForChild("Data"):FindFirstChild("ShopItems")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ShopItemsModule = ReplicatedStorage.src.Data:FindFirstChild("ShopItems")
 local ValuesItemShop = {}
 if ShopItemsModule then
 	local ShopItems = require(ShopItemsModule)
@@ -3490,11 +3491,21 @@ if ShopItemsModule then
 			and not string.find(tostring(value), "bundle")
 			and not string.find(tostring(value), "gift")
 		then
-			table.insert(ValuesItemShop, key)
+			table.insert(ValuesItemShop, key.Name)
 		end
 	end
 else
 	warn("Módulo ShopItems não encontrado.")
+end
+
+local itemModels = game:GetService("ReplicatedStorage"):WaitForChild("packages"):WaitForChild("assets"):FindFirstChild("ItemModels")
+local ValuesItemsToFeed = {}
+if itemModels then
+    for i, v in pairs(itemModels:GetChildren()) do
+        table.insert(ValuesItemsToFeed, v.Name)
+    end
+else
+    warn("ItemModels not found!")
 end
 
 local fxCache = game:GetService("ReplicatedStorage"):FindFirstChild("_FX_CACHE")
@@ -3503,18 +3514,18 @@ if fxCache then
     for _, v in pairs(fxCache:GetChildren()) do
         if v.Name == "CollectionUnitFrame" then
             local collectionUnitFrame = v
-            table.insert(ValuesUnitId, collectionUnitFrame.name.Text .. " | Level: " .. collectionUnitFrame.Main.Level.Text .. " | " .. collectionUnitFrame._uuid.Value)
+            table.insert(ValuesUnitId,collectionUnitFrame.name.Text .. " | Level: " .. collectionUnitFrame.Main.Level.Text .. " | " .. collectionUnitFrame._uuid.Value)
         end
     end
 end
 
-local namePortal = game:GetService("ReplicatedStorage"):WaitForChild("packages"):WaitForChild("assets"):FindFirstChild("ItemModels")
+local namePortal = game:GetService("ReplicatedStorage").packages.assets:FindFirstChild("ItemModels")
 local ValuesPortalName = {}
 
 if namePortal then
-    for _, v in pairs(namePortal:GetChildren()) do
+    for i, v in pairs(namePortal:GetChildren()) do
         if string.find(v.Name:lower(), "portal") then
-            table.insert(ValuesPortalName, v.Name)
+            table.insert(ValuesPortalName,v.Name)
         end
     end
 end
@@ -3522,7 +3533,7 @@ end
 local Players = game.Players
 local ValuesPlayersName = {}
 
-for _, v in pairs(Players:GetChildren()) do
+for i, v in pairs(Players:GetChildren()) do
     if v.Name ~= game.Players.LocalPlayer.Name then
         table.insert(ValuesPlayersName, v.Name)
     end
