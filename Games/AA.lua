@@ -1990,6 +1990,8 @@ end
 
 function autoPlace()
 	while getgenv().autoPlace == true do
+		local distancePercentage = distancePercentage or 100
+		local GroundPercentage = GroundPercentage or 100
 		if getgenv().OnlyautoPlace == true then
 			local wave = workspace:FindFirstChild("_wave_num")
 			if selectedWaveToPlace == wave then
