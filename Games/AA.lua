@@ -63,6 +63,10 @@ getgenv().autoBuy = false
 getgenv().autoRollSakamotoBanner = false
 getgenv().hideUIExec = false
 
+local distancePercentage
+local GroundPercentage
+local HillPercentage
+
 local Window = MacLib:Window({
     Title = "Tempest Hub",
     Subtitle = "Anime Adventures",
@@ -1990,11 +1994,177 @@ end
 
 function autoPlace()
 	while getgenv().autoPlace == true do
-		local distancePercentage = distancePercentage or 100
-		local GroundPercentage = GroundPercentage or 100
-		if getgenv().OnlyautoPlace == true then
-			local wave = workspace:FindFirstChild("_wave_num")
-			if selectedWaveToPlace == wave then
+		if getgenv().loadedallscript == true then	
+			if getgenv().OnlyautoPlace == true then
+				local wave = workspace:FindFirstChild("_wave_num")
+				if selectedWaveToPlace == wave then
+					local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+					local success, upvalues = pcall(debug.getupvalues, Loader.init)
+					
+					if not success then
+						warn("Failed to get upvalues from Loader.init")
+						return
+					end
+					
+					local Modules = {
+						["CORE_CLASS"] = upvalues[6],
+						["CORE_SERVICE"] = upvalues[7],
+						["SERVER_CLASS"] = upvalues[8],
+						["SERVER_SERVICE"] = upvalues[9],
+						["CLIENT_CLASS"] = upvalues[10],
+						["CLIENT_SERVICE"] = upvalues[11],
+					}
+					
+					local StatsServiceClient = Modules["CLIENT_SERVICE"] and Modules["CLIENT_SERVICE"]["StatsServiceClient"]
+					
+					local unitTypes = {}
+					local restrictedUnits = {"erwin", "wendy", "Leafy"}
+					
+					function createAreaVisualization(center, radius)
+						local area = Instance.new("Part")
+						area.Name = "UnitSpawnArea"
+						area.Size = Vector3.new(radius * 2, 0.1, radius * 2)
+						area.Position = center + Vector3.new(0, 0.05, 0)
+						area.Anchored = true
+						area.CanCollide = false
+						area.Transparency = 0.5
+						area.Color = Color3.fromRGB(0, 255, 0)
+						area.Shape = Enum.PartType.Cylinder
+						area.Orientation = Vector3.new(90, 0, 0)
+						area.Parent = workspace
+						return area
+					end
+					
+					function getRandomPositionAroundWaypoint(waypointPosition, radius)
+						local angle = math.random() * (2 * math.pi)
+						local distance = math.random() * radius
+						local offset = Vector3.new(math.cos(angle) * distance, 0, math.sin(angle) * distance)
+						return waypointPosition + offset
+					end
+					
+					function GetCFrame(position, rotationX, rotationY, isAerial)
+						if isAerial then
+							return CFrame.new(position.X, position.Y + 20, position.Z) * CFrame.Angles(math.rad(rotationX), math.rad(rotationY), 0)
+						else
+							return CFrame.new(position) * CFrame.Angles(math.rad(rotationX), math.rad(rotationY), 0)
+						end
+					end
+					
+					function alternarUnidadeTipo(unitID)
+						if not unitTypes[unitID] then
+							local isAerial = math.random() < 0.5
+							unitTypes[unitID] = isAerial and "aerea" or "terrestre"
+						end
+					end
+					
+					function checkEquippedAgainstOwnedAutoPlace()
+						local ownedUnits = StatsServiceClient.module.session.collection.collection_profile_data.owned_units
+						local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
+						local matchedUUIDs = {}
+						local unitNames = {}
+					
+						for _, equippedUUID in pairs(equippedUnits) do
+							for key, unitData in pairs(ownedUnits) do
+								if tostring(equippedUUID) == tostring(key) then
+									table.insert(matchedUUIDs, key)
+									unitNames[key] = unitData.unit_id
+								end
+							end
+						end
+					
+						return matchedUUIDs, unitNames
+					end
+					
+					function isFemtoInMapAutoPlace()
+						for _, unit in pairs(workspace:GetChildren()) do
+							if unit:IsA("Model") and (unit.Name == "griffith_reincarnation" or unit.Name == "femto_egg") then
+								return true
+							end
+						end
+						return false
+					end
+					
+					function placeUnit(unitID, waypoint, radius)
+						alternarUnidadeTipo(unitID)
+						local isAerial = unitTypes[unitID] == "aerea"
+					
+						local spawnPosition = getRandomPositionAroundWaypoint(waypoint.Position, radius)
+						local spawnCFrame = GetCFrame(spawnPosition, 0, 0, isAerial)
+					
+						local matchedUnits, unitNames = checkEquippedAgainstOwnedAutoPlace()
+					
+						for _, matchedID in pairs(matchedUnits) do
+							if matchedID == unitID then
+								local unitName = unitNames[unitID] or "Unknown"
+								
+								if getgenv().autoSacrificeGriffith == true and workspace._UNITS:FindFirstChild("femto_egg") then
+									if table.find(restrictedUnits, unitName) and not isFemtoInMapAutoPlace() then
+										print("Skipping unit:", unitName, "until a Femto is in the map.")
+										return
+									end
+								end
+					
+								if unitName == "femto_egg" and not isFemtoInMapAutoPlace() then
+									local oppositePosition = waypoint.Position + Vector3.new(25, 0, 25)
+									local oppositeCFrame = GetCFrame(oppositePosition, 0, 0, false)
+									game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unitID, oppositeCFrame)
+								else
+									game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unitID, spawnCFrame)
+								end
+							end
+						end
+					end
+					
+					function placeUnitsWithFemtoPriority(equippedUnits, waypoints, radiusMax)
+						local femtoEggInTeam = false
+						local femtoEggID = nil
+					
+						for _, unitID in pairs(equippedUnits) do
+							local matchedUnits, unitNames = checkEquippedAgainstOwnedAutoPlace()
+							for _, matchedID in pairs(matchedUnits) do
+								local unitName = unitNames[matchedID]
+								if unitName == "femto_egg" then
+									femtoEggInTeam = true
+									femtoEggID = unitID
+									break
+								end
+							end
+							if femtoEggInTeam then break end
+						end
+					
+						local unitQueue = {}
+					
+						if femtoEggInTeam then
+							table.insert(unitQueue, femtoEggID)
+						end
+					
+						for _, unitID in pairs(equippedUnits) do
+							if unitID ~= femtoEggID then
+								table.insert(unitQueue, unitID)
+							end
+						end
+					
+						local totalWaypoints = #waypoints
+						local waypointStep = totalWaypoints / 100
+						local radiusStep = radiusMax / 100
+					
+						for _, unitID in pairs(unitQueue) do
+							local selectedWaypointIndex = math.clamp(math.floor(distancePercentage * waypointStep), 1, totalWaypoints)
+							local selectedRadius = math.clamp(GroundPercentage * radiusStep, 1, radiusMax)
+							local waypoint = waypoints[selectedWaypointIndex]
+							placeUnit(unitID, waypoint, selectedRadius)
+						end
+					end
+					
+					if StatsServiceClient and StatsServiceClient.module and StatsServiceClient.module.session and StatsServiceClient.module.session.collection and StatsServiceClient.module.session.collection.collection_profile_data and StatsServiceClient.module.session.collection.collection_profile_data.equipped_units then
+						local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
+						local waypoints = workspace._BASES.pve.LANES["1"]:GetChildren()
+						local radiusMax = 15
+					
+						placeUnitsWithFemtoPriority(equippedUnits, waypoints, radiusMax)
+					end
+				end
+			else
 				local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
 				local success, upvalues = pcall(debug.getupvalues, Loader.init)
 				
@@ -2160,172 +2330,6 @@ function autoPlace()
 				
 					placeUnitsWithFemtoPriority(equippedUnits, waypoints, radiusMax)
 				end
-			end
-		else
-			local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-			local success, upvalues = pcall(debug.getupvalues, Loader.init)
-			
-			if not success then
-				warn("Failed to get upvalues from Loader.init")
-				return
-			end
-			
-			local Modules = {
-				["CORE_CLASS"] = upvalues[6],
-				["CORE_SERVICE"] = upvalues[7],
-				["SERVER_CLASS"] = upvalues[8],
-				["SERVER_SERVICE"] = upvalues[9],
-				["CLIENT_CLASS"] = upvalues[10],
-				["CLIENT_SERVICE"] = upvalues[11],
-			}
-			
-			local StatsServiceClient = Modules["CLIENT_SERVICE"] and Modules["CLIENT_SERVICE"]["StatsServiceClient"]
-			
-			local unitTypes = {}
-			local restrictedUnits = {"erwin", "wendy", "Leafy"}
-			
-			function createAreaVisualization(center, radius)
-				local area = Instance.new("Part")
-				area.Name = "UnitSpawnArea"
-				area.Size = Vector3.new(radius * 2, 0.1, radius * 2)
-				area.Position = center + Vector3.new(0, 0.05, 0)
-				area.Anchored = true
-				area.CanCollide = false
-				area.Transparency = 0.5
-				area.Color = Color3.fromRGB(0, 255, 0)
-				area.Shape = Enum.PartType.Cylinder
-				area.Orientation = Vector3.new(90, 0, 0)
-				area.Parent = workspace
-				return area
-			end
-			
-			function getRandomPositionAroundWaypoint(waypointPosition, radius)
-				local angle = math.random() * (2 * math.pi)
-				local distance = math.random() * radius
-				local offset = Vector3.new(math.cos(angle) * distance, 0, math.sin(angle) * distance)
-				return waypointPosition + offset
-			end
-			
-			function GetCFrame(position, rotationX, rotationY, isAerial)
-				if isAerial then
-					return CFrame.new(position.X, position.Y + 20, position.Z) * CFrame.Angles(math.rad(rotationX), math.rad(rotationY), 0)
-				else
-					return CFrame.new(position) * CFrame.Angles(math.rad(rotationX), math.rad(rotationY), 0)
-				end
-			end
-			
-			function alternarUnidadeTipo(unitID)
-				if not unitTypes[unitID] then
-					local isAerial = math.random() < 0.5
-					unitTypes[unitID] = isAerial and "aerea" or "terrestre"
-				end
-			end
-			
-			function checkEquippedAgainstOwnedAutoPlace()
-				local ownedUnits = StatsServiceClient.module.session.collection.collection_profile_data.owned_units
-				local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
-				local matchedUUIDs = {}
-				local unitNames = {}
-			
-				for _, equippedUUID in pairs(equippedUnits) do
-					for key, unitData in pairs(ownedUnits) do
-						if tostring(equippedUUID) == tostring(key) then
-							table.insert(matchedUUIDs, key)
-							unitNames[key] = unitData.unit_id
-						end
-					end
-				end
-			
-				return matchedUUIDs, unitNames
-			end
-			
-			function isFemtoInMapAutoPlace()
-				for _, unit in pairs(workspace:GetChildren()) do
-					if unit:IsA("Model") and (unit.Name == "griffith_reincarnation" or unit.Name == "femto_egg") then
-						return true
-					end
-				end
-				return false
-			end
-			
-			function placeUnit(unitID, waypoint, radius)
-				alternarUnidadeTipo(unitID)
-				local isAerial = unitTypes[unitID] == "aerea"
-			
-				local spawnPosition = getRandomPositionAroundWaypoint(waypoint.Position, radius)
-				local spawnCFrame = GetCFrame(spawnPosition, 0, 0, isAerial)
-			
-				local matchedUnits, unitNames = checkEquippedAgainstOwnedAutoPlace()
-			
-				for _, matchedID in pairs(matchedUnits) do
-					if matchedID == unitID then
-						local unitName = unitNames[unitID] or "Unknown"
-						
-						if getgenv().autoSacrificeGriffith == true and workspace._UNITS:FindFirstChild("femto_egg") then
-							if table.find(restrictedUnits, unitName) and not isFemtoInMapAutoPlace() then
-								print("Skipping unit:", unitName, "until a Femto is in the map.")
-								return
-							end
-						end
-			
-						if unitName == "femto_egg" and not isFemtoInMapAutoPlace() then
-							local oppositePosition = waypoint.Position + Vector3.new(25, 0, 25)
-							local oppositeCFrame = GetCFrame(oppositePosition, 0, 0, false)
-							game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unitID, oppositeCFrame)
-						else
-							game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("spawn_unit"):InvokeServer(unitID, spawnCFrame)
-						end
-					end
-				end
-			end
-			
-			function placeUnitsWithFemtoPriority(equippedUnits, waypoints, radiusMax)
-				local femtoEggInTeam = false
-				local femtoEggID = nil
-			
-				for _, unitID in pairs(equippedUnits) do
-					local matchedUnits, unitNames = checkEquippedAgainstOwnedAutoPlace()
-					for _, matchedID in pairs(matchedUnits) do
-						local unitName = unitNames[matchedID]
-						if unitName == "femto_egg" then
-							femtoEggInTeam = true
-							femtoEggID = unitID
-							break
-						end
-					end
-					if femtoEggInTeam then break end
-				end
-			
-				local unitQueue = {}
-			
-				if femtoEggInTeam then
-					table.insert(unitQueue, femtoEggID)
-				end
-			
-				for _, unitID in pairs(equippedUnits) do
-					if unitID ~= femtoEggID then
-						table.insert(unitQueue, unitID)
-					end
-				end
-			
-				local totalWaypoints = #waypoints
-				local waypointStep = totalWaypoints / 100
-				local radiusStep = radiusMax / 100
-			
-                for _, unitID in pairs(unitQueue) do
-                    local selectedWaypointIndex = math.clamp(math.floor(distancePercentage * waypointStep), 1, totalWaypoints)
-                    local selectedRadius = math.clamp(GroundPercentage * radiusStep, 1, radiusMax)
-                    local waypoint = waypoints[selectedWaypointIndex]
-                    placeUnit(unitID, waypoint, selectedRadius)
-                end
-			end
-			
-			if StatsServiceClient and StatsServiceClient.module and StatsServiceClient.module.session and StatsServiceClient.module.session.collection and StatsServiceClient.module.session.collection.collection_profile_data and StatsServiceClient.module.session.collection.collection_profile_data.equipped_units then
-				local equippedUnits = StatsServiceClient.module.session.collection.collection_profile_data.equipped_units
-				local waypoints = workspace._BASES.pve.LANES["1"]:GetChildren()
-				local radiusMax = 15
-			
-				placeUnitsWithFemtoPriority(equippedUnits, waypoints, radiusMax)
 			end
 		end
 		wait()
@@ -4477,7 +4481,7 @@ sections.MainSection21:Slider({
 	DisplayMethod = "Percent",
 	Precision = 1,
 	Callback = function(Value)
-		distancePercentage = Value
+		distancePercentage = math.round(Value) or MacLib.Options.distancePercentage.Value
 	end
 }, "distancePercentage")
 
@@ -4489,7 +4493,7 @@ sections.MainSection21:Slider({
 	DisplayMethod = "Percent",
 	Precision = 1,
 	Callback = function(Value)
-		GroundPercentage = Value
+		GroundPercentage = math.round(Value) or MacLib.Options.GroundPercentage.Value
 	end,
 }, "GroundPercentage")
 
@@ -4501,19 +4505,22 @@ sections.MainSection21:Slider({
 	DisplayMethod = "Percent",
 	Precision = 1,
 	Callback = function(Value)
-		HillPercentage = Value
+		HillPercentage = math.round(Value) or MacLib.Options.HillPercentage.Value
 	end,
 }, "HillPercentage")
 
 sections.MainSection21:Toggle({
-	Name = "Auto Place",
-	Default = false,
-	Callback = function(value)
-		getgenv().autoPlace = value
-		if value then
-			autoPlace()
-		end
-	end,
+    Name = "Auto Place",
+    Default = false,
+    Callback = function(value)
+        getgenv().autoPlace = value
+        if value then
+			distancePercentage = MacLib.Options.distancePercentage.Value
+            GroundPercentage = MacLib.Options.GroundPercentage.Value
+            HillPercentage = MacLib.Options.HillPercentage.Value
+            autoPlace()
+        end
+    end,
 }, "AutoPlace")
 
 sections.MainSection21:Toggle({
@@ -4880,3 +4887,4 @@ warn("[TEMPEST HUB] Loaded")
 createBC()
 createInfoUnit()
 hideUI()
+getgenv().loadedallscript = true
