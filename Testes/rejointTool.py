@@ -26,29 +26,34 @@ def is_window_frozen(pid):
         return False
     return False
 
-def open_roblox(place_id):
+def open_roblox(place_id, linkcodeVip):
     """Open Roblox with a specific place ID."""
-    url = f"roblox://placeId={place_id}"
+    url = f"roblox://placeId={place_id}privateServerLinkCode={linkcodeVip}"
     try:
         os.startfile(url)
-        print(f"Tentando abrir Roblox com o placeId: {place_id}")
+        print(f"Attempting to open Roblox with placeId: {place_id}")
     except Exception as e:
-        print(f"Erro ao tentar abrir Roblox: {e}")
+        print(f"Error trying to open Roblox: {e}")
 
 def main():
-    place_id = 8304191830  # Substitua pelo ID do lugar desejado
+    print("Please enter the place ID:")
+    place_id = input("Place ID: ")
+
+    print("Please enter the private server link code:")
+    linkcodeVip = input("Link Code: ")
+
     while True:
         roblox_process = is_roblox_open()
         if roblox_process:
             pid = roblox_process.pid
             if is_window_frozen(pid):
-                print("Roblox está congelado!")
-                open_roblox(place_id)
+                print("Roblox is frozen!")
+                open_roblox(place_id, linkcodeVip)
         else:
-            print("Roblox não está aberto.")
-            open_roblox(place_id)
+            print("Roblox is not open.")
+            open_roblox(place_id, linkcodeVip)
 
-        time.sleep(5)  # Verificar a cada 5 segundos
+        time.sleep(5)
 
 if __name__ == "__main__":
     main()

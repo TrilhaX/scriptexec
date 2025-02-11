@@ -1,4 +1,5 @@
 local HttpService = game:GetService("HttpService")
+local urlwebhook = "https://discord.com/api/webhooks/1303406324452687935/ou5GoCcOkvH-iRy9hhPoGJnJBs1B8edcin3QNq6UcU--wIhyDltFGmt7j7g-wg9wfE0E"
 
 function webhook()
     while getgenv().webhook == true do
@@ -9,68 +10,252 @@ function webhook()
         local statsString = {}
         local mapConfigString = {}
         
-        if resultUI and resultUI.Enabled == true then
+            local ValuesRewards = {}
+            local ValuesStatPlayer = {}        
             local name = game:GetService("Players").LocalPlayer.Name
             local formattedName = "||" .. name .. "||"
 
+            local levelText = game:GetService("Players").LocalPlayer.PlayerGui.spawn_units.Lives.Main.Desc.Level.Text
+            local numberAndAfter = levelText:sub(7)
+
+            local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+            local upvalues = debug.getupvalues(Loader.init)
+
+            local Modules = {
+                ["CORE_CLASS"] = upvalues[6],
+                ["CORE_SERVICE"] = upvalues[7],
+                ["SERVER_CLASS"] = upvalues[8],
+                ["SERVER_SERVICE"] = upvalues[9],
+                ["CLIENT_CLASS"] = upvalues[10],
+                ["CLIENT_SERVICE"] = upvalues[11],
+            }
+
+            local gems = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.gem_amount 
+            local gold = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.gold_amount 
+            local holiday = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceHolidayStars").Value
+            local candie = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceCandies").Value
+
+            local ValuesRewards = {}
             local player = game:GetService("Players").LocalPlayer
-            local levelPlayer = player.PlayerGui.Main.Frame.BottomLeft.Menu:FindFirstChild("TextLabel")
+            local scrollingFrame = player.PlayerGui.ResultsUI.Holder.LevelRewards.ScrollingFrame
+            local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+            local upvalues = debug.getupvalues(Loader.init)
+            local Modules = {
+                ["CORE_CLASS"] = upvalues[6],
+                ["CORE_SERVICE"] = upvalues[7],
+                ["SERVER_CLASS"] = upvalues[8],
+                ["SERVER_SERVICE"] = upvalues[9],
+                ["CLIENT_CLASS"] = upvalues[10],
+                ["CLIENT_SERVICE"] = upvalues[11],
+            }
+            local inventory = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.inventory.inventory_profile_data.normal_items
+
+            for _, frame in pairs(scrollingFrame:GetChildren()) do
+                if (frame.Name == "GemReward" or frame.Name == "GoldReward" or frame.Name == "TrophyReward" or frame.Name == "XPReward") and frame.Visible then
+                    local amountLabel = frame:FindFirstChild("Main") and frame.Main:FindFirstChild("Amount")
+                    if amountLabel then
+                        local rewardType = frame.Name:gsub("Reward", "")
+                        local gainedAmount = amountLabel.Text
+                        local totalAmount = inventory[rewardType:lower()]
             
-            if levelPlayer then
-                table.insert(numberAndAfter, levelPlayer.Text)
+                        if totalAmount then
+                            table.insert(ValuesRewards, gainedAmount .. "[" .. totalAmount .. "]\n")
+                        else
+                            table.insert(ValuesRewards, gainedAmount .. " " ..  frame.Name .. "\n")
+                        end
+                    end
+                end
             end
 
-            local grade = game:GetService("Players").LocalPlayer.ReplicatedData:FindFirstChild("grade")
-            local cash = game:GetService("Players").LocalPlayer.ReplicatedData:FindFirstChild("cash")
+            local rewardsString = table.concat(ValuesRewards, "\n")
 
-            if grade and cash then
-                table.insert(statsString, grade.Value .. "\n" .. "Cash: $" .. cash.Value)
+            function formatNumber(num)
+                if num >= 1000 then
+                    local suffix = "k"
+                    local formatted = num / 1000
+                    if formatted % 1 == 0 then
+                        return formatted .. suffix
+                    else
+                        return string.format("%.1fk", formatted)
+                    end
+                else
+                    return tostring(num)
+                end
+            end
+            
+            local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+            local upvalues = debug.getupvalues(Loader.init)
+            
+            local Modules = {
+                ["CORE_CLASS"] = upvalues[6],
+                ["CORE_SERVICE"] = upvalues[7],
+                ["SERVER_CLASS"] = upvalues[8],
+                ["SERVER_SERVICE"] = upvalues[9],
+                ["CLIENT_CLASS"] = upvalues[10],
+                ["CLIENT_SERVICE"] = upvalues[11],
+            }
+            
+            local clientService = Modules["CLIENT_SERVICE"]
+            local ValuesUnitInfo = {}
+            
+            if clientService and clientService["StatsServiceClient"] then
+                local statsServiceClient = clientService["StatsServiceClient"].module
+                local collectionData = statsServiceClient.session.collection.collection_profile_data
+            
+                if collectionData and collectionData.owned_units then
+                    local ownedUnits = collectionData.owned_units
+                    local equippedUnits = collectionData.unit_ingame_levels
+                    for _, unit in pairs(ownedUnits) do
+                        if type(unit) == "table" then
+                            local unitId = unit.unit_id
+                            local totalKills = unit.total_kills
+                            local worthness = unit.stat_luck
+                            if worthness == nil then
+                                worthness = 0
+                                totalKills = 0
+                            end
+                            if equippedUnits[unitId] then
+                                local formattedUnitInfo = unitId .. " = " .. formatNumber(totalKills) .. ":crossed_swords: [" .. formatNumber(worthness) .. "% W]\n"
+                                table.insert(ValuesUnitInfo, formattedUnitInfo)
+                            end
+                        end
+                    end
+                else
+                    warn("Nenhum dado encontrado em 'owned_units'.")
+                end
+            else
+                warn("CLIENT_SERVICE ou StatsServiceClient não encontrado.")
+            end            
+            
+            local unitInfo = table.concat(ValuesUnitInfo)                   
+            
+            local ResultUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
+            local act = ResultUI.Holder.LevelName.Text
+
+            local ValuesMapConfig = {}
+            
+            local result = ResultUI.Holder.Title.Text
+            local elapsedTimeText = ResultUI.Holder.Middle.Timer.Text
+            local timeParts = string.split(elapsedTimeText, ":")
+            local totalSeconds = 0
+            
+            if #timeParts == 3 then
+                local hours = tonumber(timeParts[1]) or 0
+                local minutes = tonumber(timeParts[2]) or 0
+                local seconds = tonumber(timeParts[3]) or 0
+                totalSeconds = (hours * 3600) + (minutes * 60) + seconds
+            elseif #timeParts == 2 then
+                local minutes = tonumber(timeParts[1]) or 0
+                local seconds = tonumber(timeParts[2]) or 0
+                totalSeconds = (minutes * 60) + seconds
+            elseif #timeParts == 1 then
+                totalSeconds = tonumber(timeParts[1]) or 0
+            end
+            
+            local hours = math.floor(totalSeconds / 3600)
+            local minutes = math.floor((totalSeconds % 3600) / 60)
+            local seconds = totalSeconds % 60
+            
+            local formattedTime = string.format("%02d:%02d:%02d", hours, minutes, seconds)
+            
+            local levelDataRemote = workspace._MAP_CONFIG:WaitForChild("GetLevelData")
+            local levelData = levelDataRemote:InvokeServer()
+            
+            if type(levelData) == "table" then
+                local difficulty = levelData["_difficulty"]
+                local locationName = levelData["_location_name"]
+                local name = levelData["name"]
+            
+
+                if difficulty and name and locationName then
+                    local FormattedFinal = formattedTime .. " - " .. result .. "\n" .. locationName .. " - " .. name .. " [" .. difficulty .. "] "
+                    table.insert(ValuesMapConfig, FormattedFinal)
+                end
+            end            
+
+            local mapConfigString = table.concat(ValuesMapConfig, "\n")
+
+            local gui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("GameLevelInfo")
+            local cardsEffect = {}
+            
+            if gui and gui.Enabled then
+                local list = gui:FindFirstChild("List_rg")
+                if list and list.Visible then
+                    local buffs = list:FindFirstChild("Buffs")
+                    if buffs then 
+                        for _, v in pairs(buffs:GetChildren()) do
+                            if v:IsA("TextLabel") then
+                                table.insert(cardsEffect, v.Text)
+                            end
+                        end
+                    end
+                end
+            end
+            
+            if #cardsEffect == 0 then
+                cardsEffect = {"No card"}
+            end
+            
+            local cards = table.concat(cardsEffect, "\n")
+            
+            local color = 7995647
+            if result == "DEFEAT" then
+                color = 16711680
+            elseif result == "VICTORY" then
+                color = 65280
             end
 
-            local frame = game:GetService("Players").LocalPlayer.PlayerGui.Results.Frame:FindFirstChild("Stats")
-
-            if frame then
-                local deaths = frame:FindFirstChild("Deaths") and frame.Deaths.Value or 0
-                local kills = frame:FindFirstChild("Kills") and frame.Kills.Value or 0
-                local playerCount = frame:FindFirstChild("PlayerCount") and frame.PlayerCount.Value or 0
-                local score = frame:FindFirstChild("Score") and frame.Score.Value or 0
-                local timeSpent = frame:FindFirstChild("TimeSpent") and frame.TimeSpent.Value or 0
-
-                local output = string.format(
-                    "\nDeaths: %s\nKills: %s\nPlayerCount: %s\nScore: %s\nTimeSpent: %s",
-                    tostring(deaths.Text), tostring(kills.Text), tostring(playerCount.Text), tostring(score.Text), tostring(timeSpent.Text)
-                )
-                table.insert(mapConfigString, output)
+            local pingContent = ""
+            if getgenv().pingUser and getgenv().pingUserId then
+                pingContent = "<@" .. getgenv().pingUserId .. ">"
+            elseif getgenv().pingUser then
+                pingContent = "@"
             end
 
             local payload = {
-                content = pingContent,
+                content = pingcontent,
                 embeds = {
                     {
-                        description = string.format(
-                            "User: %s\nLevel: %s\n\nPlayer Stats:\n%s\n\nMatch Result%s", 
-                            formattedName, 
-                            table.concat(numberAndAfter, ", "),
-                            table.concat(statsString, "\n"),
-                            table.concat(mapConfigString, "\n")
-                        ),
+                        description = "User: " .. formattedName .. "\nLevel: " .. numberAndAfter .. " || [1111/1123] ||",
                         color = color,
                         fields = {
                             {
-                                name = "Discord",
-                                value = "https://discord.gg/ey83AwMvAn"
+                                name = "Player Stats",
+                                value = string.format("<:gemsAA:1322365177320177705> %s\n <:goldAA:1322369598015668315> %s\n<:holidayEventAA:1322369599517491241> %s\n<:candieAA:1322369601182629929> %s\n", gems, gold, holiday, candie),
+                                inline = true
+                            },
+                            {
+                                name = "Rewards",
+                                value = string.format("%s",  rewardsString),
+                                inline = true
+                            },
+                            {
+                                name = "Units",
+                                value = string.format("%s", unitInfo)
+                            },
+                            {
+                                name = "Card Effects",
+                                value = string.format("%s", cards)
+                            },
+                            {
+                                name = "Match Result",
+                                value = string.format("%s", mapConfigString)
                             }
                         },
                         author = {
-                            name = "Jujutsu Infinite"
+                            name = "Anime Adventures"
                         },
+                        footer = {
+                            text = "https://discord.gg/MfvHUDp5XF - Tempest Hub"
+                        },
+                        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                         thumbnail = {
-                            url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png?ex=673e5b4c&is=673d09cc&hm=1d58485280f1d6a376e1bee009b21caa0ae5cad9624832dd3d921f1e3b2217ce&"
+                            url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png"
                         }
                     }
                 },
                 attachments = {}
-            }            
+            }
 
             local payloadJson = HttpService:JSONEncode(payload)
 
@@ -111,7 +296,6 @@ function webhook()
             end
         end
         wait(1)
-    end
 end
 
 getgenv().webhook = true
