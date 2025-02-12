@@ -8,17 +8,21 @@ local ScrollingFrame = Instance.new("ScrollingFrame")
 local UIGridLayout = Instance.new("UIGridLayout")
 local Template = Instance.new("Frame")
 local ImageLabel = Instance.new("ImageLabel")
-local upgradeLabel = Instance.new("TextLabel")
+local TextLabel = Instance.new("TextLabel")
 local Buttons = Instance.new("Frame")
 local upgradeImageButton = Instance.new("ImageButton")
 local sellImageButton = Instance.new("ImageButton")
 local skillImageButton = Instance.new("ImageButton")
+local UIGridLayout = Instance.new("UIGridLayout")
 local UIGridLayout_2 = Instance.new("UIGridLayout")
+local UIGridLayout_3 = Instance.new("UIGridLayout")
+local UIGridLayout_4 = Instance.new("UIGridLayout")
+local UIGridLayout_5 = Instance.new("UIGridLayout")
+local UIGridLayout_6 = Instance.new("UIGridLayout")
 local UIListLayout = Instance.new("UIListLayout")
 local BottomButtons = Instance.new("Frame")
 local CloseButton = Instance.new("TextButton")
 local SellAllButton = Instance.new("TextButton")
-local UIGridLayout_3 = Instance.new("UIGridLayout")
 local BackgroundOpenUnitManagerFrame = Instance.new("Frame")
 local backgroundBUttonPressFrame = Instance.new("Frame")
 local TextLabel = Instance.new("TextLabel")
@@ -29,14 +33,6 @@ local UICorner3 = Instance.new("UICorner")
 local UICorner4 = Instance.new("UICorner")
 local UICorner5 = Instance.new("UICorner")
 local UICorner6 = Instance.new("UICorner")
-
-local bcUMFrame = game.Players.LocalPlayer.PlayerGui.UnitManagerGui.BackgroundUnitManagerFrame
-local bcOUMFrame = game.Players.LocalPlayer.PlayerGui.UnitManagerGui.BackgroundOpenUnitManagerFrame.TextButton
-local closeUnitManager = game.Players.LocalPlayer.PlayerGui.UnitManagerGui.BackgroundUnitManagerFrame.BottomButtons.CloseButton
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-local u = game:GetService("UserInputService")
-local units = workspace._UNITS
 
 UnitManagerGui.Name = "UnitManagerGui"
 UnitManagerGui.Parent = game.Players.LocalPlayer.PlayerGui
@@ -106,12 +102,7 @@ ScrollingFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 ScrollingFrame.Size = UDim2.new(1, 0, 1, 0)
 ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ScrollingFrame.ScrollBarThickness = 7
-
-UIGridLayout.Parent = ScrollingFrame
-UIGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIGridLayout.CellPadding = UDim2.new(0.0500000000, 5, 0.0500000000, 5)
-UIGridLayout.CellSize = UDim2.new(0, 120, 0, 120)
+ScrollingFrame.AutomaticCanvasSize = "Y"
 
 BottomButtons.Name = "BottomButtons"
 BottomButtons.Parent = BackgroundUnitManagerFrame
@@ -209,39 +200,93 @@ TextButton.TextScaled = true
 TextButton.TextSize = 14
 TextButton.TextWrapped = true
 
-function templateClone(unitName, upgrade)
-    Template.Name = unitName
-    Template.Parent = ScrollingFrame
-    Template.AnchorPoint = Vector2.new(0.5, 0.5)
-    Template.BackgroundColor3 = Color3.new(1, 1, 1)
-    Template.BackgroundTransparency = 1
-    Template.BorderColor3 = Color3.new(0, 0, 0)
-    Template.BorderSizePixel = 0
-    Template.Position = UDim2.new(0.180000007, 0, 0.0659999996, 0)
-    Template.Size = UDim2.new(0, 150, 0, 140)
+Template.Name = "Template"
+Template.Parent = ScrollingFrame
+Template.AnchorPoint = Vector2.new(0.5, 0.5)
+Template.BackgroundColor3 = Color3.new(1, 1, 1)
+Template.BackgroundTransparency = 1
+Template.BorderColor3 = Color3.new(0, 0, 0)
+Template.BorderSizePixel = 0
+Template.Position = UDim2.new(0.180000007, 0, 0.0659999996, 0)
+Template.Size = UDim2.new(0, 150, 0, 140)
+Template.Visible = false
 
-    ImageLabel.Parent = Template
-    ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    ImageLabel.BackgroundColor3 = Color3.new(1, 1, 1)
-    ImageLabel.BorderColor3 = Color3.new(0, 0, 0)
-    ImageLabel.BorderSizePixel = 0
-    ImageLabel.Position = UDim2.new(0.5, 0, 0.307970852, 0)
-    ImageLabel.Size = UDim2.new(0, 120, 0, 120)
+TextLabel.Parent = ImageLabel
+TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+TextLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+TextLabel.BackgroundTransparency = 1
+TextLabel.BorderColor3 = Color3.new(0, 0, 0)
+TextLabel.BorderSizePixel = 0
+TextLabel.Position = UDim2.new(0.5, 12, 0.100000001, 5)
+TextLabel.Size = UDim2.new(0, 120, 0, 20)
+TextLabel.Font = Enum.Font.Unknown
+TextLabel.Text = "Upgrade: "
+TextLabel.TextColor3 = Color3.new(0, 0, 0)
+TextLabel.TextScaled = true
+TextLabel.TextSize = 14
+TextLabel.TextWrapped = true
+TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-    upgradeLabel.Parent = Template
-    upgradeLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    upgradeLabel.BackgroundColor3 = Color3.new(1, 1, 1)
-    upgradeLabel.BackgroundTransparency = 1
-    upgradeLabel.BorderColor3 = Color3.new(0, 0, 0)
-    upgradeLabel.BorderSizePixel = 0
-    upgradeLabel.Position = UDim2.new(0.5, 0, 0.85, 0)
-    upgradeLabel.Size = UDim2.new(0, 120, 0, 20)
-    upgradeLabel.Font = Enum.Font.SourceSans
-    upgradeLabel.Text = "Upgrade: " .. upgrade
-    upgradeLabel.TextColor3 = Color3.new(1, 1, 1)
-    upgradeLabel.TextSize = 14
-    upgradeLabel.TextWrapped = true
-end
+Buttons.Name = "ZButtons"
+Buttons.Parent = Template
+Buttons.AnchorPoint = Vector2.new(0.5, 0.5)
+Buttons.BackgroundColor3 = Color3.new(1, 1, 1)
+Buttons.BackgroundTransparency = 1
+Buttons.BorderColor3 = Color3.new(0, 0, 0)
+Buttons.BorderSizePixel = 0
+Buttons.ClipsDescendants = true
+Buttons.Size = UDim2.new(0, 100, 0, 100)
+
+upgradeImageButton.Name = "upgradeImageButton"
+upgradeImageButton.Parent = Buttons
+upgradeImageButton.BackgroundColor3 = Color3.new(1, 1, 1)
+upgradeImageButton.BorderColor3 = Color3.new(0, 0, 0)
+upgradeImageButton.BorderSizePixel = 0
+upgradeImageButton.Size = UDim2.new(0, 100, 0, 100)
+upgradeImageButton.Transparency = 1
+upgradeImageButton.Image = "http://www.roblox.com/asset/?id=15640528020"
+
+sellImageButton.Name = "sellImageButton"
+sellImageButton.Parent = Buttons
+sellImageButton.BackgroundColor3 = Color3.new(1, 1, 1)
+sellImageButton.BorderColor3 = Color3.new(0, 0, 0)
+sellImageButton.BorderSizePixel = 0
+sellImageButton.Size = UDim2.new(0, 100, 0, 100)
+sellImageButton.Transparency = 1
+sellImageButton.Image = "http://www.roblox.com/asset/?id=12086987759"
+
+skillImageButton.Name = "skillImageButton"
+skillImageButton.Parent = Buttons
+skillImageButton.BackgroundColor3 = Color3.new(1, 1, 1)
+skillImageButton.BorderColor3 = Color3.new(0, 0, 0)
+skillImageButton.BorderSizePixel = 0
+skillImageButton.Size = UDim2.new(0, 100, 0, 100)
+skillImageButton.Transparency = 1
+skillImageButton.Image = "http://www.roblox.com/asset/?id=13321880274"
+
+UIGridLayout_6.Parent = Buttons
+UIGridLayout_6.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIGridLayout_6.SortOrder = Enum.SortOrder.LayoutOrder
+UIGridLayout_6.CellSize = UDim2.new(0.2, 10, 0.2, 5)
+
+UIGridLayout_4.Parent = Template
+UIGridLayout_4.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIGridLayout_4.SortOrder = Enum.SortOrder.Name
+UIGridLayout_4.CellSize = UDim2.new(0.5, 50, 0.2, 60)
+
+UIGridLayout_5.Parent = ScrollingFrame
+UIGridLayout_5.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIGridLayout_5.SortOrder = Enum.SortOrder.LayoutOrder
+UIGridLayout_5.CellSize = UDim2.new(0, 120, 0, 150)
+
+
+local bcUMFrame = game.Players.LocalPlayer.PlayerGui.UnitManagerGui.BackgroundUnitManagerFrame
+local bcOUMFrame = game.Players.LocalPlayer.PlayerGui.UnitManagerGui.BackgroundOpenUnitManagerFrame.TextButton
+local closeUnitManager = game.Players.LocalPlayer.PlayerGui.UnitManagerGui.BackgroundUnitManagerFrame.BottomButtons.CloseButton
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local u = game:GetService("UserInputService")
+local units = workspace._UNITS
 
 function toggleGui()
 	bcUMFrame.Visible = not bcUMFrame.Visible
@@ -293,14 +338,129 @@ u.InputBegan:Connect(function(input)
 	toggleGui()
 end)
 
+local unitTable = {}
+
+function templateClone(unitName, upgrade, imageGui) 
+    if not Template then
+        warn("Template não encontrado!")
+        return
+    end
+
+    local clonado = Template:Clone()
+    clonado.Name = unitName
+    clonado.Visible = true
+
+    local clonadoImg = imageGui:Clone()
+    clonadoImg.Parent = clonado
+
+    local textLabel = clonadoImg:FindFirstChild("TextLabel")
+    if textLabel then
+        textLabel.Text = "Upgrade: " .. tostring(upgrade)
+    else
+        warn("TextLabel não encontrado!")
+    end
+
+    table.insert(unitTable, clonado)
+
+    if ScrollingFrame then
+        clonado.Parent = ScrollingFrame
+    else
+        warn("ScrollingFrame não definido!")
+    end
+
+    local upgradeImageButton = clonado:FindFirstChild("UpgradeButton")
+    if upgradeImageButton then
+        upgradeImageButton.MouseButton1Click:Connect(function()
+            local unitIndex = #unitTable
+            upgradeUnit(unitIndex)
+        end)
+    end
+
+    local sellImageButton = clonado:FindFirstChild("SellButton")
+    if sellImageButton then
+        sellImageButton.MouseButton1Click:Connect(function()
+            local unitIndex = #unitTable
+            sellUnit(unitIndex, clonado)
+        end)
+    end
+
+    local skillImageButton = clonado:FindFirstChild("SkillButton")
+    if skillImageButton then
+        skillImageButton.MouseButton1Click:Connect(function()
+            local unitIndex = #unitTable
+            useSkillOnUnit(unitIndex)
+        end)
+    end
+end
+
+if SellAllButton then
+    SellAllButton.MouseButton1Click:Connect(function()
+        useSellAll()
+    end)
+end
+
+function upgradeUnit(unitIndex)
+    local unit = unitTable[unitIndex]
+    if unit then
+        local args = { [1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(unit)) }
+        local success, err = pcall(function()
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end)
+    end
+end
+
+function sellUnit(unitIndex, clonado)
+    local unit = unitTable[unitIndex]
+    if unit then
+        local args = { [1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(unit)) }
+        local success, err = pcall(function()
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end)
+
+        if clonado then
+            clonado:Destroy()
+        end
+    end
+end
+
+function useSkillOnUnit(unitIndex)
+    local unit = unitTable[unitIndex]
+    if unit then
+        local args = { [1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(unit)) }
+        local success, err = pcall(function()
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end)
+    end
+end
+
+function useSellAll()
+    for i, unit in ipairs(unitTable) do
+        if unit then
+            local args = { [1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(unit)) }
+            local success, err = pcall(function()
+                game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+            end)
+
+            if not success then
+                warn("Erro ao vender unidade", unit.Name, err)
+            end
+        end
+    end
+end
+
 units.ChildAdded:Connect(function(unit)
-    local stats = unit:FindFirstChild("_stats")
+    local stats = unit:FindFirstChild("_stats") or unit:WaitForChild("_stats", 5)
     if stats then
         local uuid = stats:FindFirstChild("uuid")
         if uuid and uuid.Value ~= "neutral" then
-            local upgrade = unit._stats.upgrade.Value
-            local unitName = unit.Name
-            templateClone(unitName, upgrade)
+            local upgrade = stats:FindFirstChild("upgrade")
+            if upgrade then
+                local unitName = unit.Name
+                local imageGui = game:GetService("Players").LocalPlayer.PlayerGui.UnitUpgrade.Primary.Container.Main.Main.Icon.Common
+                if imageGui then
+                    templateClone(unitName, upgrade.Value, imageGui)
+                end
+            end
         end
     end
 end)
