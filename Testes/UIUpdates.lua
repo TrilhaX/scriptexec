@@ -52,6 +52,47 @@ function aeuat()
     end
 end
 
+function dupeVegeto()
+    while getgenv().dupeVegeto == true do
+        function safeWaitForChild(parent, childName, timeout)
+            local child = parent:FindFirstChild(childName)
+            local elapsedTime = 0
+            while not child and elapsedTime < timeout do
+                wait(0.1)
+                elapsedTime = elapsedTime + 0.1
+                child = parent:FindFirstChild(childName)
+            end
+            return child
+        end
+
+        local gokuSSJ3 = safeWaitForChild(workspace:WaitForChild("_UNITS"), "goku_ssj3", 5)
+        if gokuSSJ3 then
+            local args = { [1] = gokuSSJ3 }
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end
+
+        local vegetaMajin = safeWaitForChild(workspace:WaitForChild("_UNITS"), "vegeta_majin", 5)
+        if vegetaMajin then
+            local args = { [1] = vegetaMajin }
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end
+
+        local gokuSSJ3Dead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "goku_ssj3", 5)
+        if gokuSSJ3Dead then
+            local args = { [1] = gokuSSJ3Dead }
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end
+
+        local vegetaMajinDead = safeWaitForChild(game:GetService("ReplicatedStorage"):WaitForChild("_DEAD_UNITS"), "vegeta_majin", 5)
+        if vegetaMajinDead then
+            local args = { [1] = vegetaMajinDead }
+            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("use_active_attack"):InvokeServer(unpack(args))
+        end
+
+        wait()
+    end
+end
+
 local Tabs = {
     Main = Window:AddTab('Main'),
 }
@@ -73,6 +114,15 @@ LeftGroupBox:AddToggle('aeuat', {
     Callback = function(Value)
         getgenv().aeuat = Value
 		aeuat()
+    end
+})
+
+LeftGroupBox:AddToggle('Auto Roll Technique', {
+    Text = 'Dupe Vegeto',
+    Default = false,
+    Callback = function(Value)
+        getgenv().dupeVegeto = Value
+		dupeVegeto()
     end
 })
 

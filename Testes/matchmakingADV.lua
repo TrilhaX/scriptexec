@@ -168,7 +168,7 @@ end
 function autoreplay()
 	while getgenv().autoreplay == true do
 		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
-		if resultUI and resultUI.Enabled then
+		if resultUI and resultUI.Enabled == true then
 			local args = {
 				[1] = "replay",
 			}
@@ -186,7 +186,7 @@ end
 function autoleave()
 	while getgenv().autoleave == true do
 		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
-		if resultUI and resultUI.Enabled then
+		if resultUI and resultUI.Enabled == true then
 			game:GetService("ReplicatedStorage").endpoints.client_to_server.teleport_back_to_lobby:InvokeServer("leave")
 		end
 		wait()
@@ -196,7 +196,7 @@ end
 function autonext()
 	while getgenv().autonext == true do
 		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
-		if resultUI and resultUI.Enabled then
+		if resultUI and resultUI.Enabled == true then
 			local args = {
 				[1] = "next_story",
 			}
