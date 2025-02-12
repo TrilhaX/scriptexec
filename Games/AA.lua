@@ -747,19 +747,26 @@ function templateClone(unitName, upgrade, imagePut)
 	textLabelImg.BorderSizePixel = 0
 	textLabelImg.Position = UDim2.new(0.5, 7, 0.1, 5)
 	textLabelImg.Size = UDim2.new(0, 120, 0, 20)
-	textLabelImg.Font = Enum.Font.Gotham 
-	textLabelImg.Text = "Upgrade: "
-	textLabelImg.TextColor3 = Color3.new(0, 0, 0)
+	textLabelImg.Font = Enum.Font.Merriweather
+	textLabelImg.Text = "Upgrade: " .. upgrade
+	textLabelImg.TextColor3 = Color3.new(255, 255, 255)
 	textLabelImg.TextScaled = true
 	textLabelImg.TextSize = 14
 	textLabelImg.TextWrapped = true
 	textLabelImg.TextXAlignment = Enum.TextXAlignment.Left
+	textLabelImg.ZIndex = 15
+	textLabelImg.TextBold = true	
 	
 	local textLabel = clonadoImg.Main:FindFirstChild("TextLabel")
 	if textLabel then
 		textLabel.Text = "Upgrade: " .. tostring(upgrade)
 	else
 		warn("TextLabel não encontrado!")
+	end
+
+	function updateUnitStats(upgrade)
+		local upgradeValue = upgrade
+		textLabelImg.Text = "Upgrade: " .. upgradeValue
 	end
 
     local upgradeImageButton = clonado:FindFirstChild("UpgradeButton")
@@ -853,6 +860,22 @@ units.ChildAdded:Connect(function(unit)
                 local imageGui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("UnitUpgrade")
                 local imagePut = imageGui.Primary.Container.Main.Main.Icon.Common
 				templateClone(unitName, upgrade.Value, imagePut)
+				while true do
+					local units2 = units:GetChildren()
+					local stats = units2:FindFirstChild("_stats") or units2:WaitForChild("_stats", 5)
+					if stats then
+						local uuid = stats:FindFirstChild("uuid")
+						if uuid and uuid.Value ~= "neutral" then
+							local upgrade = stats:FindFirstChild("upgrade")
+							if upgrade then
+								if upgrade > 0 then
+									updateUnitStats(upgrade)
+								end
+							end
+						end
+					end
+					wait()
+				end
             end
         end
     end
