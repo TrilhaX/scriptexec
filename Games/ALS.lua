@@ -1,28 +1,163 @@
-warn('[TEMPEST HUB] Loading Ui')
+--Checking if game is loaded
+repeat task.wait() until game:IsLoaded()
+warn("[TEMPEST HUB] Loading Ui")
 wait()
-local repo = 'https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/'
 
-local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
-local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
-local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
-Library:Notify('Welcome to Tempest Hub', 5)
+--Starting Script
+local MacLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/maclibTempestHubUI/main/maclib.lua"))()
 
-local Window = Library:CreateWindow({ 
-    Title = 'Tempest Hub | Anime Last Stand',
-    Center = true,
-    AutoShow = true,
-    TabPadding = 8,
-    MenuFadeTime = 0.2
+local isMobile = game:GetService("UserInputService").TouchEnabled
+local pcSize = UDim2.fromOffset(868, 650)
+local mobileSize = UDim2.fromOffset(800, 550)
+local currentSize = isMobile and mobileSize or pcSize
+
+local Window = MacLib:Window({
+    Title = "Tempest Hub",
+    Subtitle = "Anime Last Stand",
+    Size = currentSize,
+    DragStyle = 1,
+    DisabledWindowControls = {},
+    ShowUserInfo = true,
+    Keybind = Enum.KeyCode.RightControl,
+    AcrylicBlur = true,
 })
 
-Library:Notify('Loading Anime Last Stand Script', 5)
-warn('[TEMPEST HUB] Loading Function')
+function changeUISize(scale)
+    if Window then
+        if scale < 0.1 then
+            scale = 0.1
+        elseif scale > 1.5 then
+            scale = 1.5
+        end
+
+        local newWidth = pcSize.X.Offset * scale
+        local newHeight = pcSize.Y.Offset * scale
+
+        Window:SetSize(UDim2.fromOffset(newWidth, newHeight))
+        Window:Notify({
+            Title = "UI Resized",
+            Description = "New size scale: " .. scale,
+            Lifetime = 3
+        })
+    end
+end
+
+function findGuiRecursive(parent, targetName)
+    for _, child in ipairs(parent:GetChildren()) do
+        if child.Name == targetName then
+            return child
+        end
+        local found = findGuiRecursive(child, targetName)
+        if found then
+            return found
+        end
+    end
+    return nil
+end
+
+function hideUI()
+    local UICorner1 = Instance.new("UICorner")
+    local backgroundFrame = Instance.new("Frame")
+    local tempestButton = Instance.new("TextButton")
+    local UIPadding = Instance.new("UIPadding")
+
+    local coreGui = game:GetService("CoreGui")
+    local maclibGui = findGuiRecursive(coreGui, "MaclibGui")
+
+    if not maclibGui then
+        warn("MaclibGui not found in CoreGui.")
+        return
+    end
+
+    backgroundFrame.Name = "backgroundFrame"
+    backgroundFrame.Parent = maclibGui
+    backgroundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    backgroundFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    backgroundFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    backgroundFrame.BorderSizePixel = 0
+    backgroundFrame.Position = UDim2.new(0.98, 0, 0.5, 0)
+    backgroundFrame.Size = UDim2.new(0, 100, 0, 100)
+
+    UICorner1.Parent = backgroundFrame
+
+    tempestButton.Name = "tempestButton"
+    tempestButton.Parent = backgroundFrame
+    tempestButton.AnchorPoint = Vector2.new(0.5, 0.5)
+    tempestButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    tempestButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    tempestButton.BorderSizePixel = 0
+    tempestButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+    tempestButton.Size = UDim2.new(1, 0, 1, 0)
+    tempestButton.Font = Enum.Font.PermanentMarker
+    tempestButton.Text = "Tempest Hub"
+    tempestButton.TextColor3 = Color3.fromRGB(75, 0, 130)
+    tempestButton.TextScaled = true
+    tempestButton.TextSize = 14.000
+    tempestButton.TextWrapped = true
+
+    UIPadding.Parent = backgroundFrame
+    UIPadding.PaddingTop = UDim.new(0.1, 0)
+    UIPadding.PaddingLeft = UDim.new(0.1, 0)
+    UIPadding.PaddingRight = UDim.new(0.1, 0)
+    UIPadding.PaddingBottom = UDim.new(0.1, 0)
+
+    tempestButton.Activated:Connect(function()
+        local maclib = maclibGui
+        if maclib then
+            maclib.Base.Visible = not maclib.Base.Visible
+            maclib.Notifications.Visible = not maclib.Notifications.Visible
+        else
+            warn("MaclibGui not found in CoreGui.")
+        end
+    end)
+end
+
+local globalSettings = {
+	UIBlurToggle = Window:GlobalSetting({
+		Name = "UI Blur",
+		Default = Window:GetAcrylicBlurState(),
+		Callback = function(bool)
+			Window:SetAcrylicBlurState(bool)
+			Window:Notify({
+				Title = Window.Settings.Title,
+				Description = (bool and "Enabled" or "Disabled") .. " UI Blur",
+				Lifetime = 5
+			})
+		end,
+	}),
+	NotificationToggler = Window:GlobalSetting({
+		Name = "Notifications",
+		Default = Window:GetNotificationsState(),
+		Callback = function(bool)
+			Window:SetNotificationsState(bool)
+			Window:Notify({
+				Title = Window.Settings.Title,
+				Description = (bool and "Enabled" or "Disabled") .. " Notifications",
+				Lifetime = 5
+			})
+		end,
+	}),
+	ShowUserInfo = Window:GlobalSetting({
+		Name = "Show User Info",
+		Default = Window:GetUserInfoState(),
+		Callback = function(bool)
+			Window:SetUserInfoState(false)
+			Window:Notify({
+				Title = Window.Settings.Title,
+				Description = (bool and "Showing" or "Redacted") .. " User Info",
+				Lifetime = 5
+			})
+		end,
+	})
+}
+warn("[TEMPEST HUB] Loading Function")
 wait()
-warn('[TEMPEST HUB] Loading Toggles')
+warn("[TEMPEST HUB] Loading Toggles")
 wait()
-warn('[TEMPEST HUB] Last Checking')
+warn("[TEMPEST HUB] Last Checking")
 wait()
 
+--Locals
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -35,606 +170,367 @@ local selectedtech = nil
 local slots = game:GetService("Players").LocalPlayer.Slots
 local quirkInfoModule = require(game:GetService("ReplicatedStorage").Modules.QuirkInfo)
 
+--General Functions
+
+function safeWaitForChild(parent, childName, timeout)
+    local child = parent:FindFirstChild(childName)
+    local elapsedTime = 0
+    while not child and elapsedTime < timeout do
+        wait(0.1)
+        elapsedTime = elapsedTime + 0.1
+        child = parent:FindFirstChild(childName)
+    end
+    return child
+end
+
 function hideUIExec()
-	if getgenv().hideUIExec then
-		local coreGui = game:GetService("CoreGui")
-		local windowFrame = nil
-		
-		if coreGui:FindFirstChild("LinoriaGui") then
-			windowFrame = coreGui.LinoriaGui:FindFirstChild("windowFrame")
-		elseif coreGui:FindFirstChild("RobloxGui") and coreGui.RobloxGui:FindFirstChild("LinoriaGui") then
-			windowFrame = coreGui.RobloxGui.LinoriaGui:FindFirstChild("windowFrame")
-		end
-		
-		if windowFrame then
-			windowFrame.Visible = false
-		else
-			warn("windowFrame não encontrado.")
-		end		
+	while getgenv().hideUIExec do
+        if getgenv().loadedallscript == true then
+            local coreGui = game:GetService("CoreGui").RobloxGui
+            local Base = nil
+            
+            if coreGui:FindFirstChild("MaclibGui") then
+                Base = coreGui.MaclibGui:FindFirstChild("Base")
+            end            
+            
+            if Base then
+                Base.Visible = false
+            else
+                warn("Base não encontrado.")
+            end	
+        end	
+        wait()
 	end
 end
 
 function aeuat()
-    if getgenv().aeuat == true then
-        local teleportQueued = false
-        game.Players.LocalPlayer.OnTeleport:Connect(function(State)
-            if (State == Enum.TeleportState.Started or State == Enum.TeleportState.InProgress) and not teleportQueued then
-                teleportQueued = true
-                
-                queue_on_teleport([[         
-                    repeat task.wait() until game:IsLoaded()
+	while getgenv().aeuat == true do
+        if getgenv().loadedallscript == true then
+            local teleportQueued = false
+            game.Players.LocalPlayer.OnTeleport:Connect(function(State)
+                if
+                    (State == Enum.TeleportState.Started or State == Enum.TeleportState.InProgress) and not teleportQueued
+                then
+                    teleportQueued = true
+
+                    queue_on_teleport([[         
+                        repeat task.wait() until game:IsLoaded()
+                        if getgenv().executed then return end    
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
+                    ]])
+
+                    getgenv().executed = true
                     wait(1)
-                    if getgenv().executed then return end    
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
-                ]])
-                
-                getgenv().executed = true
-                wait(10)
-                teleportQueued = false
-            end
-        end)
-        wait()
-    end
-end
-
-local function tweenModel(model, targetCFrame)
-    if not model.PrimaryPart then
-        warn("PrimaryPart is not set for the model")
-        return
-    end
-    
-    local duration = (model.PrimaryPart.Position - targetCFrame.Position).Magnitude / speed
-    local info = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-    
-    local cframeValue = Instance.new("CFrameValue")
-    cframeValue.Value = model:GetPrimaryPartCFrame()
-    
-    cframeValue:GetPropertyChangedSignal("Value"):Connect(function()
-        model:SetPrimaryPartCFrame(cframeValue.Value)
-    end)
-    
-    local tween = TweenService:Create(cframeValue, info, {
-        Value = targetCFrame,
-    })
-    
-    tween:Play()
-    tween.Completed:Connect(function()
-        cframeValue:Destroy()
-    end)
-    
-    return tween
-end
-
-local function GetCFrame(obj, height, angle)
-    local cframe = CFrame.new()
-
-    if typeof(obj) == "Vector3" then
-        cframe = CFrame.new(obj)
-    elseif typeof(obj) == "table" then
-        cframe = CFrame.new(unpack(obj))
-    elseif typeof(obj) == "string" then
-        local parts = {}
-        for val in obj:gmatch("[^,]+") do
-            table.insert(parts, tonumber(val))
-        end
-        if #parts >= 3 then
-            cframe = CFrame.new(unpack(parts))
-        end
-    elseif typeof(obj) == "Instance" then
-        if obj:IsA("Model") then
-            local rootPart = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Torso")
-            if rootPart then
-                cframe = rootPart.CFrame
-            end
-        elseif obj:IsA("Part") then
-            cframe = obj.CFrame
-        end
-    end
-
-    if height then
-        cframe = cframe + Vector3.new(0, height, 0)
-    end
-    if angle then
-        cframe = cframe * CFrame.Angles(0, math.rad(angle), 0)
-    end
-    
-    return cframe
-end
-
-function securityMode()
-    local players = game:GetService("Players")
-    local ignorePlaceIds = {12886143095, 18583778121}
-
-    local function isPlaceIdIgnored(placeId)
-        for _, id in ipairs(ignorePlaceIds) do
-            if id == placeId then
-                return true
-            end
-        end
-        return false
-    end
-
-    while getgenv().securityMode do
-        if #players:GetPlayers() >= 2 then
-            local player1 = players:GetPlayers()[1]
-            local targetPlaceId = 12886143095
-
-            if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
-                game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
-            end
-        end
-        wait(1)
-    end
-end
-
-function joinInfCastle()
-    while getgenv().joinInfCastle do
-        repeat task.wait() until game:IsLoaded()
-        wait(1)
-
-        local function fireCastleRequests(room)
-            local replicatedStorage = game:GetService("ReplicatedStorage")
-            local manager = replicatedStorage.Remotes.InfiniteCastleManager
-
-            manager:FireServer("GetGlobalData")
-            wait(0.1)
-            manager:FireServer("GetData")
-            wait(0.1)
-            manager:FireServer("Play", tonumber(room), "True")
-        end
-
-        local function teleportToNPC(npcName)
-            local npc = workspace.Lobby.Npcs:FindFirstChild(npcName)
-            if npc then
-                local teleportCFrame = GetCFrame(npc)
-                local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
-                tween:Play()
-                tween.Completed:Wait()
-            else
-                warn("NPC " .. npcName .. " não encontrado!")
-            end
-        end
-
-        if getgenv().autoRRSMethod then
-            if getgenv().joinMethod == 'Method 1' then
-                fireCastleRequests(5)
-            elseif getgenv().joinMethod == "Method 2" then
-                teleportToNPC("Asta")
-                fireCastleRequests(5)
-            end
-        else
-            if getgenv().joinMethod == 'Method 1' then
-                fireCastleRequests(selectedRoomInfCastle)
-            elseif getgenv().joinMethod == "Method 2" then
-                teleportToNPC("Asta")
-                fireCastleRequests(selectedRoomInfCastle)
-            end
-        end
-
-        wait(1)
-    end
-end
-
-function autoNext()
-    local player = game.Players.LocalPlayer
-
-    while getgenv().autoRetry do
-        local uiEndGame = player:FindFirstChild("PlayerGui"):FindFirstChild("EndGameUI")
-
-        if uiEndGame then
-            wait(1)
-            local button
-            local playerGui = player:WaitForChild("PlayerGui")
-            local endGameUI = playerGui:WaitForChild("EndGameUI")
-            local bg = endGameUI:WaitForChild("BG")
-            local buttons = bg:WaitForChild("Buttons")
-            button = buttons:FindFirstChild("Next")
-
-            if button then
-                GuiService.SelectedObject = button
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-                break
-            else
-                warn("Botão 'Next' não encontrado!")
-            end
-        else
-            warn("UI EndGame não encontrada!")
-        end
-
-        wait(.5)
-    end
-end
-
-function autoRetry()
-    local player = game.Players.LocalPlayer
-    while getgenv().autoRetry do
-        local uiEndGame = player:FindFirstChild("PlayerGui"):FindFirstChild("EndGameUI")
-        if uiEndGame then
-            wait(1)
-            local button = uiEndGame.BG.Buttons:FindFirstChild("Retry")
-            if button then
-                while getgenv().autoRetry do
-                    GuiService.SelectedObject = button
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-                    wait(.5)
+                    teleportQueued = false
                 end
-            end
+            end)
         end
-        wait(.5)
-    end
+		wait()
+	end
 end
 
-function autoLeave()
-    while getgenv().autoLeave do
-        local uiEndGame = game.Players.LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
-        if uiEndGame then
-            wait(1)
-            game.ReplicatedStorage.Remotes.TeleportBack:FireServer()
-            break
-        end
-        wait(.5)
-    end
-end
-
-function placeUnits()
-    while getgenv().placeUnits == true do
-        local player = game:GetService("Players").LocalPlayer
-        local slots = player:FindFirstChild("Slots")
-        local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-        local placeTower = remotes and remotes:FindFirstChild("PlaceTower")
-
-        if not placeTower then
-            warn("PlaceTower RemoteEvent não encontrado.")
-            return
-        end
-
-        local function placeUnit(unit, position)
-            local towers = workspace:FindFirstChild("Towers")
-            if not towers then
-                warn("Workspace 'Towers' não encontrado.")
-                return
-            end
-
-            local unitExists = false
-            for _, child in ipairs(towers:GetChildren()) do
-                if child.Name == unit then
-                    unitExists = true
-                    break
-                end
-            end
-
-            if not unitExists then
-                wait(.1) 
-                local args = { unit, position }
-                placeTower:FireServer(unpack(args))
-                wait(.5)
-            else
-                wait()
-            end
-        end
-
-        local basePosition = CFrame.new(-164.9412384033203, 197.93942260742188, 15.210136413574219)
-
-        while not selectedMaxSlot do
-            wait(.1)
-        end
-
-        for i = 1, selectedMaxSlot do
-            local slot = slots and slots:FindFirstChild("Slot" .. i)
-            if slot and slot.Value then
-                local newPosition = basePosition + Vector3.new(i * 2, 0, 0)
-                placeUnit(slot.Value, newPosition)
-            else
-                wait()
-            end
-        end
-        wait()
-    end
-end
-
-function sellUnit()
-    while getgenv().sellUnit do
-        local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
-        local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
-
-        if getgenv().onlysellinwaveX and beforeSlash ~= selectedWaveXToSell then
-            wait(1)
-        end
-
-        print("Vendendo unidades na wave", beforeSlash)
-        wait(1)
-    end
-end
-
-function upgradeUnit()
-    while getgenv().upgradeUnit do
-        local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
-        local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
-
-        if getgenv().onlyupgradeinwaveX and beforeSlash ~= selectedWaveXToUpgrade then
-            wait(1)
-        end
-
-        local towers = workspace:FindFirstChild("Towers")
-        if towers then
-            for _, unit in ipairs(towers:GetChildren()) do
-                local upgradeLevel = unit:FindFirstChild("Upgrade") and unit.Upgrade.Value or 0
-                local upgradeRemote = game.ReplicatedStorage.Remotes:FindFirstChild("Upgrade")
-                if upgradeRemote then
-                    while upgradeLevel < maxUpgradeLevel do
-                        upgradeRemote:InvokeServer(unit)
-                        wait(.5)
-                        upgradeLevel = unit:FindFirstChild("Upgrade") and unit.Upgrade.Value or upgradeLevel
-                    end
-                end
-            end
-        end
-        wait(1)
-    end
-end
-
-function autoJoinRaid()
-    while getgenv().autoJoinRaid == true do
-        local raidFolder = workspace:FindFirstChild("TeleporterFolder")
-        if raidFolder and raidFolder:FindFirstChild("Raids") then
-            local door = raidFolder.Raids.Teleporter:FindFirstChild("Door")
-            if door then
-                local doorCFrame = GetCFrame(door)
-                local tween = tweenModel(game.Players.LocalPlayer.Character, doorCFrame)
-                tween:Play()
-                tween.Completed:Wait()
-
-                wait(1)
-                local argsRaid = {
-                    [1] = selectedRaidMap,
-                    [2] = selectedFaseRaid,
-                    [3] = "Nightmare",
-                    [4] = false
-                }
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Raids"):WaitForChild("Select"):InvokeServer(unpack(argsRaid))
-
-                wait(.5)
-                local argsTeleporter = {
-                    [1] = "Skip"
-                }
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Teleporter"):WaitForChild("Interact"):FireServer(unpack(argsTeleporter))
-
-                wait(10)
-            else
-                warn("Porta do raid não encontrada!")
-                wait()
-            end
-        else
-            warn("TeleporterFolder ou Raids não encontrado!")
+function firebutton(Button, method)
+    local a = Button
+    if getconnections and method == "getconnections" then
+        for i, v in pairs(getconnections(Button.Activated)) do
             wait()
+            v.Function()
         end
+    elseif firesignal and method == "firesignal" then
+        local events = { 'MouseButton1Click', 'MouseButton1Down', 'Activated' }
+        for i, v in pairs(events) do
+            firesignal(Button[v])
+        end
+    else
+        game:GetService('VirtualInputManager'):SendMouseButtonEvent(a.AbsolutePosition.X + a.AbsoluteSize.X / 2, a.AbsolutePosition.Y + 50, 0, true, a, 1)
+        game:GetService('VirtualInputManager'):SendMouseButtonEvent(a.AbsolutePosition.X + a.AbsoluteSize.X / 2, a.AbsolutePosition.Y + 50, 0, false, a, 1)
     end
 end
 
-function autoGamespeed()
-    while getgenv().autoGamespeed == true do
-        local success, remotes = pcall(function()
-            return game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-        end)
+function removeTexturesAndHeavyObjects(object)
+	for _, child in ipairs(object:GetDescendants()) do
+		if child:IsA("Texture") or child:IsA("Decal") then
+			child:Destroy()
+		elseif child:IsA("MeshPart") then
+			child:Destroy()
+		elseif child:IsA("ParticleEmitter") or child:IsA("Trail") then
+			child:Destroy()
+		elseif child:IsA("Model") or child:IsA("Folder") then
+			removeTexturesAndHeavyObjects(child)
+		end
+	end
+end
 
-        if success and remotes then
-            local voteChange = remotes:FindFirstChild("VoteChangeTimeScale")
-            if voteChange then
-                voteChange:FireServer(true)
-                break
-            end
-        else
-            warn("Remotes not found!")
-        end
+function fpsBoost()
+	while getgenv().fpsBoost == true do
+		if getgenv().loadedallscript == true then
+			removeTexturesAndHeavyObjects(workspace)
+		end
+        break
+	end
+end
 
-        wait(1)
-    end
+function betterFpsBoost()
+	while getgenv().betterFpsBoost == true do
+		if getgenv().loadedallscript == true then
+			removeTexturesAndHeavyObjects(workspace)
+			local enemiesAndUnits = workspace:FindFirstChild("_UNITS")
+
+			if enemiesAndUnits then
+				for i,v in pairs(enemiesAndUnits:GetChildren())do
+					v:Destroy()
+				end
+			end
+		end
+        break
+	end
 end
 
 function extremeFpsBoost()
-    if getgenv().extremeFpsBoost == true then
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    while getgenv().extremeFpsBoost == true do
+		if getgenv().loadedallscript == true then
+			removeTexturesAndHeavyObjects(workspace)
+			local enemiesAndUnits = workspace:FindFirstChild("_UNITS")
 
-        game.Lighting.GlobalShadows = false
-        game.Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+			if enemiesAndUnits then
+				for i,v in pairs(enemiesAndUnits:GetChildren())do
+					v:Destroy()
+				end
+			end
+			settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("Part") or obj:IsA("MeshPart") or obj:IsA("UnionOperation") then
-                obj.Material = Enum.Material.SmoothPlastic
-                obj.Color = Color3.new(.5, .5, .5)
-                obj.Transparency = 0
-                obj.CanCollide = true
-            elseif obj:IsA("Mesh") or obj:IsA("SpecialMesh") or obj:IsA("Decal") or obj:IsA("Texture") then
-                obj:Destroy()
-            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-                obj.Enabled = false
-            end
-        end
+			game.Lighting.GlobalShadows = false
+			game.Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
 
-        for _, effect in pairs(game.Lighting:GetChildren()) do
-            if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") then
-                effect.Enabled = false
-            end
-        end
+			for _, obj in pairs(workspace:GetDescendants()) do
+				if obj:IsA("Part") or obj:IsA("MeshPart") or obj:IsA("UnionOperation") then
+					obj.Material = Enum.Material.SmoothPlastic
+					obj.Color = Color3.new(.5, .5, .5)
+					obj.Transparency = 0
+					obj.CanCollide = true
+				elseif obj:IsA("Mesh") or obj:IsA("SpecialMesh") or obj:IsA("Decal") or obj:IsA("Texture") then
+					obj:Destroy()
+				elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+					obj.Enabled = false
+				end
+			end
+
+			for _, effect in pairs(game.Lighting:GetChildren()) do
+				if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") then
+					effect.Enabled = false
+				end
+			end
+		end
+        break
     end
 end
 
-function HPI()
-    if getgenv().HPI == true then
+function autoWalk()
+	while getgenv().autoWalk == true do
+		if getgenv().loadedallscript == true then
+			game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.W, false, game)
+			wait(1)
+			game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.S, false, game)
+			wait(1)
+		end
+		wait()
+	end
+end
+
+function tweenModel(model, targetCFrame)
+	if not model.PrimaryPart then
+		warn("PrimaryPart is not set for the model")
+		return
+	end
+
+	local duration = (model.PrimaryPart.Position - targetCFrame.Position).Magnitude / speed
+	local info = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+
+	local cframeValue = Instance.new("CFrameValue")
+	cframeValue.Value = model:GetPrimaryPartCFrame()
+
+	cframeValue:GetPropertyChangedSignal("Value"):Connect(function()
+		model:SetPrimaryPartCFrame(cframeValue.Value)
+	end)
+
+	local tween = TweenService:Create(cframeValue, info, {
+		Value = targetCFrame,
+	})
+
+	tween:Play()
+	tween.Completed:Connect(function()
+		cframeValue:Destroy()
+	end)
+
+	return tween
+end
+
+function GetCFrame(obj, height, angle)
+	local cframe = CFrame.new()
+
+	if typeof(obj) == "Vector3" then
+		cframe = CFrame.new(obj)
+	elseif typeof(obj) == "table" then
+		cframe = CFrame.new(unpack(obj))
+	elseif typeof(obj) == "string" then
+		local parts = {}
+		for val in obj:gmatch("[^,]+") do
+			table.insert(parts, tonumber(val))
+		end
+		if #parts >= 3 then
+			cframe = CFrame.new(unpack(parts))
+		end
+	elseif typeof(obj) == "Instance" then
+		if obj:IsA("Model") then
+			local rootPart = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Torso")
+			if rootPart then
+				cframe = rootPart.CFrame
+			end
+		elseif obj:IsA("Part") then
+			cframe = obj.CFrame
+		end
+	end
+
+	if height then
+		cframe = cframe + Vector3.new(0, height, 0)
+	end
+	if angle then
+		cframe = cframe * CFrame.Angles(0, math.rad(angle), 0)
+	end
+
+	return cframe
+end
+
+function blackScreen()
+	local screenGui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("BlackScreenTempestHub")
+	if screenGui then
+        screenGui.Enabled = not screenGui.Enabled
+    end
+end
+
+function createBC()
+    local player = game:GetService("Players").LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
+    
+    if playerGui:FindFirstChild("BlackScreenTempestHub") then
+        return
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "BlackScreenTempestHub"
+    screenGui.Parent = playerGui
+    screenGui.Enabled = false
+
+    local backgroundFrame = Instance.new("Frame")
+    backgroundFrame.Name = "BackgroundFrame"
+    backgroundFrame.Parent = screenGui
+    backgroundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    backgroundFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+    backgroundFrame.BorderSizePixel = 0
+    backgroundFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    backgroundFrame.Size = UDim2.new(1, 0, 2, 0)
+
+    local statFrame = Instance.new("Frame")
+    statFrame.Name = "statFrame"
+    statFrame.Parent = backgroundFrame
+    statFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    statFrame.BackgroundColor3 = Color3.fromRGB(67, 67, 67)
+    statFrame.BorderSizePixel = 0
+    statFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    statFrame.Size = UDim2.new(0, 850, 0, 550)
+
+    local border = Instance.new("UICorner")
+    border.Parent = statFrame
+
+    local function createLabel(name, positionY)
+        local label = Instance.new("TextLabel")
+        label.Name = name
+        label.Parent = statFrame
+        label.AnchorPoint = Vector2.new(0.5, 0.5)
+        label.BackgroundTransparency = 1
+        label.Position = UDim2.new(0.5, 0, positionY, 0)
+        label.Size = UDim2.new(0, 850, 0, 60)
+        label.Font = Enum.Font.SourceSans
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.TextScaled = true
+        label.TextWrapped = true
+        return label
+    end
+
+    local nameLabel = createLabel("nameLabel", 0.1)
+    nameLabel.Text = "Tempest Hub"
+
+    local levelLabel = createLabel("levelLabel", 0.25)
+
+    local gemsLabel = createLabel("gemsLabel", 0.4)
+    gemsLabel.AnchorPoint = Vector2.new(0.5, 0)
+    gemsLabel.Position = UDim2.new(0.5, 0, 0.31, 0)
+    gemsLabel.Size = UDim2.new(1, 0, 0, 380)
+
+    local function updateStats()
         local player = game.Players.LocalPlayer
-        if player and player.Character and player.Character:FindFirstChild("Head") then
-            local overhead = player.Character.Head:FindFirstChild("Overhead")
-            if overhead then
-                overhead:Destroy()
-            end
-        else
-            warn("Player or Head not found!")
+        local level = player:FindFirstChild("Level")
+        local jewels = player:FindFirstChild("Jewels")
+        local emeralds = player:FindFirstChild("Emeralds")
+        local gold = player:FindFirstChild("Gold")
+        local expAtual = player:FindFirstChild("EXP")
+        local maxExp = player:FindFirstChild("MaxEXP")
+        local rerolls = player:FindFirstChild("Rerolls")
+
+        if level and jewels and emeralds and gold and expAtual and maxExp and rerolls then
+            local playerLevel = "Level: " .. tostring(level.Value) .. " [" .. tostring(expAtual.Value) .. "/" .. tostring(maxExp.Value) .. "]"
+            local currencyInfo = "Jewels: " .. tostring(jewels.Value) .. "\n" ..
+                                 "Emeralds: " .. tostring(emeralds.Value) .. "\n" ..
+                                 "Gold: " .. tostring(gold.Value) .. "\n" ..
+                                 "Rerolls: " .. tostring(rerolls.Value)
+
+            levelLabel.Text = playerLevel
+            gemsLabel.Text = currencyInfo
         end
     end
+
+    game:GetService("RunService").RenderStepped:Connect(updateStats)
 end
 
 function deleteNotErro()
     while getgenv().deleteNotErro == true do
-        local player = game.Players.LocalPlayer
-        if player then
-            local gui = player:FindFirstChild("PlayerGui")
-            if gui then
-                local erroNot = gui:FindFirstChild("MessageUI")
-                if erroNot and erroNot:FindFirstChild("ErrorHolder") then
-                    erroNot.ErrorHolder:Destroy()
-                    break
-                end
-            end
-        else
-            warn("Player not found!")
-        end
-        wait(.5)
-    end
-end
-
-function deleteMap()
-    if getgenv().deleteMap == true then
-        local map = workspace:FindFirstChild("Map")
-        if map and map:FindFirstChild("Map") then
-            for _, obj in ipairs(map.Map:GetChildren()) do
-                if obj.Name:lower():find("model") or obj.Name:lower():find("building%d") then
-                    obj:Destroy()
-                end
-            end
-        else
-            warn("Map or nested Map not found!")
-        end
-    end
-end
-
-function autoJoinChallenge()
-    while getgenv().autoJoinChallenge == true do
-        local Teleporter = workspace.TeleporterFolder.Challenge.Teleporter.ChallengeInfo
-        local challenge = workspace.TeleporterFolder.Challenge.Teleporter.Door
-
-        if challenge then
-            local ignoreChallenge = false
-            for _, ignore in ipairs(selectedIgnoreChallenge) do
-                if Teleporter.Challenge.Value == ignore then
-                    ignoreChallenge = true
-                    break
-                end
-            end
-
-            if not ignoreChallenge and Teleporter.MapName.Value == selectedChallengeMap and Teleporter.MapNum.Value == selectActChallenge then
-                local challengeCFrame = GetCFrame(challenge)
-                local tween = tweenModel(game.Players.LocalPlayer.Character, challengeCFrame)
-                tween:Play()
-                tween.Completed:Wait()
-                break
-            end
-        end
-        wait()
-    end
-end
-
-function autoJoinStory()
-    while getgenv().autoJoinStory == true do
-        local Teleporter = workspace.TeleporterFolder.Story.Teleporter.StoryInfo
-        local story = workspace.TeleporterFolder.Story.Teleporter.Door
-
-        if story then
-            local args = {
-                [1] = selectedStoryMap,
-                [2] = selectedActStory,
-                [3] = selectedDifficultyStory,
-                [4] = false
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Story"):WaitForChild("Select"):InvokeServer(unpack(args))
-            
-        else
-            wait()
-        end
-    end
-end
-
-function autoJoinPortal()
-    while getgenv().autoJoinPortal == true do
-        print("W.I.P")
-        wait()
-    end
-end
-
-function autoGetBattlepass()
-    while getgenv().autoGetBattlepass == true do
-        wait(1)
-        local args = {
-            [1] = "All"
-        }
-        
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimBattlePass"):FireServer(unpack(args))
-        wait(1)
-    end
-end   
-
-function autoFeed()
-    while getgenv().autoFeed == true do
-        local args = {
-            [1] = selectedUnitToFeed,
-            [2] = {
-                [selectedFeed] = 1
-            }
-        }
-        
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Feed"):FireServer(unpack(args))        
-        wait()
-    end
-end
-
-function autoUniversalSkill()
-    while getgenv().autoUniversalSkill == true do
-        if getgenv().onlyBoss == true then
-            local bossHealth = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.BarHolder.Boss
-
-            if bossHealth then
-                local slots = game:GetService("Players").LocalPlayer.Slots
-
-                for i, v in pairs(slots:GetChildren()) do
-                    local success, tower = pcall(function()
-                        return workspace:WaitForChild("Towers"):WaitForChild(tostring(v.Value), 5)
-                    end)
-                
-                    if success and tower then
-                        local args = { [1] = tower, [2] = 1 }
-                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetAbilityCd"):InvokeServer(unpack(args))
-                        wait(.1)
-                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Ability"):InvokeServer(unpack(args))
-                        wait(1)
-                    else
-                        wait()
+        if getgenv().loadedallscript == true then
+            local player = game.Players.LocalPlayer
+            if player then
+                local gui = player:FindFirstChild("PlayerGui")
+                if gui then
+                    local erroNot = gui:FindFirstChild("MessageUI")
+                    if erroNot and erroNot:FindFirstChild("ErrorHolder") then
+                        erroNot.ErrorHolder:Destroy()
+                        break
                     end
                 end
             else
-                wait()
-            end
-        else
-            local slots = game:GetService("Players").LocalPlayer.Slots
-
-            for i, v in pairs(slots:GetChildren()) do
-                local success, tower = pcall(function()
-                    return workspace:WaitForChild("Towers"):WaitForChild(tostring(v.Value), 5)
-                end)
-            
-                if success and tower then
-                    local args = { [1] = tower, [2] = 1 }
-                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetAbilityCd"):InvokeServer(unpack(args))
-                    wait(.1)
-                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Ability"):InvokeServer(unpack(args))
-                    wait(1)
-                else
-                    wait()
-                end
+                warn("Player not found!")
             end
         end
-        wait()
+        wait(1)
+    end
+end
+
+function HidePlayer()
+    while getgenv().HidePlayer == true do
+        if getgenv().loadedallscript == true then
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            local playerGui = player.PlayerGui
+            local overhead = character and character:FindFirstChild("Head") and character.Head:FindFirstChild("Overhead")
+            
+            if overhead then
+                overhead:Destroy()
+            end
+            for _, obj in ipairs(character:GetChildren()) do
+				if obj:IsA("Accessory") or obj:IsA("Shirt") or obj:IsA("Pants") then
+					obj:Destroy()
+				end
+			end
+        end
+        wait(1)
     end
 end
 
@@ -865,23 +761,337 @@ function webhook()
     end
 end
 
-local blacklist = blacklist or {}
+--Function in Game
 
-local module2 = require(game:GetService("ReplicatedStorage").Modules.ChallengeInfo)
-
-local valuesChallenge = {}
-local function challengeNamesByType(tbl, typeName)
-    if type(tbl) == "table" then
-        for key, value in pairs(tbl) do
-            if type(value) == "table" then
-                table.insert(valuesChallenge, key)
+function autoRetry()
+    while getgenv().autoRetry == true do
+        if getgenv().loadedallscript == true then
+            local prompt = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Prompt")
+            if prompt then
+                local button2 = prompt.TextButton.TextButton
+                if button2 then
+                    firebutton(button2, "getconnections")
+                end
+            end
+            local uiEndGame = player:FindFirstChild("PlayerGui"):FindFirstChild("EndGameUI")
+            if uiEndGame then
+                local button = uiEndGame.BG.Buttons:FindFirstChild("Retry")
+                if button then
+                    firebutton(button, "VirtualInputManager")
+                end
             end
         end
+        wait()
     end
-    return valuesChallenge
 end
 
-local ValuesChallengeInfo = challengeNamesByType(module2, "challenge")
+function autoLeave()
+    while getgenv().autoLeave == true do
+        if getgenv().loadedallscript == true then
+            local prompt = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Prompt")
+            if prompt then
+                local button2 = prompt.TextButton.TextButton
+                if button2 then
+                    firebutton(button2, "getconnections")
+                end
+            end
+            local uiEndGame = player:FindFirstChild("PlayerGui"):FindFirstChild("EndGameUI")
+            if uiEndGame then
+                local button = uiEndGame.BG.Buttons:FindFirstChild("Leave")
+                if button then
+                    firebutton(button, "VirtualInputManager")
+                end
+            end
+        end
+        wait()
+    end
+end
+
+function autoNext()
+    while getgenv().autoNext == true do
+        if getgenv().loadedallscript == true then
+            local prompt = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Prompt")
+            if prompt then
+                local button2 = prompt.TextButton.TextButton
+                if button2 then
+                    firebutton(button2, "getconnections")
+                end
+            end
+            local uiEndGame = player:FindFirstChild("PlayerGui"):FindFirstChild("EndGameUI")
+            if uiEndGame then
+                local button = uiEndGame.BG.Buttons:FindFirstChild("Next")
+                if button then
+                    firebutton(button, "VirtualInputManager")
+                end
+            end
+        end
+        wait()
+    end
+end
+
+function deleteMap()
+    while getgenv().deleteMap == true do
+        if getgenv().loadedallscript == true then
+            local map = workspace:FindFirstChild("Map")
+            if map and map:FindFirstChild("Map") then
+                for _, obj in ipairs(map.Map:GetChildren()) do
+                    if obj.Name:lower():find("model") or obj.Name:lower():find("building%d") then
+                        obj:Destroy()
+                    end
+                end
+            end
+        wait(1)
+        end
+    end
+end
+
+function securityMode()
+    local players = game:GetService("Players")
+    local ignorePlaceIds = {12886143095, 18583778121}
+
+    local function isPlaceIdIgnored(placeId)
+        for _, id in ipairs(ignorePlaceIds) do
+            if id == placeId then
+                return true
+            end
+        end
+        return false
+    end
+
+    while getgenv().securityMode do
+        if #players:GetPlayers() >= 2 then
+            local player1 = players:GetPlayers()[1]
+            local targetPlaceId = 12886143095
+
+            if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
+                game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
+            end
+        end
+        wait(1)
+    end
+end
+
+function sellUnit()
+    while getgenv().sellUnit do
+        local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+        local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
+
+        if getgenv().onlysellinwaveX and beforeSlash ~= selectedWaveXToSell then
+            wait(1)
+        end
+
+        print("Vendendo unidades na wave", beforeSlash)
+        wait(1)
+    end
+end
+
+function upgradeUnit()
+    while getgenv().upgradeUnit do
+        local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+        local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
+
+        if getgenv().onlyupgradeinwaveX and beforeSlash ~= selectedWaveXToUpgrade then
+            wait(1)
+        end
+
+        local towers = workspace:FindFirstChild("Towers")
+        if towers then
+            for _, unit in ipairs(towers:GetChildren()) do
+                local upgradeLevel = unit:FindFirstChild("Upgrade") and unit.Upgrade.Value or 0
+                local upgradeRemote = game.ReplicatedStorage.Remotes:FindFirstChild("Upgrade")
+                if upgradeRemote then
+                    while upgradeLevel < maxUpgradeLevel do
+                        upgradeRemote:InvokeServer(unit)
+                        wait(.5)
+                        upgradeLevel = unit:FindFirstChild("Upgrade") and unit.Upgrade.Value or upgradeLevel
+                    end
+                end
+            end
+        end
+        wait(1)
+    end
+end
+
+--Function To Join Game
+
+function autoJoinChallenge()
+    while getgenv().autoJoinChallenge == true do
+        local Teleporter = workspace.TeleporterFolder.Challenge.Teleporter.ChallengeInfo
+        local challenge = workspace.TeleporterFolder.Challenge.Teleporter.Door
+
+        if challenge then
+            local ignoreChallenge = false
+            for _, ignore in ipairs(selectedIgnoreChallenge) do
+                if Teleporter.Challenge.Value == ignore then
+                    ignoreChallenge = true
+                    break
+                end
+            end
+
+            if not ignoreChallenge and Teleporter.MapName.Value == selectedChallengeMap and Teleporter.MapNum.Value == selectActChallenge then
+                local challengeCFrame = GetCFrame(challenge)
+                local tween = tweenModel(game.Players.LocalPlayer.Character, challengeCFrame)
+                tween:Play()
+                tween.Completed:Wait()
+                break
+            end
+        end
+        wait()
+    end
+end
+
+function autoJoinStory()
+    while getgenv().autoJoinStory == true do
+        local Teleporter = workspace.TeleporterFolder.Story.Teleporter.StoryInfo
+        local story = workspace.TeleporterFolder.Story.Teleporter.Door
+
+        if story then
+            local args = {
+                [1] = selectedStoryMap,
+                [2] = selectedActStory,
+                [3] = selectedDifficultyStory,
+                [4] = false
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Story"):WaitForChild("Select"):InvokeServer(unpack(args))
+            
+        else
+            wait()
+        end
+    end
+end
+
+function autoJoinRaid()
+    while getgenv().autoJoinRaid == true do
+        local raidFolder = workspace:FindFirstChild("TeleporterFolder")
+        if raidFolder and raidFolder:FindFirstChild("Raids") then
+            local door = raidFolder.Raids.Teleporter:FindFirstChild("Door")
+            if door then
+                local doorCFrame = GetCFrame(door)
+                local tween = tweenModel(game.Players.LocalPlayer.Character, doorCFrame)
+                tween:Play()
+                tween.Completed:Wait()
+
+                wait(1)
+                local argsRaid = {
+                    [1] = selectedRaidMap,
+                    [2] = selectedFaseRaid,
+                    [3] = "Nightmare",
+                    [4] = false
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Raids"):WaitForChild("Select"):InvokeServer(unpack(argsRaid))
+
+                wait(.5)
+                local argsTeleporter = {
+                    [1] = "Skip"
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Teleporter"):WaitForChild("Interact"):FireServer(unpack(argsTeleporter))
+
+                wait(10)
+            else
+                warn("Porta do raid não encontrada!")
+                wait()
+            end
+        else
+            warn("TeleporterFolder ou Raids não encontrado!")
+            wait()
+        end
+    end
+end
+
+function fireCastleRequests(room)
+end
+
+function teleportToNPC(npcName)
+    local npc = workspace.Lobby.Npcs:FindFirstChild(npcName)
+    if npc then
+        local teleportCFrame = GetCFrame(npc)
+        if teleportCFrame then
+            local tween = tweenModel(game.Players.LocalPlayer.Character, teleportCFrame)
+            if tween then
+                tween:Play()
+                tween.Completed:Wait()
+            end
+        end
+    else
+        warn("NPC " .. npcName .. " não encontrado!")
+    end
+end
+
+function joinInfCastle()
+    while getgenv().joinInfCastle == true do
+        repeat task.wait() until game:IsLoaded()
+        wait(1)
+
+        if getgenv().joinMethod == "Method 1" then
+            if selectedRoomInfCastle then
+                local args = { "GetGlobalData" }
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("InfiniteCastleManager"):FireServer(unpack(args))
+            
+                print("Entrando no quarto:", room)
+                local args = { "Play", tonumber(selectedRoomInfCastle) or 0, false }
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("InfiniteCastleManager"):FireServer(unpack(args))
+                print("Teleportando")
+            else
+                warn("Nenhum quarto selecionado para Infinite Castle!")
+            end
+
+        elseif getgenv().joinMethod == "Method 2" then
+            teleportToNPC("Asta")
+            if selectedRoomInfCastle then
+                local args = { "GetGlobalData" }
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("InfiniteCastleManager"):FireServer(unpack(args))
+            
+                print("Entrando no quarto:", room)
+                local args = { "Play", tonumber(selectedRoomInfCastle) or 0, false }
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("InfiniteCastleManager"):FireServer(unpack(args))
+            else
+                warn("Nenhum quarto selecionado para Infinite Castle!")
+            end
+        end
+
+        wait(1)
+    end
+end
+
+--Function in Lobby
+
+function autoFeed()
+    while getgenv().autoFeed == true do
+        local args = {
+            [1] = selectedUnitToFeed,
+            [2] = {
+                [selectedFeed] = 1
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Feed"):FireServer(unpack(args))        
+        wait()
+    end
+end
+
+function autoGetBattlepass()
+    while getgenv().autoGetBattlepass == true do
+        wait(1)
+        local args = {
+            [1] = "All"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimBattlePass"):FireServer(unpack(args))
+        wait(1)
+    end
+end
+
+-- Info Dropdown
+
+local blacklist = blacklist or {}
+local valuesChallengeInfo = {}
+local challengeInfo = game:GetService("ReplicatedStorage").Modules.ChallengeInfo
+for i, v in pairs(challengeInfo:GetChildren()) do
+    if v.Name ~= "PackageLink" then
+        table.insert(valuesChallengeInfo, tostring(v.Name))
+    end 
+end
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local portals = ReplicatedStorage:FindFirstChild("Portals")
@@ -902,22 +1112,12 @@ if portals and portals:IsA("Folder") then
     end
 end
 
-local mapDataModule = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("MapData")
 local ValuesMaps = {}
-if mapDataModule and mapDataModule:IsA("ModuleScript") then
-    local mapData = require(mapDataModule)
-    if type(mapData) == "table" then
-        for key, value in pairs(mapData) do
-            if type(value) == "table" then
-                table.insert(ValuesMaps, key)
-            end
-        end
-    else
-        warn("mapData is not a valid table!")
-    end
-else
-    warn("MapData module is missing or invalid!")
+local MapData = require(game:GetService("ReplicatedStorage").Modules.MapData)
+for key, value in pairs(MapData) do
+    table.insert(ValuesMaps, tostring(key)) 
 end
+
 
 local player = game:GetService("Players").LocalPlayer
 local scroll = player.PlayerGui:FindFirstChild("Inventory") and player.PlayerGui.Inventory:FindFirstChild("BG") and player.PlayerGui.Inventory.BG:FindFirstChild("Scroll")
@@ -948,737 +1148,556 @@ else
     warn("Feed selection GUI not found!")
 end
 
-Library:Notify('Place the unit you will use in the first slot', 5)
+--UI TabGroups
 
-local Tabs = {
-    Main = Window:AddTab('Main'),
+local tabGroups = {
+	TabGroup1 = Window:TabGroup()
 }
 
+--UI Tabs
 
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Player")
+local tabs = {
+	Main = tabGroups.TabGroup1:Tab({ Name = "Main", Image = "rbxassetid://18821914323" }),
+	Farm = tabGroups.TabGroup1:Tab({ Name = "Farm", Image = "rbxassetid://10734950309" }),
+    AutoPlay = tabGroups.TabGroup1:Tab({ Name = "Auto Play", Image = "rbxassetid://10734950309" }),
+    Settings = tabGroups.TabGroup1:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" }),
+}
 
-LeftGroupBox:AddToggle("HPI", {
-	Text = "Hide Player Info",
-	Default = false,
-	Callback = function(Value)
-        getgenv().HPI = Value
-		HPI()
-	end,
+--UI Sections
+
+local sections = {
+	MainSection1 = tabs.Main:Section({ Side = "Left" }),
+    MainSection2 = tabs.Main:Section({ Side = "Left" }),
+    MainSection3 = tabs.Main:Section({ Side = "Right" }),
+    MainSection4 = tabs.Main:Section({ Side = "Right" }),
+    MainSection10 = tabs.Farm:Section({ Side = "Left" }),
+    MainSection11 = tabs.Farm:Section({ Side = "Right" }),
+    MainSection12 = tabs.Farm:Section({ Side = "Right" }),
+    MainSection13 = tabs.Farm:Section({ Side = "Right" }),
+    MainSection15 = tabs.AutoPlay:Section({ Side = "Left" }),
+    MainSection16 = tabs.AutoPlay:Section({ Side = "Right" }),
+    MainSection25 = tabs.Settings:Section({ Side = "Right" }),
+}
+
+sections.MainSection1:Header({
+	Name = "Player"
 })
 
-LeftGroupBox:AddToggle("SM", {
-	Text = "Security Mode",
+sections.MainSection1:Toggle({
+	Name = "Hide Player",
 	Default = false,
-	Callback = function(Value)
-		getgenv().securityMode = Value
-        securityMode()
+	Callback = function(value)
+		getgenv().HidePlayer = value
+		HidePlayer()
 	end,
-})
+}, "HidePlayerInfo")
 
-LeftGroupBox:AddToggle("DEN", {
-	Text = "Delete Error Notifications", 
+sections.MainSection1:Toggle({
+	Name = "Auto Walk",
 	Default = false,
-	Callback = function(Value)
-        getgenv().deleteNotErro = Value
-		deleteNotErro()
+	Callback = function(value)
+		getgenv().autoWalk = value
+		autoWalk()
 	end,
-})
+}, "AutoWalk")
 
-LeftGroupBox:AddToggle("FPSBoost", {
-	Text = "FPS Boost",
+sections.MainSection1:Toggle({
+	Name = "Security Mode",
 	Default = false,
-	Callback = function(Value)
-        getgenv().extremeFpsBoost = Value
-		extremeFpsBoost()
+	Callback = function(value)
+		getgenv().securityMode = value
+		securityMode()
 	end,
-})
+}, "SecurityMode")
 
-LeftGroupBox:AddToggle("DeleteMap", {
-	Text = "Delete Map",
+sections.MainSection1:Toggle({
+	Name = "Delete Map",
 	Default = false,
-	Callback = function(Value)
-        getgenv().deleteMap = Value
+	Callback = function(value)
+		getgenv().deleteMap = value
 		deleteMap()
 	end,
-})
+}, "DeleteMap")
 
-LeftGroupBox:AddToggle("AIG", {
-	Text = "Auto Increase Gamespeed",
+sections.MainSection1:Toggle({
+	Name = "Delete Notifications",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoGamespeed = Value
-		autoGamespeed()
+	Callback = function(value)
+		getgenv().deleteNotErro = value
+		deleteNotErro()
 	end,
-})
+}, "DeleteNotErro")
 
-local RightGroupbox = Tabs.Main:AddRightGroupbox("Others")
-
-RightGroupbox:AddToggle("AL", {
-	Text = "Auto Leave",
+sections.MainSection1:Toggle({
+	Name = "Auto Leave",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoLeave = Value
+	Callback = function(value)
+		getgenv().autoLeave = value
 		autoLeave()
 	end,
-})
+}, "AutoLeave")
 
-
-RightGroupbox:AddToggle("AR", {
-	Text = "Auto Retry",
+sections.MainSection1:Toggle({
+	Name = "Auto Replay",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoRetry = Value
+	Callback = function(value)
+		getgenv().autoRetry = value
 		autoRetry()
 	end,
-})
+}, "AutoReplay")
 
-RightGroupbox:AddToggle("AN", {
-	Text = "Auto Next",
+sections.MainSection1:Toggle({
+	Name = "Auto Next",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoNext = Value
+	Callback = function(value)
+		getgenv().autoNext = value
 		autoNext()
 	end,
+}, "AutoNext")
+
+sections.MainSection2:Header({
+	Name = "Webhook"
 })
 
-RightGroupbox:AddToggle("AGB", {
-	Text = "Auto Get Battlepass",
+sections.MainSection2:Input({
+	Name = "Webhook URL",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "All",
+	Callback = function(value)
+		urlwebhook = value
+	end,
+	onChanged = function(value)
+        urlwebhook = value
+	end,
+}, "WebhookURL")
+
+sections.MainSection2:Input({
+	Name = "User ID",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "Number",
+	Callback = function(value)
+        getgenv().pingUserId = value
+	end,
+	onChanged = function(value)
+        getgenv().pingUserId = value
+	end,
+}, "pingUser@")
+
+sections.MainSection2:Toggle({
+	Name = "Send Webhook when finish game",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoGetBattlepass = Value
+	Callback = function(value)
+        getgenv().webhook = value
+        webhook()
+	end,
+}, "SendWebhook")
+
+sections.MainSection2:Toggle({
+	Name = "Ping User",
+	Default = false,
+	Callback = function(value)
+        getgenv().pingUser = value
+	end,
+}, "PingUser")
+
+sections.MainSection3:Header({
+	Name = "Extra"
+})
+
+sections.MainSection3:Toggle({
+	Name = "Auto Get Battlepass",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoGetBattlepass = value
 		autoGetBattlepass()
 	end,
+}, "autoGetBattlepass")
+
+sections.MainSection4:Header({
+	Name = "Unit"
 })
 
-local MyButton2 = RightGroupbox:AddButton({
-    Text = 'Reedem Codes',
-    Func = function()
-        local codes = {
-            "Thegrammyisbacky",
-            "ThrillerBark",
-            "100RRLIMITEDTIMECODE",
-            "Raffle",
-            "Nomoredelay",
-            "ThrillerNext",
-            "BugsFixed",
-            "BossStudio4Life",
-            "500MVISITS!",
-            "Spooky",
-            "Dracula",
-            "CLANWARS",
-            "TheFixesAreHere",
-            "Lagfixes",
-            "SorryForBugs",
-            "theGramALS",
-            "Bleach2",
-            "MakeYourClan",
-            "PodcastyCodeBois",
-            "NewGODLY",
-            "2xPOINTS",
-            "SorryForBugs2",
-            "300KLIKES!",
-            "JointheGram",
-            "10KAGAIN??",
-            "ZankaNoTachi",
-            "TheOne",
-            "ShinigamiVsQuincy",
-            "QOLpart2Next",
-            "TYBW",
-            "NewBUNDLES",
-            "BOBAKISBACK",
-            "Goodluck",
-            "Welcome",
-            "FollowDalG",
-            "10KFR!",
-            "OverHeaven",
-            "JOJOUpdate",
-            "HeavenUpdateHYPE",
-            "SLIME",
-            "SecretCodeFR",
-            "Event",
-            "TensuraSlime",
-            "UPDTIME",
-            "BPReset"
-        }        
-        
-        for _, code in ipairs(codes) do
-            local args = {
-                [1] = codes
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimCode"):InvokeServer(unpack(args))            
-            wait()
-        end               
-    end,
-    DoubleClick = false,
-})
-
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Webhook")
-
-LeftGroupBox:AddInput('WebhookURL', {
-    Default = '',
-    Text = "Webhook URL",
-    Numeric = false,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        urlwebhook = Value
-    end
-})
-
-LeftGroupBox:AddInput('pingUser@', {
-    Default = '',
-    Text = "User ID",
-    Numeric = false,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        getgenv().pingUserId = Value
-    end
-})
-
-LeftGroupBox:AddToggle("WebhookFG", {
-    Text = "Send Webhook when finish game",
-    Default = false,
-    Callback = function(Value)
-        getgenv().webhook = Value
-        webhook()
-    end,
-})
-
-LeftGroupBox:AddToggle("pingUser", {
-    Text = "Ping user",
-    Default = false,
-    Callback = function(Value)
-        getgenv().pingUser = Value
-    end,
-})
-
-local TabBox = Tabs.Main:AddRightTabbox()
-
-local Tab1 = TabBox:AddTab('Passive')
-
-Tab1:AddLabel('W.I.P')
-
-local Tab2 = TabBox:AddTab('Feed')
-
-Tab2:AddDropdown('FeedUnit', {
-    Values = ValuesUnitId,
-    Default = "None",
-    Multi = false,
-    Text = 'Select Unit',
-
-    Callback = function(value)
+local Dropdown = sections.MainSection4:Dropdown({
+	Name = "Select Unit",
+	Multi = false,
+	Required = true,
+	Options = ValuesUnitId,
+	Default = None,
+	Callback = function(value)
         selectedUnitToFeed = value:match(".* | .* | (.+)")
-    end
-})
+	end,
+}, "dropdownSelectUnitToFeed")
 
-Tab2:AddDropdown('dropdownSelectItemsToFeed', {
-    Values = ValuesItemsToFeed,
-    Default = "None",
-    Multi = false,
-    Text = 'Select Unit to Feed',
-    Callback = function(Value)
-        selectedFeed = Value
-    end
-})
+local Dropdown = sections.MainSection4:Dropdown({
+	Name = "Select Item To Feed",
+	Multi = false,
+	Required = true,
+	Options = ValuesItemsToFeed,
+	Default = None,
+	Callback = function(value)
+		selectedFeed = value
+	end,
+}, "dropdownSelectItemToFeed")
 
-Tab2:AddToggle("AF", {
-    Text = "Auto Feed",
-    Default = false,
-    Callback = function(Value)
-        getgenv().autoFeed = Value
-        autoFeed()
-    end,
-})
-
-local Tabs = {
-    Farm = Window:AddTab('Farm'),
-}
-
-local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Portal")
-
-LeftGroupBox:AddLabel('W.I.P')
-
-local LeftGroupBox = Tabs.Farm:AddLeftGroupbox("Story")
-
-LeftGroupBox:AddDropdown('dropdownStoryMap', {
-    Values = ValuesMaps,
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Story Map',
-
-    Callback = function(Value)
-        selectedStoryMap = Value
-    end
-})
-
-LeftGroupBox:AddDropdown('dropdownSelectDifficultyStory', {
-    Values = {'Normal', "Nightmare", "Purgatory"},
-    Default = "None",
-    Multi = true,
-
-    Text = 'Select a Difficulty',
-
-    Callback = function(Values)
-        selectedDifficultyStory = Values
-    end
-})
-
-LeftGroupBox:AddDropdown('dropdownSelectActStory', {
-    Values = {1, 2, 3, 4, 5, 6},
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Act',
-
-    Callback = function(Value)
-        selectedActStory = Value
-    end
-})
-
-LeftGroupBox:AddToggle("AJS", {
-	Text = "Auto Join Story",
+sections.MainSection4:Toggle({
+	Name = "Auto Feed",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoJoinStory = Value
+	Callback = function(value)
+		getgenv().autoFeed = value
+		autoFeed()
+	end,
+}, "autoFeed")
+
+sections.MainSection10:Header({
+	Name = "Story"
+})
+
+local Dropdown = sections.MainSection10:Dropdown({
+	Name = "Select Story Map",
+	Multi = false,
+	Required = true,
+	Options = ValuesMaps,
+	Default = None,
+	Callback = function(value)
+		selectedStoryMap = value
+	end,
+}, "dropdownStoryMap")
+
+local Dropdown = sections.MainSection10:Dropdown({
+	Name = "Select Difficulty",
+	Multi = false,
+	Required = true,
+	Options = {'Normal', "Nightmare", "Purgatory"},
+	Default = None,
+	Callback = function(value)
+		selectedDifficultyStory = value
+	end,
+}, "dropdownSelectDifficultyStory")
+
+local Dropdown = sections.MainSection10:Dropdown({
+	Name = "Select Act",
+	Multi = false,
+	Required = true,
+	Options = {1,2,3,4,5,6},
+	Default = None,
+	Callback = function(value)
+		selectedActStory = value
+	end,
+}, "dropdownSelectActStory")
+
+sections.MainSection10:Toggle({
+	Name = "Auto Story",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoJoinStory = value
 		autoJoinStory()
 	end,
+}, "autoJoinStory")
+
+sections.MainSection11:Header({
+	Name = "Raid"
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Raid")
+local Dropdown = sections.MainSection11:Dropdown({
+	Name = "Select Raid Map",
+	Multi = false,
+	Required = true,
+	Options = ValuesMaps,
+	Default = None,
+	Callback = function(value)
+		selectedRaidMap = value
+	end,
+}, "dropdownRaidMap")
 
-RightGroupbox:AddDropdown('dropdownRaidMap', {
-    Values = ValuesMaps,
-    Default = "None",
-    Multi = false,
+local Dropdown = sections.MainSection11:Dropdown({
+	Name = "Select Act",
+	Multi = false,
+	Required = true,
+	Options = {1,2,3,4,5,6},
+	Default = None,
+	Callback = function(value)
+		selectedFaseRaid = value
+	end,
+}, "dropdownSelectFaseRaid")
 
-    Text = 'Select Raid Map',
-
-    Callback = function(Value)
-        selectedRaidMap = Value
-    end
-})
-
-RightGroupbox:AddDropdown('dropdownSelectFaseRaid', {
-    Values = {1, 2, 3, 4, 5, 6},
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Act Raid',
-
-    Callback = function(Value)
-        selectedFaseRaid = Value
-    end
-})
-
-RightGroupbox:AddToggle("AJR", {
-	Text = "Auto Join Raid",
+sections.MainSection11:Toggle({
+	Name = "Auto Raid",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoJoinRaid = Value
+	Callback = function(value)
+		getgenv().autoJoinRaid = value
 		autoJoinRaid()
 	end,
+}, "autoJoinRaid")
+
+sections.MainSection12:Header({
+	Name = "Challenges"
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Challenges")
+local Dropdown = sections.MainSection12:Dropdown({
+	Name = "Select Map",
+	Multi = false,
+	Required = true,
+	Options = ValuesMaps,
+	Default = None,
+	Callback = function(value)
+		selectedChallengeMap = value
+	end,
+}, "dropdownChallengeMap")
 
-RightGroupbox:AddDropdown('dropdownChallengeMap', {
-    Values = ValuesMaps,
-    Default = "None",
+local Dropdown = sections.MainSection12:Dropdown({
+    Name = "Ignore Difficulty",
     Multi = false,
+    Required = true,
+    Options = valuesChallengeInfo, 
+    Default = none,
+    Callback = function(value)
+        selectedIgnoreChallenge = value
+    end,
+}, "dropdownSelectChallengeInfo")
 
-    Text = 'Select Challenge Map',
+local Dropdown = sections.MainSection12:Dropdown({
+	Name = "Select Act",
+	Multi = false,
+	Required = true,
+	Options = {1,2,3,4,5,6},
+	Default = None,
+	Callback = function(value)
+		selectActChallenge = value
+	end,
+}, "dropdownSelectActChallenge")
 
-    Callback = function(Value)
-        selectedChallengeMap = Value
-    end
-})
-
-RightGroupbox:AddDropdown('dropdownSelectChallengeInfo', {
-    Values = ValuesChallengeInfo,
-    Default = {},
-    Multi = true,
-
-    Text = 'Ignore Difficulty',
-
-    Callback = function(Values)
-        selectedIgnoreChallenge = Values
-    end
-})
-
-RightGroupbox:AddDropdown('dropdownSelectActChallenge', {
-    Values = {1, 2, 3, 4, 5, 6},
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Act',
-
-    Callback = function(Value)
-        selectActChallenge = Value
-    end
-})
-
-RightGroupbox:AddToggle("AJC", {
-	Text = "Auto Join Challenge",
+sections.MainSection12:Toggle({
+	Name = "Auto Challenge",
 	Default = false,
-	Callback = function(Value)
-		getgenv().autoJoinChallenge = Value
+	Callback = function(value)
+		getgenv().autoJoinChallenge = value
 		autoJoinChallenge()
 	end,
+}, "autoJoinChallenge")
+
+sections.MainSection13:Header({
+	Name = "Infinite Caslte"
 })
 
-local RightGroupbox = Tabs.Farm:AddRightGroupbox("Inf Castle")
+local Dropdown = sections.MainSection13:Dropdown({
+	Name = "Method To Join in Inf Castle",
+	Multi = false,
+	Required = true,
+	Options = {'Method 1', 'Method 2'},
+	Default = None,
+	Callback = function(value)
+        getgenv().joinMethod = value
+	end,
+}, "dropdownMethod")
 
-RightGroupbox:AddDropdown('dropdownMethod', {
-    Values = {'Method 1', 'Method 2',},
-    Default = "None",
-    Multi = false,
+sections.MainSection13:Input({
+	Name = "Choose Inf Castle Room",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "Number",
+	Callback = function(value)
+        selectedRoomInfCastle = value
+	end,
+	onChanged = function(value)
+        selectedRoomInfCastle = value
+	end,
+}, "InfCastleRoom")
 
-    Text = 'Method To Join in Inf Castle',
-
-    Callback = function(Value)
-        getgenv().joinMethod = Value
-    end
-})
-
-RightGroupbox:AddInput('CICR', {
-    Default = '',
-    Text = "Choose Inf Castle Room",
-    Numeric = true,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        selectedRoomInfCastle = Value
-    end
-})
-
-RightGroupbox:AddToggle("AIC", {
-	Text = "Auto Join Inf Castle",
+sections.MainSection13:Toggle({
+	Name = "Auto Inf Caslte",
 	Default = false,
-	Callback = function(Value)
-		getgenv().joinInfCastle = Value
+	Callback = function(value)
+		getgenv().joinInfCastle = value
 		joinInfCastle()
 	end,
+}, "autoInfCastle")
+
+sections.MainSection15:Header({
+	Name = "Place & Upgrade"
 })
 
-RightGroupbox:AddToggle("ARRSM", {
-	Text = "Auto RRS Method",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoRRSMethod = Value
+local Dropdown = sections.MainSection15:Dropdown({
+	Name = "Select Max Slot To Put",
+	Multi = false,
+	Required = true,
+	Options = {'1', '2', '3', '4', '5', '6'},
+	Default = None,
+	Callback = function(value)
+        selectedMaxSlot = tonumber(value)
 	end,
-})
+}, "dropdownSlot")
 
-local Tabs = {
-    Units = Window:AddTab('Other'),
-}
+sections.MainSection15:Input({
+	Name = "Start Place at x Wave",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "Number",
+	Callback = function(value)
+        selectedWaveXToPlace = value
+	end,
+	onChanged = function(value)
+        selectedWaveXToPlace = value
+	end,
+}, "inputAutoPlaceWaveX")
 
-local LeftGroupBox = Tabs.Units:AddLeftGroupbox("Place & Upgrade")
-
-LeftGroupBox:AddDropdown('dropdownSlot', {
-    Values = {'1', '2', '3', '4', '5', '6'},
-    Default = "None",
-    Multi = false,
-
-    Text = 'Select Max Slot To Put',
-
-    Callback = function(Value)
-        selectedMaxSlot = tonumber(Value)
-    end
-})
-
-LeftGroupBox:AddInput('inputAutoPlaceWaveX', {
-    Default = '',
-    Text = "Start Place at x Wave",
-    Numeric = true,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        selectedWaveXToPlace = Value
-    end
-})
-
-LeftGroupBox:AddToggle("APUUPAJFK", {
-    Text = "Auto Place Unit",
-    Default = false,
-    Callback = function(Value)
-        getgenv().placeUnits = Value
+sections.MainSection15:Toggle({
+	Name = "Auto Place Unit",
+	Default = false,
+	Callback = function(value)
+        getgenv().placeUnits = value
         placeUnits()
-    end,
-})
-
-LeftGroupBox:AddToggle("OPU", {
-	Text = "Only Place in Wave X",
-	Default = false,
-	Callback = function(Value)
-		getgenv().onlyPlaceinwaveX = Value
 	end,
-})
+}, "autoPlaceUnit")
 
-LeftGroupBox:AddInput('inputAutoUpgradeWaveX', {
-    Default = '',
-    Text = "Start Upgrade at x Wave",
-    Numeric = true,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        selectedWaveXToUpgrade = Value
-    end
-})
-
-LeftGroupBox:AddToggle("AUU", {
-	Text = "Auto Upgrade Unit",
+sections.MainSection15:Toggle({
+	Name = "Only Place in Wave X",
 	Default = false,
-	Callback = function(Value)
-		getgenv().upgradeUnit = Value
+	Callback = function(value)
+		getgenv().onlyPlaceinwaveX = value
+	end,
+}, "onlyPlaceInWaveX")
+
+sections.MainSection15:Input({
+	Name = "Start Upgrade at x Wave",
+	Placeholder = "Press enter after paste",
+	AcceptedCharacters = "Number",
+	Callback = function(value)
+        selectedWaveXToUpgrade = value
+	end,
+	onChanged = function(value)
+        selectedWaveXToUpgrade = value
+	end,
+}, "inputAutoUpgradeWaveX")
+
+sections.MainSection15:Toggle({
+	Name = "Auto Upgrade Unit",
+	Default = false,
+	Callback = function(value)
+		getgenv().upgradeUnit = value
 		upgradeUnit()
 	end,
-})
+}, "autoUpgradeUnit")
 
-LeftGroupBox:AddToggle("OUU", {
-	Text = "Only Upgrade in Wave X",
+sections.MainSection15:Toggle({
+	Name = "Only Upgrade in Wave X",
 	Default = false,
-	Callback = function(Value)
-		getgenv().onlyupgradeinwaveX = Value
+	Callback = function(value)
+		getgenv().onlyupgradeinwaveX = value
 	end,
+}, "onlyUpgradeInWaveX")
+
+sections.MainSection16:Header({
+	Name = "Skills"
 })
 
-LeftGroupBox:AddInput('inputAutoSellWaveX', {
-    Default = '',
-    Text = "Start Sell at x Wave",
-    Numeric = true,
-    Finished = false,
-    Placeholder = 'Press enter after paste',
-    Callback = function(Value)
-        selectedWaveXToSell = Value
-    end
-})
-
-LeftGroupBox:AddToggle("ASU", {
-	Text = "Auto Sell Unit (W.I.P)",
+sections.MainSection16:Toggle({
+	Name = "Auto Universal Skill",
 	Default = false,
-	Callback = function(Value)
-		getgenv().sellUnit = Value
-		sellUnit()
-	end,
-})
-
-LeftGroupBox:AddToggle("OSU", {
-	Text = "Only Sell in Wave X",
-	Default = false,
-	Callback = function(Value)
-		getgenv().onlysellinwaveX = Value
-	end,
-})
-
-local RightGroupbox = Tabs.Units:AddRightGroupbox("Skills")
-
-RightGroupbox:AddToggle("AUS", {
-	Text = "Auto Universal Skill",
-	Default = false,
-	Callback = function(Value)
-		getgenv().autoUniversalSkill = Value
+	Callback = function(value)
+		getgenv().autoUniversalSkill = value
         autoUniversalSkill()
 	end,
-})
+}, "autoUniversalSkill")
 
-RightGroupbox:AddToggle("OUSIB", {
-	Text = "Only use skills in boss",
+sections.MainSection16:Toggle({
+	Name = "Only use skills in boss",
 	Default = false,
-	Callback = function(Value)
-		getgenv().onlyBoss = Value
+	Callback = function(value)
+		getgenv().onlyBoss = value
 	end,
-})
+}, "onlyUseSkillsInBoss")
 
-RightGroupbox:AddSlider('Slot1', {
-    Text = 'Slot 1',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
+--UI IMPORTANT THINGS
 
-    Callback = function(Value)
-        selectedSlot1 = Value
-    end
-})
+MacLib:SetFolder("Maclib")
+tabs.Settings:InsertConfigSection("Left")
 
-RightGroupbox:AddSlider('Slot2', {
-    Text = 'Slot 2',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot2 = Value
-    end
-})
-
-RightGroupbox:AddSlider('Slot3', {
-    Text = 'Slot 3',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot3 = Value
-    end
-})
-
-RightGroupbox:AddSlider('Slot4', {
-    Text = 'Slot 4',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot4 = Value
-    end
-})
-
-RightGroupbox:AddSlider('Slot5', {
-    Text = 'Slot 5',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot5 = Value
-    end
-})
-
-RightGroupbox:AddSlider('Slot6', {
-    Text = 'Slot 6',
-    Default = 1,
-    Min = 1,
-    Max = 20,
-    Rounding = 0,
-    Compact = false,
-
-    Callback = function(Value)
-        selectedSlot6 = Value
-    end
-})
-
-RightGroupbox:AddToggle("MaxUpgrade", {
-	Text = "Max Upgrade",
+sections.MainSection25:Toggle({
+	Name = "Hide UI when Execute",
 	Default = false,
-	Callback = function(Value)
-		getgenv().maxupgradeUnit = Value
-	end,
-})
-
-local Tabs = {
-    Shop = Window:AddTab('Shop'),
-}
-
-Library:SetWatermarkVisibility(true)
-
-local FrameTimer = tick()
-local FrameCounter = 0
-local FPS = 60
-local StartTime = tick()
-
-local WatermarkConnection
-
-local function FormatTime(seconds)
-    local hours = math.floor(seconds / 3600)
-    local minutes = math.floor((seconds % 3600) / 60)
-    local seconds = math.floor(seconds % 60)
-    return string.format("%02d:%02d:%02d", hours, minutes, seconds)
-end
-
-local function UpdateWatermark()
-    FrameCounter = FrameCounter + 1
-
-    if (tick() - FrameTimer) >= 1 then
-        FPS = FrameCounter
-        FrameTimer = tick()
-        FrameCounter = 0
-    end
-
-    local activeTime = tick() - StartTime
-
-    Library:SetWatermark(('Tempest Hub | %s fps | %s ms | %s'):format(
-        math.floor(FPS),
-        math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()),
-        FormatTime(activeTime)
-    ))
-end
-
-WatermarkConnection = game:GetService('RunService').RenderStepped:Connect(UpdateWatermark)
-
-local TabsUI = {
-    ['UI Settings'] = Window:AddTab('UI Settings'),
-}
-
-local function Unload()
-    WatermarkConnection:Disconnect()
-    print('Unloaded!')
-    Library.Unloaded = true
-end
-
-local MenuGroup = TabsUI['UI Settings']:AddLeftGroupbox('Menu')
-
-MenuGroup:AddToggle('huwe', {
-    Text = 'Hide UI When Execute',
-    Default = false,
-    Callback = function(Value)
-        getgenv().hideUIExec = Value
+	Callback = function(value)
+		getgenv().hideUIExec = value
 		hideUIExec()
-    end
-})
+	end,
+}, "HideUiWhenExecute")
 
-MenuGroup:AddToggle('AUTOEXECUTE', {
-    Text = 'Auto Execute',
-    Default = false,
-    Callback = function(Value)
-        getgenv().aeuat = Value
+sections.MainSection25:Toggle({
+	Name = "Auto Execute",
+	Default = false,
+	Callback = function(value)
+		getgenv().aeuat = value
 		aeuat()
+	end,
+}, "AutoExecute")
+
+sections.MainSection25:Toggle({
+	Name = "Blackscreen",
+	Default = false,
+	Callback = function(value)
+		blackScreen()
+	end,
+}, "BlackScreen")
+
+sections.MainSection25:Toggle({
+	Name = "FPS Boost",
+	Default = false,
+	Callback = function(value)
+        getgenv().fpsBoost = value
+		fpsBoost()
+	end,
+}, "FPSBoost")
+
+sections.MainSection25:Toggle({
+	Name = "Better FPS Boost",
+	Default = false,
+	Callback = function(value)
+        getgenv().betterFpsBoost = value
+		betterFpsBoost()
+	end,
+}, "BetterFPSBoost")
+
+sections.MainSection25:Toggle({
+	Name = "REALLY Better FPS Boost",
+	Default = false,
+	Callback = function(value)
+        getgenv().extremeFpsBoost = value
+		extremeFpsBoost()
+	end,
+}, "REALLYBetterFPSBoost")
+
+sections.MainSection25:Slider({
+    Name = "Change UI Size",
+    Default = 0.8,
+    Minimum = 0.1,
+    Maximum = 1.5,
+    Increment = 0.05,
+    DisplayMethod = "Round", 
+    Precision = 1,
+    Callback = function(value)
+        changeUISize(value)
     end
-})
+}, "changeUISize")
 
-
-MenuGroup:AddButton('Unload', function() Library:Unload() end)
-MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true, Text = 'Menu keybind' })
-
-Library.ToggleKeybind = Options.MenuKeybind
-
-ThemeManager:SetLibrary(Library)
-SaveManager:SetLibrary(Library)
-
-ThemeManager:SetFolder('Tempest Hub')
-SaveManager:SetFolder('Tempest Hub/_ALS_')
-
-SaveManager:BuildConfigSection(TabsUI['UI Settings'])
-
-ThemeManager:ApplyToTab(TabsUI['UI Settings'])
-
-SaveManager:LoadAutoloadConfig()
-
-local GameConfigName = '_ALS_'
-local player = game.Players.LocalPlayer
-SaveManager:Load(player.Name .. GameConfigName)
-spawn(function()
-    while task.wait(1) do
-        if Library.Unloaded then
-            break
-        end
-        SaveManager:Save(player.Name .. GameConfigName)
-    end
+Window.onUnloaded(function()
+	print("Unloaded!")
 end)
 
-for i,v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
-    v:Disable()
+tabs.Main:Select()
+
+MacLib:SetFolder("Tempest Hub")
+MacLib:SetFolder("Tempest Hub/_ALS_")
+local GameConfigName = "_ALS_"
+local player = game.Players.LocalPlayer
+MacLib:LoadConfig(player.Name .. GameConfigName)
+spawn(function()
+	while task.wait(1) do
+		MacLib:SaveConfig(player.Name .. GameConfigName)
+	end
+end)
+
+--Anti AFK
+for i, v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
+	v:Disable()
 end
-warn('[TEMPEST HUB] Loaded')
+warn("[TEMPEST HUB] Loaded")
+hideUI()
+createBC()
+getgenv().loadedallscript = true
