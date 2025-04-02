@@ -1646,6 +1646,24 @@ sections.MainSection1:Toggle({
 }, "DeleteNotErro")
 
 sections.MainSection1:Toggle({
+	Name = "Auto Start",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoStartGG = value
+		autoStart()
+	end,
+}, "AutoStart")
+
+sections.MainSection1:Toggle({
+	Name = "Auto Skip Wave",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoSkipWaveGG = value
+		autoSkipWave()
+	end,
+}, "AutoSkipWave")
+
+sections.MainSection1:Toggle({
 	Name = "Auto Leave",
 	Default = false,
 	Callback = function(value)
