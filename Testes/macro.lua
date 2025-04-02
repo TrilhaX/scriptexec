@@ -152,7 +152,8 @@ function collectRemoteInfo(remoteName, args)
     end
 
     if selectedTypeOfRecord == "Money" or selectedTypeOfRecord == "Hybrid" then
-        local money = game.Players.LocalPlayer.notSavable.money
+        local player = game.Players.LocalPlayer
+        local money = player:FindFirstChild("Cash")
         if money then
             remoteData.money = money.Value
         end     
@@ -227,6 +228,29 @@ function stringToCFrame(str)
 end
 
 function playMacro(macroName)
+    local player = game:GetService("Players").LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
+    local bottomGui = playerGui:WaitForChild("Bottom")
+    local frame = bottomGui:WaitForChild("Frame")
+
+    for _, child in ipairs(frame:GetChildren()) do
+        if child:IsA("Frame") then
+            local textButtonCount = 0
+            for _, subChild in ipairs(child:GetChildren()) do
+                if subChild:IsA("TextButton") then
+                    textButtonCount = textButtonCount + 1
+                end
+            end
+            
+            if textButtonCount == 2 then
+                print("Frame encontrado:", child.Name)
+                if child.Visible == true then
+                    wait(0.1)
+                end
+            end
+        end
+    end
+
     if not macrosFolder then
         warn("macrosFolder not defined!")
         return
@@ -298,10 +322,11 @@ function playMacro(macroName)
         end
         
         if (selectedTypeOfRecord == "Money" or selectedTypeOfRecord == "Hybrid") and step.money then
-            local moneyValue = game.Players.LocalPlayer.notSavable.money
-            if moneyValue then
+            local player = game.Players.LocalPlayer
+            local money = player.Cash
+            if money then
                 local startWait = tick()
-                while isPlaying and moneyValue.Value < step.money and (tick() - startWait) < moneyCheckTimeout do
+                while isPlaying and money.Value < step.money and (tick() - startWait) < moneyCheckTimeout do
                     print("Waiting for money... Current:", moneyValue.Value, "Needed:", step.money)
                     wait(moneyCheckInterval)
                 end
