@@ -1,22 +1,47 @@
-warn('[TEMPEST HUB] Loading UI')
-wait(.1)
+--Checking if game is loaded
+repeat task.wait() until game:IsLoaded()
+warn("[TEMPEST HUB] Loading Ui")
+wait()
 
-local repo = 'https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/'
-local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
-local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
-local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
+--Starting Script
+local MacLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/maclibTempestHubUI/main/maclib.lua"))()
 
-Library:Notify('Welcome to Tempest Hub', 5)
+local isMobile = game:GetService("UserInputService").TouchEnabled
+local pcSize = UDim2.fromOffset(868, 650)
+local mobileSize = UDim2.fromOffset(800, 550)
+local currentSize = isMobile and mobileSize or pcSize
 
-local Window = Library:CreateWindow({
-    Title = 'Tempest Hub | Anime Reborn',
-    Center = true,
-    AutoShow = true,
-    TabPadding = 8,
-    MenuFadeTime = 0.2
+local Window = MacLib:Window({
+    Title = "Tempest Hub",
+    Subtitle = "Anime Last Stand",
+    Size = currentSize,
+    DragStyle = 1,
+    DisabledWindowControls = {},
+    ShowUserInfo = true,
+    Keybind = Enum.KeyCode.RightControl,
+    AcrylicBlur = true,
 })
 
-Library:Notify('Loading Anime Reborn Script', 5)
+function changeUISize(scale)
+    if Window then
+        if scale < 0.1 then
+            scale = 0.1
+        elseif scale > 1.5 then
+            scale = 1.5
+        end
+
+        local newWidth = pcSize.X.Offset * scale
+        local newHeight = pcSize.Y.Offset * scale
+
+        Window:SetSize(UDim2.fromOffset(newWidth, newHeight))
+        Window:Notify({
+            Title = "UI Resized",
+            Description = "New size scale: " .. scale,
+            Lifetime = 3
+        })
+    end
+end
+
 wait(.1)
 
 local macros = {}
@@ -27,59 +52,74 @@ local recordingData = {}
 local Options = {}
 local selectedTypeOfRecord = "None"
 local startTime = tick()
-local mapsFolder = game:GetService("ReplicatedStorage").Registry.Maps
-local maps = mapsFolder:GetChildren()
 local printedNames = {}
 local mapNames = {}
 local dropdowns = {}
+local macroName
+local delayMacro
 
-local macrosFolder = 'Tempest Hub/_Anime_Reborn_/Macros'
+local macrosFolder = 'Tempest Hub/_ALS_/Macros'
 if not isfolder(macrosFolder) then
     makefolder(macrosFolder)
 end
 
 function updateDropdown()
-    macros = {}
-    for _, file in ipairs(listfiles(macrosFolder)) do
-        if file:match("%.json$") then
-            table.insert(macros, file:match("([^/]+)%.json$"))
+    local newMacros = {"None"}
+    
+    if isfolder(macrosFolder) then
+        for _, file in ipairs(listfiles(macrosFolder)) do
+            local name = file:match("([^/]+)%.json$") or file:match("([^\\]+)%.json$")
+            if name then
+                table.insert(newMacros, name)
+            end
         end
     end
+    
+    macros = newMacros
 
-    if Options.SelectedMacro then
-        Options.SelectedMacro:SetValues(macros)
-    else
-        warn("Options.SelectedMacro is nil")
+    if SelectedMacro then
+        SelectedMacro:SetValues(macros)
+        SelectedMacro:SetValue("None")
     end
 end
 
 function createJsonFile(fileName)
-    if fileName == '' then
-        Library:Notify("Please enter a valid macro name", 3)
+    if fileName == '' or not fileName then
+        Window:Notify({
+            Title = "Error",
+            Description = "Please enter a macro name",
+            Lifetime = 3
+        })
         return
     end
 
     local filePath = macrosFolder .. '/' .. fileName .. '.json'
     if isfile(filePath) then
-        Library:Notify("Macro already exists: " .. fileName, 3)
+        Window:Notify({
+            Title = "Error",
+            Description = "Macro already exists",
+            Lifetime = 3
+        })
         return
     end
 
     writefile(filePath, "{}")
     updateDropdown()
-    Library:Notify('Macro created: ' .. fileName, 3)
+    Window:Notify({
+        Title = "Success",
+        Description = "Macro created: " .. fileName,
+        Lifetime = 3
+    })
 end
 
-function toggleRecording()
+function recordingMacro()
     if not selectedMacro or selectedMacro == "None" then
-        Library:Notify("Please select a macro before recording", 3)
-        Toggles.RecordMacro:SetValue(false)
+        RecordMacro:SetValue(false)
         return
     end
 
     if not selectedTypeOfRecord or selectedTypeOfRecord == "None" then
-        Library:Notify("Please select a type of record before recording", 3)
-        Toggles.RecordMacro:SetValue(false)
+        RecordMacro:SetValue(false)
         return
     end
 
@@ -100,8 +140,8 @@ end
 
 function collectRemoteInfo(remoteName, args)
     local remoteData = { 
-        action = args[1], 
-        arguments = { [1] = args[1], [2] = {} }, 
+        action = remoteName, 
+        arguments = args,
         index = recordingData.currentStepIndex + 1
     }
 
@@ -118,14 +158,27 @@ function collectRemoteInfo(remoteName, args)
         end     
     end
 
-    if args[2] then
-        for key, value in pairs(args[2]) do
-            if typeof(value) == "CFrame" then
-                remoteData.arguments[2][key] = {X = value.X, Y = value.Y, Z = value.Z}            
-            elseif typeof(value) == "Instance" then
-                remoteData.arguments[2][key] = value.Name or tostring(value)
+    if #args > 1 then
+        remoteData.arguments = {}
+        for i = 1, #args do
+            local arg = args[i]
+            
+            if typeof(arg) == "table" then
+                local serializedTable = {}
+                for k, v in pairs(arg) do
+                    if typeof(v) == "CFrame" then
+                        serializedTable[tostring(k)] = {CFrame = {v:GetComponents()}}
+                    elseif typeof(v) == "Vector3" then
+                        serializedTable[tostring(k)] = {Vector3 = {X = v.X, Y = v.Y, Z = v.Z}}
+                    elseif typeof(v) == "Instance" then
+                        serializedTable[tostring(k)] = {Instance = v:GetFullName()}
+                    else
+                        serializedTable[tostring(k)] = v
+                    end
+                end
+                remoteData.arguments[i] = serializedTable
             else
-                remoteData.arguments[2][key] = tostring(value)
+                remoteData.arguments[i] = arg
             end
         end
     end
@@ -133,31 +186,27 @@ function collectRemoteInfo(remoteName, args)
     table.insert(recordingData.steps, remoteData)
 end
 
-function handleUnitRemote(args)
+function getUnitRemote(remoteName, args)
     if not isRecording then return end
 
-    local action = args[1]
-
-    if action == "Place" then
-        collectRemoteInfo("PlaceUnit", args)
-    elseif action == "Upgrade" then
-        collectRemoteInfo("UpgradeUnit", args)
-    elseif action == "Sell" then
-        collectRemoteInfo("SellUnit", args)
+    local action = remoteName
+    
+    if action == "PlaceTower" or action == "Upgrade" or action == "Sell" or action == "ChangeTargeting" then
+        collectRemoteInfo(action, args)
     elseif action == "SpecialAbility" and getgenv().recordSkill == true then
-        collectRemoteInfo("SkillUse", args)
+        collectRemoteInfo(action, args)
     else
-        warn("Unknown action:", action)
+        warn("Ação desconhecida:", action)
     end
 end
 
 function updateRecordingStatus()
     if isRecording then
-        RecordingStatusLabel:SetText("Recording Status: Recording...")
+        RecordingStatusLabel:UpdateName("Recording Status: Recording...")
     elseif isPlaying then
-        RecordingStatusLabel:SetText("Playing Status: " .. selectedMacro)
+        RecordingStatusLabel:UpdateName("Playing Status: " .. selectedMacro)
     else
-        RecordingStatusLabel:SetText("Recording Status: Not Recording or Playing")
+        RecordingStatusLabel:UpdateName("Recording Status: Not Recording or Playing")
     end
 end
 
@@ -165,319 +214,437 @@ function updateSlotStatus(selectedSlot, selectedUnit)
     updateStatus("Selected Slot: " .. selectedSlot .. " | Unit: " .. selectedUnit)
 end
 
-function playMacro(macroName)
-    while getgenv().playMacro == true do
-    local filePath = macrosFolder .. '/' .. macroName .. '.json'
-    if not isfile(filePath) then
-        Library:Notify("Macro não encontrada: " .. macroName, 3)
-        return
-    end  
+function stringToCFrame(str)
+    local parts = {}
+    for num in str:gmatch("[%d%.%-]+") do
+        table.insert(parts, tonumber(num))
+    end
     
-    local success, macroData = pcall(function()
-        return game:GetService("HttpService"):JSONDecode(readfile(filePath))
-    end)
-    if not success then
-        Library:Notify("Erro ao carregar macro: " .. macroName, 3)
-        return
+    if #parts >= 3 then
+        return CFrame.new(parts[1], parts[2], parts[3])
     end
-    local currentStepIndex = 1
-
-    local function checkConditions(step)
-        local conditionsMet = true
-
-        if step.time then
-            if tick() - startTime < step.time then
-                conditionsMet = false
-            end
-        end
-
-        if step.money then
-            local money = game.Players.LocalPlayer.notSavable.money
-            if money and money.Value < step.money then
-                conditionsMet = false
-            end
-        end
-
-        return conditionsMet
-    end
-
-    local function executeStep(step)
-        isPlaying = true
-        local remote = game.ReplicatedStorage.Events.Unit
-        if remote then
-            if step.action == "Place" then
-                if type(step.arguments) == "table" then
-                    if step.arguments[2] and step.arguments[2].position then
-                        local pos = step.arguments[2].position
-                        if pos.X and pos.Y and pos.Z then
-                            remote:FireServer(step.action, {
-                                rot = step.arguments[2].rot or nil,
-                                slot = step.arguments[2].slot or nil,
-                                position = CFrame.new(pos.X, pos.Y, pos.Z)
-                            })
-                        else
-                            warn("Dados de posição incompletos! Definindo posição padrão...")
-                            remote:FireServer(step.action, {
-                                rot = step.arguments[2].rot or nil,
-                                slot = step.arguments[2].slot or nil,
-                                position = CFrame.new(0, 0, 0)
-                            })
-                        end
-                    else
-                        warn("Position está ausente ou nil! Usando posição padrão...")
-                        remote:FireServer(step.action, {
-                            rot = step.arguments[2] and step.arguments[2].rot or nil,
-                            slot = step.arguments[2] and step.arguments[2].slot or nil,
-                            position = CFrame.new(0, 0, 0)
-                        })
-                    end
-                end
-            elseif step.action == "Upgrade" then
-                if type(step.arguments) == "table" then
-                    remote:FireServer("Upgrade", {
-                        unit = workspace:WaitForChild("UnitsPlaced"):WaitForChild(step.arguments[2].unit),
-                    })
-                end
-            elseif step.action == "Sell" then
-                if type(step.arguments) == "table" then
-                    game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Unit"):FireServer("Sell", {
-                        unit =  workspace:WaitForChild("UnitsPlaced"):WaitForChild(step.arguments[2].unit),
-                    })
-                end
-            elseif step.action == "SpecialAbility" then
-                if type(step.arguments) == "table" then
-                    game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Unit"):FireServer("SpecialAbility", {
-                        unit = workspace:WaitForChild("UnitsPlaced"):WaitForChild(step.arguments[2].unit),
-                    })
-                end
-            else
-                remote:FireServer(step.action, step.arguments)
-            end
-        else
-            warn("Remote não encontrado para a ação: " .. step.action)
-        end
-    end 
-
-    while currentStepIndex <= #macroData.steps do
-        local step = macroData.steps[currentStepIndex]
-
-        if checkConditions(step) then
-            executeStep(step)
-            currentStepIndex = currentStepIndex + 1
-        else
-            wait(1)
-        end
-    end
-    Library:Notify("Macro '" .. macroName .. "' executado com sucesso!", 3)
-    break
-    end
+    return nil
 end
 
--- Hookmetamethod para capturar PlaceTower e Upgrade
+function playMacro(macroName)
+    if not macrosFolder then
+        warn("macrosFolder not defined!")
+        return
+    end
+
+    if not macroName or macroName == "None" then
+        return
+    end
+
+    local filePath = macrosFolder .. '/' .. macroName .. '.json'
+    
+    if not isfile(filePath) then
+        return
+    end
+
+    local fileContent
+    local success, err = pcall(function()
+        fileContent = readfile(filePath)
+    end)
+    
+    if not success then
+        return
+    end
+
+    local success, macroData = pcall(function()
+        return game:GetService("HttpService"):JSONDecode(fileContent)
+    end)
+    
+    if not success then
+        return
+    end
+    
+    if not macroData or not macroData.steps then
+        return
+    end
+
+    if not isPlaying then isPlaying = false end
+    if not updateRecordingStatus then 
+        updateRecordingStatus = function() end 
+        warn("updateRecordingStatus not defined - using dummy function")
+    end
+
+    isPlaying = true
+    updateRecordingStatus()
+    
+    local startTime = tick()
+    local moneyCheckTimeout = 10
+    local moneyCheckInterval = 0.1
+
+    for i, step in ipairs(macroData.steps) do
+        if not isPlaying then 
+            print("Macro stopped manually at step", i)
+            break 
+        end
+
+        if not step.action and not step.time and not step.money then
+            warn("Invalid step format at index " .. i .. ": " .. tostring(step))
+            break
+        end
+
+        if (selectedTypeOfRecord == "Time" or selectedTypeOfRecord == "Hybrid") and step.time then
+            local elapsed = tick() - startTime
+            local waitTime = step.time - elapsed
+            
+            if waitTime > 0 then
+                print("Waiting for", waitTime, "seconds (time-based)")
+                wait(waitTime)
+            end
+        end
+        
+        if (selectedTypeOfRecord == "Money" or selectedTypeOfRecord == "Hybrid") and step.money then
+            local moneyValue = game.Players.LocalPlayer.notSavable.money
+            if moneyValue then
+                local startWait = tick()
+                while isPlaying and moneyValue.Value < step.money and (tick() - startWait) < moneyCheckTimeout do
+                    print("Waiting for money... Current:", moneyValue.Value, "Needed:", step.money)
+                    wait(moneyCheckInterval)
+                end
+                
+                if moneyValue.Value < step.money then
+                    break
+                end
+            else
+                warn("moneyValue not found!")
+            end
+        end
+
+        if step.action then
+            local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+            if not remotes then
+                break
+            end
+            
+            local args = step.arguments or {}
+            local remote
+            
+            print("Executing step", i, "Action:", step.action, "Args:", unpack(args or {}))
+            
+            if step.action == "PlaceTower" and #args >= 2 then
+                local remote = remotes:FindFirstChild("PlaceTower")
+                if not remote then
+                    warn("PlaceTower remote not found!")
+                    return
+                end
+            
+                local towerName = tostring(args[1])
+                local position = args[2]
+            
+                if typeof(position) == "string" then
+                    position = stringToCFrame(position)
+                    if not position then
+                        warn("Formato de posição inválido:", args[2])
+                        return
+                    end
+                elseif typeof(position) ~= "CFrame" then
+                    warn("Tipo de posição inválido (esperado CFrame ou string):", typeof(position))
+                    return
+                end
+            
+                remote:FireServer(towerName, position)
+                print("Torre colocada:", towerName, "em", position)
+            elseif step.action == "Upgrade" and #args >= 1 then
+                remote = remotes:FindFirstChild("Upgrade")
+                local tower = workspace.Towers:FindFirstChild(args[1])
+                if remote and tower then
+                    remote:InvokeServer(tower)
+                end
+            elseif step.action == "Sell" and #args >= 1 then
+                remote = remotes:FindFirstChild("Sell")
+                local tower = workspace.Towers:FindFirstChild(args[1])
+                if remote and tower then
+                    remote:InvokeServer(tower)
+                end
+            elseif step.action == "ChangeTargeting" and #args >= 1 then
+                remote = remotes:FindFirstChild("ChangeTargeting")
+                local tower = workspace.Towers:FindFirstChild(args[1])
+                if remote and tower then
+                    remote:InvokeServer(tower)
+                end
+            elseif step.action == "SpecialAbility" and #args >= 1 then
+                remote = remotes:FindFirstChild("SpecialAbility")
+                local tower = workspace.Towers:FindFirstChild(args[1])
+                if remote and tower then
+                    remote:InvokeServer(tower)
+                end
+            else
+                warn("Unknown action or missing arguments:", step.action)
+            end
+            
+            wait(delayMacro)
+        end
+    end
+    
+    isPlaying = false
+    updateRecordingStatus()
+end
+
 local originalNamecall
 originalNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
-
-    -- Captura o PlaceTower
-    if method == "FireServer" and self.Name == "PlaceTower" and self.Parent == game.ReplicatedStorage.Remotes then
-        -- Argumentos necessários para PlaceTower
-        local unitName = args[1]  -- Nome da unidade
-        local position = args[2] -- Posição como CFrame
-        print("[Hook] PlaceTower detectado!")
-        print("Unit Name:", unitName)
-        print("Position:", position)
-    end
-
-    -- Captura o Upgrade
-    if method == "InvokeServer" and self.Name == "Upgrade" and self.Parent == game.ReplicatedStorage.Remotes then
-        -- Argumentos necessários para Upgrade
-        local unit = args[1]  -- Unidade no workspace
-        print("[Hook] Upgrade detectado!")
-        print("Unit:", unit)
+    local remoteName = self.Name
+    
+    if isRecording and not checkcaller() then
+        if method == "FireServer" and remoteName == "PlaceTower" and self.Parent == game.ReplicatedStorage.Remotes then
+            print("[RECORD] PlaceTower:", args[1], args[2])
+            local processedArgs = {
+                tostring(args[1]),
+                tostring(args[2])
+            }
+            getUnitRemote("PlaceTower", processedArgs)
+        
+        elseif method == "InvokeServer" and self.Parent == game.ReplicatedStorage.Remotes then
+            if remoteName == "Upgrade" or remoteName == "Sell" or remoteName == "ChangeTargeting" or remoteName == "SpecialAbility" then
+                print("[RECORD] "..remoteName..":", args[1])
+                getUnitRemote(remoteName, {tostring(args[1])})
+            end
+        end
     end
 
     return originalNamecall(self, ...)
 end)
 
-local Tabs = {
-    Main = Window:AddTab('Main'),
+local tabGroups = {
+	TabGroup1 = Window:TabGroup()
 }
 
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Macro")
+--UI Tabs
 
-Options.SelectedMacro = LeftGroupBox:AddDropdown('SelectedMacro', {
-    Values = macros,
-    Default = "None",
-    Text = 'Select Macro',
-    Callback = function(Value)
-        selectedMacro = Value
-        SelectedMacroLabel:SetText("Selected Macro: " .. (selectedMacro or "None"))
-    end
+local tabs = {
+	Main = tabGroups.TabGroup1:Tab({ Name = "Main", Image = "rbxassetid://18821914323" }),
+	Farm = tabGroups.TabGroup1:Tab({ Name = "Farm", Image = "rbxassetid://10734950309" }),
+    AutoPlay = tabGroups.TabGroup1:Tab({ Name = "Auto Play", Image = "rbxassetid://10734950309" }),
+    Macro = tabGroups.TabGroup1:Tab({ Name = "Macro", Image = "rbxassetid://10734950309" }),
+    Settings = tabGroups.TabGroup1:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" }),
+}
+
+--UI Sections
+
+local sections = {
+	MainSection1 = tabs.Main:Section({ Side = "Left" }),
+    MainSection2 = tabs.Main:Section({ Side = "Left" }),
+    MainSection3 = tabs.Main:Section({ Side = "Right" }),
+    MainSection4 = tabs.Main:Section({ Side = "Right" }),
+    MainSection10 = tabs.Farm:Section({ Side = "Left" }),
+    MainSection11 = tabs.Farm:Section({ Side = "Right" }),
+    MainSection12 = tabs.Farm:Section({ Side = "Right" }),
+    MainSection13 = tabs.Farm:Section({ Side = "Right" }),
+    MainSection15 = tabs.AutoPlay:Section({ Side = "Left" }),
+    MainSection16 = tabs.AutoPlay:Section({ Side = "Right" }),
+    MainSection17 = tabs.AutoPlay:Section({ Side = "Right" }),
+    MainSection18 = tabs.AutoPlay:Section({ Side = "Right" }),
+    MainSection22 = tabs.Macro:Section({ Side = "Left" }),
+    MainSection25 = tabs.Settings:Section({ Side = "Right" }),
+}
+
+sections.MainSection22:Header({
+	Name = "Macro"
 })
 
-LeftGroupBox:AddInput('MacroName', {
-    Default = '',
-    Text = "Macro Name",
-    Finished = true,
-    Placeholder = 'Enter Macro Name',
-    Callback = createJsonFile
+RecordingMethodLabel= sections.MainSection22:Label({
+	Text = 'Recording Status: Not Recording'
 })
 
-local MyButton = LeftGroupBox:AddButton({
-    Text = 'Delete Macro',
-    Func = function()
+SelectedMacroLabel= sections.MainSection22:Label({
+	Text = "Selected Macro: None"
+})
+
+RecordingStatusLabel = sections.MainSection22:Label({
+	Text = "Recording Method: None"
+})
+
+sections.MainSection22:Divider()
+
+updateDropdown()
+
+local SelectedMacro = sections.MainSection22:Dropdown({
+	Name = "Select Macro",
+	Multi = false,
+	Required = true,
+	Options = macros,
+	Default = "None",
+	Callback = function(Value)
+        selectedMacro = Value:gsub(".json$", ""):gsub(".*/", ""):gsub(".*\\", "")
+        if selectedMacro == "None" then selectedMacro = nil end
+        SelectedMacroLabel:UpdateName("Selected Macro: " .. (selectedMacro or "None"))
+	end,
+}, "SelectedMacro")
+
+local MacroName = sections.MainSection22:Input({
+    Name = "Macro Name",
+    Placeholder = "Enter Macro Name",
+    AcceptedCharacters = "All",
+    Callback = function(value)
+        macroName = value
+    end,
+    onChanged = function(value)
+        macroName = value
+    end,
+}, "MacroName")
+
+sections.MainSection22:Button({
+	Name = "Create Macro",
+	Callback = function(Value)
+        if macroName and macroName ~= "" then
+            createJsonFile(macroName)
+            updateDropdown()
+            if SelectedMacroLabel then
+                SelectedMacroLabel:UpdateName("Selected Macro: " .. (macroName or "None"))
+            end
+        else
+            Window:Notify({
+                Title = "Error",
+                Description = "Please enter a macro name first",
+                Lifetime = 3
+            })
+        end
+	end,
+})
+
+sections.MainSection22:Button({
+	Name = "Delete Macro",
+	Callback = function()
         if selectedMacro and selectedMacro ~= "None" then
             local filePath = macrosFolder .. '/' .. selectedMacro .. '.json'
             if isfile(filePath) then
                 delfile(filePath)
                 updateDropdown()
-                Library:Notify('Macro deleted: ' .. selectedMacro, 3)
-            else
-                Library:Notify("Macro not found: " .. selectedMacro, 3)
+                selectedMacro = nil
+                if SelectedMacroLabel then
+                    SelectedMacroLabel:UpdateName("Selected Macro: None")
+                end
             end
         else
-            Library:Notify("Please select a macro before deleting", 3)
+            Window:Notify({
+                Title = "Error",
+                Description = "Please select a macro to delete",
+                Lifetime = 3
+            })
         end
-    end
+	end,
 })
 
-LeftGroupBox:AddToggle("RecordMacro", {
-    Text = 'Record Macro',
-    Callback = function(Value)
-        if Value then
-            if not isRecording then
-                toggleRecording()
-            end
-        else
-            if isRecording then
-                toggleRecording()
-            end
-        end
-    end
-})
-
-LeftGroupBox:AddToggle("PlayMacro", {
-    Text = "Play Macro",
-    Callback = function(Value)
-        if Value then
+local RecordMacro = sections.MainSection22:Toggle({
+    Name = "Record Macro",
+    Default = false,
+    Callback = function(value)
+        if value then
             if not selectedMacro or selectedMacro == "None" then
-                Library:Notify("Please select a macro before playing", 3)
-                Toggles.PlayMacro:SetValue(false)
+                Window:Notify({
+                    Title = "Error",
+                    Description = "Please select a macro first",
+                    Lifetime = 3
+                })
+                RecordMacro:SetValue(false)
                 return
             end
-            getgenv().playMacro = Value
+            if not selectedTypeOfRecord or selectedTypeOfRecord == "None" then
+                Window:Notify({
+                    Title = "Error",
+                    Description = "Please select a recording method first",
+                    Lifetime = 3
+                })
+                RecordMacro:SetValue(false)
+                return
+            end
+        end
+        recordingMacro()
+    end,
+}, "RecordMacro")
+
+local PlayMacro = sections.MainSection22:Toggle({
+	Name = "Play Macro",
+	Default = false,
+	Callback = function(value)
+        if Value then
+            if not selectedMacro or selectedMacro == "None" then
+                
+                PlayMacro:SetValue(false)
+                return
+            end
             playMacro(selectedMacro)
         end
-    end
-})
+	end,
+}, "PlayMacro")
 
-Options.SelectedRecordingMethod = LeftGroupBox:AddDropdown('SelectedRecordingMethod', {
-    Values = {"Time", "Money", "Hybrid"},
-    Default = "None",
-    Text = 'Select Type of Record',
-    Callback = function(Value)
+sections.MainSection22:Slider({
+	Name = "Delay Macro",
+	Default = 0,
+	Minimum = 0,
+	Maximum = 1,
+	DisplayMethod = "Number",
+	Precision = 0,
+	Callback = function(Value)
+		delayMacro = Value
+	end
+}, "delayMacro")
+
+local SelectedRecordingMethod = sections.MainSection22:Dropdown({
+	Name = "Select Type of Record",
+	Multi = false,
+	Required = true,
+	Options = {"Time", "Money", "Hybrid"},
+	Default = "None",
+	Callback = function(Value)
         selectedTypeOfRecord = Value
-        RecordingMethodLabel:SetText("Recording Method: " .. selectedTypeOfRecord)
+        RecordingMethodLabel:UpdateName("Recording Method: " .. selectedTypeOfRecord)
         if selectedTypeOfRecord == "Time" then
             startTime = tick()
         end
-    end
-})
+	end,
+}, "SelectedRecordingMethod")
 
-LeftGroupBox:AddToggle("RecordSkillMacro", {
-    Text = 'Record Skill in Macro',
-    Callback = function(Value)
+sections.MainSection22:Toggle({
+	Name = "Record Skill in Macro",
+	Default = false,
+	Callback = function(value)
         getgenv().recordSkill = Value
-    end
-})
-
-LeftGroupBox:AddDivider()
-
-RecordingStatusLabel = LeftGroupBox:AddLabel('Recording Status: Not Recording', true)
-SelectedMacroLabel = LeftGroupBox:AddLabel('Selected Macro: None', true)
-RecordingMethodLabel = LeftGroupBox:AddLabel('Recording Method: None', true)
+	end,
+}, "RecordSkillMacro")
 
 updateDropdown() 
 
-Library:SetWatermarkVisibility(true)
+MacLib:SetFolder("Maclib")
+tabs.Settings:InsertConfigSection("Left")
 
-local FrameTimer = tick()
-local FrameCounter = 0
-local FPS = 60
-local StartTime = tick()
-
-local WatermarkConnection
-
-local function FormatTime(seconds)
-    local hours = math.floor(seconds / 3600)
-    local minutes = math.floor((seconds % 3600) / 60)
-    local seconds = math.floor(seconds % 60)
-    return string.format("%02d:%02d:%02d", hours, minutes, seconds)
-end
-
-local function UpdateWatermark()
-    FrameCounter = FrameCounter + 1
-
-    if (tick() - FrameTimer) >= 1 then
-        FPS = FrameCounter
-        FrameTimer = tick()
-        FrameCounter = 0
+sections.MainSection25:Slider({
+    Name = "Change UI Size",
+    Default = 0.8,
+    Minimum = 0.1,
+    Maximum = 1.5,
+    Increment = 0.05,
+    DisplayMethod = "Round", 
+    Precision = 1,
+    Callback = function(value)
+        changeUISize(value)
     end
+}, "changeUISize")
 
-    local activeTime = tick() - StartTime
-
-    Library:SetWatermark(('Tempest Hub | %s fps | %s ms | %s'):format(
-        math.floor(FPS),
-        math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()),
-        FormatTime(activeTime)
-    ))
-end
-
-WatermarkConnection = game:GetService('RunService').RenderStepped:Connect(UpdateWatermark)
-
-local TabsUI = {
-    ['UI Settings'] = Window:AddTab('UI Settings'),
-}
-
-local function Unload()
-    WatermarkConnection:Disconnect()
-    print('Unloaded!')
-    Library.Unloaded = true
-end
-
-local MenuGroup = TabsUI['UI Settings']:AddLeftGroupbox('Menu')
-
-MenuGroup:AddButton('Unload', function() Library:Unload() end)
-MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true, Text = 'Menu keybind' })
-
-Library.ToggleKeybind = Options.MenuKeybind
-
-ThemeManager:SetLibrary(Library)
-SaveManager:SetLibrary(Library)
-
-ThemeManager:SetFolder('Tempest Hub')
-SaveManager:SetFolder('Tempest Hub/_MACRO_')
-
-SaveManager:BuildConfigSection(TabsUI['UI Settings'])
-
-ThemeManager:ApplyToTab(TabsUI['UI Settings'])
-
-SaveManager:LoadAutoloadConfig()
-
-local GameConfigName = '_MACRO_'
-local player = game.Players.LocalPlayer
-SaveManager:Load(player.Name .. GameConfigName)
-spawn(function()
-    while task.wait(1) do
-        if Library.Unloaded then
-            break
-        end
-        SaveManager:Save(player.Name .. GameConfigName)
-    end
+Window.onUnloaded(function()
+	print("Unloaded!")
 end)
 
-for i,v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
-    v:Disable()
+tabs.Main:Select()
+
+MacLib:SetFolder("Tempest Hub")
+MacLib:SetFolder("Tempest Hub/_ALS_")
+local GameConfigName = "_ALS_"
+local player = game.Players.LocalPlayer
+MacLib:LoadConfig(player.Name .. GameConfigName)
+spawn(function()
+	while task.wait(1) do
+		MacLib:SaveConfig(player.Name .. GameConfigName)
+	end
+end)
+
+--Anti AFK
+for i, v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
+	v:Disable()
 end
-warn('[TEMPEST HUB] Loaded')
+warn("[TEMPEST HUB] Loaded")

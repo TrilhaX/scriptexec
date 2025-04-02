@@ -184,7 +184,7 @@ function safeWaitForChild(parent, childName, timeout)
 end
 
 function hideUIExec()
-	while getgenv().hideUIExec do
+	while getgenv().hideUIExecGG do
         if getgenv().loadedallscript == true then
             local coreGui = game:GetService("CoreGui").RobloxGui
             local Base = nil
@@ -204,7 +204,7 @@ function hideUIExec()
 end
 
 function aeuat()
-	while getgenv().aeuat == true do
+	while getgenv().aeuatGG == true do
         if getgenv().loadedallscript == true then
             local teleportQueued = false
             game.Players.LocalPlayer.OnTeleport:Connect(function(State)
@@ -262,7 +262,7 @@ function removeTexturesAndHeavyObjects(object)
 end
 
 function fpsBoost()
-	while getgenv().fpsBoost == true do
+	while getgenv().fpsBoostGG == true do
 		if getgenv().loadedallscript == true then
 			removeTexturesAndHeavyObjects(workspace)
 		end
@@ -271,7 +271,7 @@ function fpsBoost()
 end
 
 function betterFpsBoost()
-	while getgenv().betterFpsBoost == true do
+	while getgenv().betterFpsBoostGG == true do
 		if getgenv().loadedallscript == true then
 			removeTexturesAndHeavyObjects(workspace)
 			local enemiesAndUnits = workspace:FindFirstChild("_UNITS")
@@ -287,7 +287,7 @@ function betterFpsBoost()
 end
 
 function extremeFpsBoost()
-    while getgenv().extremeFpsBoost == true do
+    while getgenv().extremeFpsBoostGG == true do
 		if getgenv().loadedallscript == true then
 			removeTexturesAndHeavyObjects(workspace)
 			local enemiesAndUnits = workspace:FindFirstChild("_UNITS")
@@ -326,7 +326,7 @@ function extremeFpsBoost()
 end
 
 function autoWalk()
-	while getgenv().autoWalk == true do
+	while getgenv().autoWalkGG == true do
 		if getgenv().loadedallscript == true then
 			game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.W, false, game)
 			wait(1)
@@ -493,7 +493,7 @@ function createBC()
 end
 
 function deleteNotErro()
-    while getgenv().deleteNotErro == true do
+    while getgenv().deleteNotErroGG == true do
         if getgenv().loadedallscript == true then
             local player = game.Players.LocalPlayer
             if player then
@@ -514,7 +514,7 @@ function deleteNotErro()
 end
 
 function HidePlayer()
-    while getgenv().HidePlayer == true do
+    while getgenv().HidePlayerGG == true do
         if getgenv().loadedallscript == true then
             local player = game.Players.LocalPlayer
             local character = player.Character
@@ -535,7 +535,7 @@ function HidePlayer()
 end
 
 function webhook()
-    while getgenv().webhook == true do
+    while getgenv().webhookGG == true do
         local discordWebhookUrl = urlwebhook
         local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
         
@@ -764,7 +764,7 @@ end
 --Function in Game
 
 function autoRetry()
-    while getgenv().autoRetry == true do
+    while getgenv().autoRetryGG == true do
         if getgenv().loadedallscript == true then
             local prompt = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Prompt")
             if prompt then
@@ -786,7 +786,7 @@ function autoRetry()
 end
 
 function autoLeave()
-    while getgenv().autoLeave == true do
+    while getgenv().autoLeaveGG == true do
         if getgenv().loadedallscript == true then
             local prompt = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Prompt")
             if prompt then
@@ -808,7 +808,7 @@ function autoLeave()
 end
 
 function autoNext()
-    while getgenv().autoNext == true do
+    while getgenv().autoNextGG == true do
         if getgenv().loadedallscript == true then
             local prompt = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Prompt")
             if prompt then
@@ -830,7 +830,7 @@ function autoNext()
 end
 
 function deleteMap()
-    while getgenv().deleteMap == true do
+    while getgenv().deleteMapGG == true do
         if getgenv().loadedallscript == true then
             local map = workspace:FindFirstChild("Map")
             if map and map:FindFirstChild("Map") then
@@ -858,7 +858,7 @@ function securityMode()
         return false
     end
 
-    while getgenv().securityMode do
+    while getgenv().securityModeGG do
         if #players:GetPlayers() >= 2 then
             local player1 = players:GetPlayers()[1]
             local targetPlaceId = 12886143095
@@ -886,7 +886,7 @@ function sellUnit()
 end
 
 function upgradeUnit()
-    while getgenv().upgradeUnit do
+    while getgenv().upgradeUnitGG do
         local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
         local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
 
@@ -915,7 +915,7 @@ end
 --Function To Join Game
 
 function autoJoinChallenge()
-    while getgenv().autoJoinChallenge == true do
+    while getgenv().autoJoinChallengeGG == true do
         local Teleporter = workspace.TeleporterFolder.Challenge.Teleporter.ChallengeInfo
         local challenge = workspace.TeleporterFolder.Challenge.Teleporter.Door
 
@@ -941,20 +941,22 @@ function autoJoinChallenge()
 end
 
 function autoJoinStory()
-    while getgenv().autoJoinStory == true do
-        local Teleporter = workspace.TeleporterFolder.Story.Teleporter.StoryInfo
+    while getgenv().autoJoinStoryGG == true do
         local story = workspace.TeleporterFolder.Story.Teleporter.Door
 
         if story then
+            local doorCFrame = GetCFrame(story)
+            local tween = tweenModel(game.Players.LocalPlayer.Character, doorCFrame)
+            tween:Play()
+            tween.Completed:Wait()
+            wait(1)     
             local args = {
-                [1] = selectedStoryMap,
-                [2] = selectedActStory,
-                [3] = selectedDifficultyStory,
+                [1] = tostring(selectedStoryMap),
+                [2] = tonumber(selectedActStory),
+                [3] = tostring(selectedDifficultyStory),
                 [4] = false
             }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Story"):WaitForChild("Select"):InvokeServer(unpack(args))
-            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Story"):WaitForChild("Select"):InvokeServer(unpack(args))    
         else
             wait()
         end
@@ -962,7 +964,7 @@ function autoJoinStory()
 end
 
 function autoJoinRaid()
-    while getgenv().autoJoinRaid == true do
+    while getgenv().autoJoinRaidGG == true do
         local raidFolder = workspace:FindFirstChild("TeleporterFolder")
         if raidFolder and raidFolder:FindFirstChild("Raids") then
             local door = raidFolder.Raids.Teleporter:FindFirstChild("Door")
@@ -971,7 +973,6 @@ function autoJoinRaid()
                 local tween = tweenModel(game.Players.LocalPlayer.Character, doorCFrame)
                 tween:Play()
                 tween.Completed:Wait()
-
                 wait(1)
                 local argsRaid = {
                     [1] = selectedRaidMap,
@@ -1019,7 +1020,7 @@ function teleportToNPC(npcName)
 end
 
 function joinInfCastle()
-    while getgenv().joinInfCastle == true do
+    while getgenv().joinInfCastleGG == true do
         repeat task.wait() until game:IsLoaded()
         wait(1)
 
@@ -1057,7 +1058,7 @@ end
 --Function in Lobby
 
 function autoFeed()
-    while getgenv().autoFeed == true do
+    while getgenv().autoFeedGG == true do
         local args = {
             [1] = selectedUnitToFeed,
             [2] = {
@@ -1071,7 +1072,7 @@ function autoFeed()
 end
 
 function autoGetBattlepass()
-    while getgenv().autoGetBattlepass == true do
+    while getgenv().autoGetBattlepassGG == true do
         wait(1)
         local args = {
             [1] = "All"
@@ -1187,7 +1188,7 @@ sections.MainSection1:Toggle({
 	Name = "Hide Player",
 	Default = false,
 	Callback = function(value)
-		getgenv().HidePlayer = value
+		getgenv().HidePlayerGG = value
 		HidePlayer()
 	end,
 }, "HidePlayerInfo")
@@ -1196,7 +1197,7 @@ sections.MainSection1:Toggle({
 	Name = "Auto Walk",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoWalk = value
+		getgenv().autoWalkGG = value
 		autoWalk()
 	end,
 }, "AutoWalk")
@@ -1205,7 +1206,7 @@ sections.MainSection1:Toggle({
 	Name = "Security Mode",
 	Default = false,
 	Callback = function(value)
-		getgenv().securityMode = value
+		getgenv().securityModeGG = value
 		securityMode()
 	end,
 }, "SecurityMode")
@@ -1214,7 +1215,7 @@ sections.MainSection1:Toggle({
 	Name = "Delete Map",
 	Default = false,
 	Callback = function(value)
-		getgenv().deleteMap = value
+		getgenv().deleteMapGG = value
 		deleteMap()
 	end,
 }, "DeleteMap")
@@ -1223,7 +1224,7 @@ sections.MainSection1:Toggle({
 	Name = "Delete Notifications",
 	Default = false,
 	Callback = function(value)
-		getgenv().deleteNotErro = value
+		getgenv().deleteNotErroGG = value
 		deleteNotErro()
 	end,
 }, "DeleteNotErro")
@@ -1232,7 +1233,7 @@ sections.MainSection1:Toggle({
 	Name = "Auto Leave",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoLeave = value
+		getgenv().autoLeaveGG = value
 		autoLeave()
 	end,
 }, "AutoLeave")
@@ -1241,7 +1242,7 @@ sections.MainSection1:Toggle({
 	Name = "Auto Replay",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoRetry = value
+		getgenv().autoRetryGG = value
 		autoRetry()
 	end,
 }, "AutoReplay")
@@ -1250,7 +1251,7 @@ sections.MainSection1:Toggle({
 	Name = "Auto Next",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoNext = value
+		getgenv().autoNextGG = value
 		autoNext()
 	end,
 }, "AutoNext")
@@ -1287,7 +1288,7 @@ sections.MainSection2:Toggle({
 	Name = "Send Webhook when finish game",
 	Default = false,
 	Callback = function(value)
-        getgenv().webhook = value
+        getgenv().webhookGG = value
         webhook()
 	end,
 }, "SendWebhook")
@@ -1308,7 +1309,7 @@ sections.MainSection3:Toggle({
 	Name = "Auto Get Battlepass",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoGetBattlepass = value
+		getgenv().autoGetBattlepassGG = value
 		autoGetBattlepass()
 	end,
 }, "autoGetBattlepass")
@@ -1343,7 +1344,7 @@ sections.MainSection4:Toggle({
 	Name = "Auto Feed",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoFeed = value
+		getgenv().autoFeedGG = value
 		autoFeed()
 	end,
 }, "autoFeed")
@@ -1389,7 +1390,7 @@ sections.MainSection10:Toggle({
 	Name = "Auto Story",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoJoinStory = value
+		getgenv().autoJoinStoryGG = value
 		autoJoinStory()
 	end,
 }, "autoJoinStory")
@@ -1424,7 +1425,7 @@ sections.MainSection11:Toggle({
 	Name = "Auto Raid",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoJoinRaid = value
+		getgenv().autoJoinRaidGG = value
 		autoJoinRaid()
 	end,
 }, "autoJoinRaid")
@@ -1470,7 +1471,7 @@ sections.MainSection12:Toggle({
 	Name = "Auto Challenge",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoJoinChallenge = value
+		getgenv().autoJoinChallengeGG = value
 		autoJoinChallenge()
 	end,
 }, "autoJoinChallenge")
@@ -1506,7 +1507,7 @@ sections.MainSection13:Toggle({
 	Name = "Auto Inf Caslte",
 	Default = false,
 	Callback = function(value)
-		getgenv().joinInfCastle = value
+		getgenv().joinInfCastleGG = value
 		joinInfCastle()
 	end,
 }, "autoInfCastle")
@@ -1542,7 +1543,7 @@ sections.MainSection15:Toggle({
 	Name = "Auto Place Unit",
 	Default = false,
 	Callback = function(value)
-        getgenv().placeUnits = value
+        getgenv().placeUnitsGG = value
         placeUnits()
 	end,
 }, "autoPlaceUnit")
@@ -1571,7 +1572,7 @@ sections.MainSection15:Toggle({
 	Name = "Auto Upgrade Unit",
 	Default = false,
 	Callback = function(value)
-		getgenv().upgradeUnit = value
+		getgenv().upgradeUnitGG = value
 		upgradeUnit()
 	end,
 }, "autoUpgradeUnit")
@@ -1592,7 +1593,7 @@ sections.MainSection16:Toggle({
 	Name = "Auto Universal Skill",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoUniversalSkill = value
+		getgenv().autoUniversalSkillGG = value
         autoUniversalSkill()
 	end,
 }, "autoUniversalSkill")
@@ -1614,7 +1615,7 @@ sections.MainSection25:Toggle({
 	Name = "Hide UI when Execute",
 	Default = false,
 	Callback = function(value)
-		getgenv().hideUIExec = value
+		getgenv().hideUIExecGG = value
 		hideUIExec()
 	end,
 }, "HideUiWhenExecute")
@@ -1623,7 +1624,7 @@ sections.MainSection25:Toggle({
 	Name = "Auto Execute",
 	Default = false,
 	Callback = function(value)
-		getgenv().aeuat = value
+		getgenv().aeuatGG = value
 		aeuat()
 	end,
 }, "AutoExecute")
@@ -1640,7 +1641,7 @@ sections.MainSection25:Toggle({
 	Name = "FPS Boost",
 	Default = false,
 	Callback = function(value)
-        getgenv().fpsBoost = value
+        getgenv().fpsBoostGG = value
 		fpsBoost()
 	end,
 }, "FPSBoost")
@@ -1649,7 +1650,7 @@ sections.MainSection25:Toggle({
 	Name = "Better FPS Boost",
 	Default = false,
 	Callback = function(value)
-        getgenv().betterFpsBoost = value
+        getgenv().betterFpsBoostGG = value
 		betterFpsBoost()
 	end,
 }, "BetterFPSBoost")
@@ -1658,7 +1659,7 @@ sections.MainSection25:Toggle({
 	Name = "REALLY Better FPS Boost",
 	Default = false,
 	Callback = function(value)
-        getgenv().extremeFpsBoost = value
+        getgenv().extremeFpsBoostGG = value
 		extremeFpsBoost()
 	end,
 }, "REALLYBetterFPSBoost")
