@@ -55,63 +55,6 @@ function findGuiRecursive(parent, targetName)
     return nil
 end
 
-function hideUI()
-    local UICorner1 = Instance.new("UICorner")
-    local backgroundFrame = Instance.new("Frame")
-    local tempestButton = Instance.new("TextButton")
-    local UIPadding = Instance.new("UIPadding")
-
-    local coreGui = game:GetService("CoreGui")
-    local maclibGui = findGuiRecursive(coreGui, "MaclibGui")
-
-    if not maclibGui then
-        warn("MaclibGui not found in CoreGui.")
-        return
-    end
-
-    backgroundFrame.Name = "backgroundFrame"
-    backgroundFrame.Parent = maclibGui
-    backgroundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-    backgroundFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    backgroundFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    backgroundFrame.BorderSizePixel = 0
-    backgroundFrame.Position = UDim2.new(0.98, 0, 0.5, 0)
-    backgroundFrame.Size = UDim2.new(0, 100, 0, 100)
-
-    UICorner1.Parent = backgroundFrame
-
-    tempestButton.Name = "tempestButton"
-    tempestButton.Parent = backgroundFrame
-    tempestButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    tempestButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    tempestButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    tempestButton.BorderSizePixel = 0
-    tempestButton.Position = UDim2.new(0.5, 0, 0.5, 0)
-    tempestButton.Size = UDim2.new(1, 0, 1, 0)
-    tempestButton.Font = Enum.Font.PermanentMarker
-    tempestButton.Text = "Tempest Hub"
-    tempestButton.TextColor3 = Color3.fromRGB(75, 0, 130)
-    tempestButton.TextScaled = true
-    tempestButton.TextSize = 14.000
-    tempestButton.TextWrapped = true
-
-    UIPadding.Parent = backgroundFrame
-    UIPadding.PaddingTop = UDim.new(0.1, 0)
-    UIPadding.PaddingLeft = UDim.new(0.1, 0)
-    UIPadding.PaddingRight = UDim.new(0.1, 0)
-    UIPadding.PaddingBottom = UDim.new(0.1, 0)
-
-    tempestButton.Activated:Connect(function()
-        local maclib = maclibGui
-        if maclib then
-            maclib.Base.Visible = not maclib.Base.Visible
-            maclib.Notifications.Visible = not maclib.Notifications.Visible
-        else
-            warn("MaclibGui not found in CoreGui.")
-        end
-    end)
-end
-
 local globalSettings = {
 	UIBlurToggle = Window:GlobalSetting({
 		Name = "UI Blur",
@@ -183,6 +126,63 @@ function safeWaitForChild(parent, childName, timeout)
     return child
 end
 
+function hideUI()
+    local UICorner1 = Instance.new("UICorner")
+    local backgroundFrame = Instance.new("Frame")
+    local tempestButton = Instance.new("TextButton")
+    local UIPadding = Instance.new("UIPadding")
+
+    local coreGui = game:GetService("CoreGui")
+    local maclibGui = coreGui:FindFirstChild("MaclibGui")
+
+    if not maclibGui then
+        warn("MaclibGui not found in CoreGui.")
+        return
+    end
+
+    backgroundFrame.Name = "backgroundFrame"
+    backgroundFrame.Parent = maclibGui
+    backgroundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    backgroundFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    backgroundFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    backgroundFrame.BorderSizePixel = 0
+    backgroundFrame.Position = UDim2.new(0.98, 0, 0.5, 0)
+    backgroundFrame.Size = UDim2.new(0, 100, 0, 100)
+
+    UICorner1.Parent = backgroundFrame
+
+    tempestButton.Name = "tempestButton"
+    tempestButton.Parent = backgroundFrame
+    tempestButton.AnchorPoint = Vector2.new(0.5, 0.5)
+    tempestButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    tempestButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    tempestButton.BorderSizePixel = 0
+    tempestButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+    tempestButton.Size = UDim2.new(1, 0, 1, 0)
+    tempestButton.Font = Enum.Font.PermanentMarker
+    tempestButton.Text = "Tempest Hub"
+    tempestButton.TextColor3 = Color3.fromRGB(75, 0, 130)
+    tempestButton.TextScaled = true
+    tempestButton.TextSize = 14.000
+    tempestButton.TextWrapped = true
+
+    UIPadding.Parent = backgroundFrame
+    UIPadding.PaddingTop = UDim.new(0.1, 0)
+    UIPadding.PaddingLeft = UDim.new(0.1, 0)
+    UIPadding.PaddingRight = UDim.new(0.1, 0)
+    UIPadding.PaddingBottom = UDim.new(0.1, 0)
+
+    tempestButton.Activated:Connect(function()
+        local maclib = maclibGui
+        if maclib then
+            maclib.Base.Visible = not maclib.Base.Visible
+            maclib.Notifications.Visible = not maclib.Notifications.Visible
+        else
+            warn("MaclibGui not found in CoreGui.")
+        end
+    end)
+end
+
 function hideUIExec()
 	while getgenv().hideUIExecGG do
         if getgenv().loadedallscript == true then
@@ -236,29 +236,31 @@ function firebutton(Button, method)
     end
 
     local a = Button
+
     if getconnections and method == "getconnections" then
         if Button.Activated then
             for i, v in pairs(getconnections(Button.Activated)) do
                 wait()
                 v.Function()
             end
-        else
-            warn("firebutton: O botão não tem um evento 'Activated'.")
         end
+
     elseif firesignal and method == "firesignal" then
+
         local events = { 'MouseButton1Click', 'MouseButton1Down', 'Activated' }
         for _, v in pairs(events) do
             if Button[v] then
+                print("[DEBUG] Disparando evento:", v)
                 firesignal(Button[v])
             end
         end
+
     elseif VirtualInputManager and method == "VirtualInputManager" then
         game:GetService("GuiService").SelectedObject = Button
-        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-        game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+        wait(1)
         game:GetService("GuiService").SelectedObject = nil
-    else
-        print("Unsupported method")
     end
 end
 
@@ -533,208 +535,195 @@ function HidePlayer()
         if getgenv().loadedallscript == true then
             local player = game.Players.LocalPlayer
             local character = player.Character
-            local playerGui = player.PlayerGui
-            local overhead = character and character:FindFirstChild("Head") and character.Head:FindFirstChild("Overhead")
             
-            if overhead then
-                overhead:Destroy()
+            if character then
+                local head = character.Head
+                local humanoidrootpart = character.HumanoidRootPart
+                for i, v in pairs(head:GetChildren())do
+                    if v.ClassName == "BillboardGui" or v.ClassName == "Decal" then
+                        v:Destroy()
+                    end
+                end
+                        for i, v in pairs(humanoidrootpart:GetChildren())do
+                    if v.ClassName == "BillboardGui" or v.ClassName == "Decal" then
+                        v:Destroy()
+                    end
+                end
+                for _, obj in ipairs(character:GetChildren()) do
+                    if obj:IsA("Accessory") or obj:IsA("Shirt") or obj:IsA("Pants") then
+                        obj:Destroy()
+                    end
+                end
             end
-            for _, obj in ipairs(character:GetChildren()) do
-				if obj:IsA("Accessory") or obj:IsA("Shirt") or obj:IsA("Pants") then
-					obj:Destroy()
-				end
-			end
         end
-        wait(1)
+        wait()
     end
 end
 
 function webhook()
     while getgenv().webhookGG == true do
         local discordWebhookUrl = urlwebhook
-        local uiEndGame = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("EndGameUI")
-        
+        local player = game:GetService("Players").LocalPlayer
+        local uiEndGame = player:WaitForChild("PlayerGui"):FindFirstChild("EndGameUI")
+
         if uiEndGame then
-            local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
-            local name = game:GetService("Players").LocalPlayer.Name
+            local resultText = uiEndGame.BG.Container.Stats.Result.Text
+            local name = player.Name
             local formattedName = "||" .. name .. "||"
-            local elapsedTimeText = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.ElapsedTime.Text
-            local timeOnly = string.sub(elapsedTimeText, 13)
-            
-            local Rerolls1 = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Rewards.Holder:FindFirstChild("Rerolls")
-            local formattedAmount = "N/A"
-            
-            if Rerolls1 then
-                local Amount = Rerolls1:FindFirstChild("Amount")
-                if Amount and Amount.Text then
-                    formattedAmount = Amount.Text
-                end
-            end
+            local retorno = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetPlayerData"):InvokeServer(player)
 
-            local args = {
-                [1] = game.Players.LocalPlayer,
-            }
-            
-            local retorno = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetPlayerData"):InvokeServer(unpack(args))
-            
-            local keys = {"Rerolls", "Jewels", "RaidTokens", "Gold", "Emeralds", "Halloween_Currency"}
-            local playerStats = ""
-            
-            for _, key in ipairs(keys) do
-                local value = retorno[key]
-                if value ~= nil then
-                    playerStats = playerStats .. key .. ": " .. tostring(value) .. "\n"
-                else
-                    playerStats = playerStats .. key .. ": nil (chave não encontrada)\n"
-                end
-            end
+            local emeralds = retorno.Emeralds or 0
+            local jewels = retorno.Jewels or 0
+            local rerolls = retorno.Rerolls or 0
+            local gold = retorno.Gold or 0
+            local raidTokens = retorno.RaidTokens or 0
 
-            local args = {
-                [1] = game.Players.LocalPlayer,
-            }
+            local levelValue = retorno.Level and string.match(retorno.Level, "%d+") or "N/A"
+            local expValue = retorno.EXP or 0
+            local maxExpValue = retorno.MaxEXP or 0
+
+            local formattedLevel = string.format("%s [%s/%s]", levelValue, expValue, maxExpValue)      
+
+            local rewards = uiEndGame.BG.Container.Rewards:FindFirstChild("Holder")
+            local formattedResultFR = ""
             
-            local retorno = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetPlayerData"):InvokeServer(unpack(args))
-            
-            local keys2 = {"Level", "EXP", "MaxEXP"}
-            
-            local levelValue, expValue, maxExpValue
-            
-            for _, key2 in ipairs(keys2) do
-                local value = retorno[key2]
-                
-                if key2 == "Level" then
-                    if value then
-                        levelValue = string.match(value, "%d+")
-                    else
-                        levelValue = "N/A"
+            if rewards then
+                local realRewards = rewards:GetChildren()
+                for _, v in pairs(realRewards) do
+                    if v.Name ~= "UIListLayout" and v.Name ~= "UIPadding" then
+                        local amount = v:FindFirstChild("Amount")
+                        local item = v:FindFirstChild("ItemName")
+                        
+                        if amount and item and amount.Text ~= "" and item.Text ~= "" then
+                            formattedResultFR = formattedResultFR .. amount.Text .. " " .. item.Text .. "\n"
+                        end
                     end
-                elseif key2== "EXP" then
-                    expValue = value or 0
-                elseif key2 == "MaxEXP" then
-                    maxExpValue = value or 0
-                end
-                
-                if value ~= nil then
-                    wait()
-                else
-                    wait()
                 end
             end
             
-            local formattedLevel = string.format("%s [%s/%s]", levelValue, expValue, maxExpValue)
-            
-            local pingContent = ""
-            if getgenv().pingUser and getgenv().pingUserId then
-                pingContent = "<@" .. getgenv().pingUserId .. ">"
-            elseif getgenv().pingUser then
-                pingContent = "@"
+            if formattedResultFR == "" then
+                formattedResultFR = "No rewards"
+            end            
+
+            local formattedUnit = ""
+            local unitData = retorno.UnitData
+            if typeof(unitData) == "table" then
+                for _, unitInfo in pairs(unitData) do
+                    if unitInfo.Equipped == true then
+                        formattedUnit = formattedUnit .. "[ " .. unitInfo.Level .. " ] = " .. unitInfo.UnitName .. " [ " .. unitInfo.Worthiness .. "% ]⚔️\n"
+                    end
+                end
             end
+            
+            if formattedUnit == "" then
+                formattedUnit = "None"
+            end            
 
-            local Wave = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.EndWave.Text
-            local elapsedTimeText = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.ElapsedTime.Text
-
+            local elapsedTimeText = uiEndGame.BG.Container.Stats.ElapsedTime.Text
             local timeParts = string.split(elapsedTimeText, ":")
-            
             local totalSeconds = 0
-            
+
             if #timeParts == 3 then
-                local hours = tonumber(timeParts[1]) or 0
-                local minutes = tonumber(timeParts[2]) or 0
-                local seconds = tonumber(timeParts[3]) or 0
-                totalSeconds = (hours * 3600) + (minutes * 60) + seconds
+                local h, m, s = tonumber(timeParts[1]), tonumber(timeParts[2]), tonumber(timeParts[3])
+                totalSeconds = (h or 0) * 3600 + (m or 0) * 60 + (s or 0)
             elseif #timeParts == 2 then
-                local minutes = tonumber(timeParts[1]) or 0
-                local seconds = tonumber(timeParts[2]) or 0
-                totalSeconds = (minutes * 60) + seconds
+                local m, s = tonumber(timeParts[1]), tonumber(timeParts[2])
+                totalSeconds = (m or 0) * 60 + (s or 0)
             elseif #timeParts == 1 then
                 totalSeconds = tonumber(timeParts[1]) or 0
             end
-            
+
             local hours = math.floor(totalSeconds / 3600)
             local minutes = math.floor((totalSeconds % 3600) / 60)
             local seconds = totalSeconds % 60
-            
-            local formattedTime = string.format("%02d:%02d:%02d", hours, minutes, seconds)           
-            
-            local waveOnly = string.sub(Wave, 15)
-            
+            local formattedTime = string.format("%02d:%02d:%02d", hours, minutes, seconds)
+
+            local waveText = uiEndGame.BG.Container.Stats.EndWave.Text
+            local waveOnly = string.sub(waveText, 15)
+
             local teleportData = game:GetService("ReplicatedStorage").Remotes.GetTeleportData:InvokeServer()
-            
-            local mapName = teleportData.MapName or "Unknown Map"
-            local mapDifficulty = teleportData.Difficulty or "Unknown Difficulty"
-            local mapType = teleportData.Type or "Unknown Type"
-            
-            local result = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Stats.Result.Text
-            local resultOnly = string.sub(result, 7)
-            
-            if resultOnly == "cleared!" then
+            local mapName = tostring(teleportData.MapName or "Unknown Map")
+            local mapDifficulty = tostring(teleportData.Difficulty or "Unknown Difficulty")
+            local mapType = tostring(teleportData.Type or "Unknown Type")
+
+            local resultOnly = string.sub(resultText, 7)
+            if resultOnly:lower() == "cleared!" then
                 resultOnly = "Victory"
             else
                 resultOnly = "Defeat"
             end
-            
-            mapName = tostring(mapName)
-            mapDifficulty = tostring(mapDifficulty)
-            mapType = tostring(mapType)
-            waveOnly = tostring(waveOnly)
-            resultOnly = tostring(resultOnly)
-            
-            local formattedResult = string.format("%s - Wave %s\n %s - %s[%s] - %s", formattedTime, waveOnly, mapType, mapName, mapDifficulty, resultOnly)
 
-            local formattedAmount = ""
-            local item = game:GetService("Players").LocalPlayer.PlayerGui.EndGameUI.BG.Container.Rewards.Holder
-            
-            local blacklist = {UIGridLayout = true, UIPadding = true}
-            
-            for i, v in pairs(item:GetChildren()) do
-                if not blacklist[v.ClassName] then
-                    if v:FindFirstChild("ItemName") and v:FindFirstChild("Amount") then
-                        local textOnly = v.ItemName.Text
-                        local amountOnly = v.Amount.Text
-                        formattedAmount = formattedAmount .. string.format("%s: %s\n", textOnly, amountOnly)
-                    end
-                end
+            local matchResultString = string.format("%s - Wave %s\n%s - %s [%s] - %s",
+                formattedTime, waveOnly, mapType, mapName, mapDifficulty, resultOnly)
+
+            local pingContent = ""
+            if getgenv().pingUser and getgenv().pingUserId then
+                pingContent = "<@" .. getgenv().pingUserId .. ">"
+            elseif getgenv().pingUser then
+                pingContent = "@everyone"
             end
 
-            local slots = game:GetService("Players").LocalPlayer.Slots
-
-            local formattedUnit = ""
-
-            for _, slot in ipairs(slots:GetChildren()) do
-                if slot:FindFirstChild("Value") and slot.Value ~= "" then
-                    if slot:FindFirstChild("Level") and slot.Level.Value ~= "" and slot.Level.Value ~= 1 then
-                        formattedUnit = string.format("[%s] - %s", tostring(slot.Level.Value, slot.Value))
-                    end
-                end
-            end                
+            local color = 7995647
+            if resultOnly == "Defeat" then
+                color = 16711680
+            elseif resultOnly == "Victory" then
+                color = 65280
+            end
 
             local payload = {
                 content = pingContent,
                 embeds = {
                     {
-                        description = string.format("User: %s\nLevel: %s\n\nPlayer Stats:\n%s\n\n++++++++++++++\n\nRewards:\n%s\n++++++++++++++\nUnits:\n %s\n\nMatch Result:\n %s", formattedName, formattedLevel, playerStats, formattedAmount, formattedUnit, formattedResult),
-                        color = 7995647,
+                        description = "User: " .. formattedName .. "\nLevel: " .. formattedLevel,
+                        color = color,
                         fields = {
                             {
-                                name = "Discord",
-                                value = "https://discord.gg/ey83AwMvAn"
+                                name = "Player Stats",
+                                value = string.format(
+                                    "<:emeraldALS:1357830472167719024> Emeralds: %d\n" ..
+                                    "<:Jewel:1357831800063262813> Jewels: %d\n" ..
+                                    "<:rerollShardALS:1357830474352951436> Rerolls: %d\n" ..
+                                    "<:Gold:1357833327817658388> Gold: %d\n" ..
+                                    "<:RaidTokenALS:1357832545202344028> Raid Tokens: %d",
+                                    emeralds, jewels, rerolls, gold, raidTokens
+                                ),
+                                inline = true
+                            },
+                            {
+                                name = "Rewards",
+                                value = formattedResultFR,
+                                inline = true
+                            },
+                            {
+                                name = "Units",
+                                value = formattedUnit
+                            },
+                            {
+                                name = "Match Result",
+                                value = matchResultString
                             }
                         },
                         author = {
                             name = "Anime Last Stand"
                         },
+                        footer = {
+                            text = "https://discord.gg/MfvHUDp5XF - Tempest Hub"
+                        },
+                        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
                         thumbnail = {
-                            url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png?ex=673e5b4c&is=673d09cc&hm=1d58485280f1d6a376e1bee009b21caa0ae5cad9624832dd3d921f1e3b2217ce&"
+                            url = "https://cdn.discordapp.com/attachments/1060717519624732762/1307102212022861864/get_attachment_url.png"
                         }
                     }
                 },
                 attachments = {}
             }
 
+            local HttpService = game:GetService("HttpService")
             local payloadJson = HttpService:JSONEncode(payload)
 
+            local response
             if syn and syn.request then
-                local response = syn.request({
+                response = syn.request({
                     Url = discordWebhookUrl,
                     Method = "POST",
                     Headers = {
@@ -742,15 +731,8 @@ function webhook()
                     },
                     Body = payloadJson
                 })
-
-                if response.Success then
-                    print("Webhook sent successfully")
-                    break
-                else
-                    warn("Error sending message to Discord with syn.request:", response.StatusCode, response.Body)
-                end
             elseif http_request then
-                local response = http_request({
+                response = http_request({
                     Url = discordWebhookUrl,
                     Method = "POST",
                     Headers = {
@@ -758,21 +740,81 @@ function webhook()
                     },
                     Body = payloadJson
                 })
-
-                if response.Success then
-                    print("Webhook sent successfully")
-                    break
-                else
-                    warn("Error sending message to Discord with http_request:", response.StatusCode, response.Body)
-                end
             else
-                print("Synchronization not supported on this device.")
+                warn("HTTP request method not supported.")
             end
-        else
-            wait()
+
+            if response and response.Success then
+                print("Webhook sent successfully")
+                break
+            elseif response then
+                warn("Error sending webhook:", response.StatusCode, response.Body)
+                break
+            end
         end
 
         wait(1)
+    end
+end
+
+function testWebhook()
+    local discordWebhookUrl = urlwebhook
+    local pingContent = ""
+    
+    if getgenv().pingUser and getgenv().pingUserId then
+        pingContent = "<@" .. getgenv().pingUserId .. ">"
+    elseif getgenv().pingUser then
+        pingContent = "@"
+    end
+
+    local payload = {
+        content = pingContent,
+        embeds = {
+            {
+                description = "Test Webhook LMAO\n\n```REWARDS:\n+Nothing LMAO\n```",
+                color = 8716543,
+                author = {
+                    name = "Anime Adventures"
+                }
+            }
+        },
+        attachments = {}
+    }
+
+    local payloadJson = HttpService:JSONEncode(payload)
+
+    if syn and syn.request then
+        local response = syn.request({
+            Url = discordWebhookUrl,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = payloadJson
+        })
+
+        if response.Success then
+            print("Webhook sent successfully")
+        else
+            warn("Error sending message to Discord with syn.request:", response.StatusCode, response.Body)
+        end
+    elseif http_request then
+        local response = http_request({
+            Url = discordWebhookUrl,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = payloadJson
+        })
+
+        if response.Success then
+            print("Webhook sent successfully")
+        else
+            warn("Error sending message to Discord with http_request:", response.StatusCode, response.Body)
+        end
+    else
+        print("Synchronization not supported on this device.")
     end
 end
 
@@ -793,7 +835,7 @@ function autoSkipWave()
 end
 
 function autoRetry()
-    while getgenv().autoRetryGG == true do
+    while getgenv().autoRetry == true do
         if getgenv().loadedallscript == true then
             local prompt = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Prompt")
             if prompt then
@@ -926,15 +968,11 @@ function upgradeUnit()
         local towers = workspace:FindFirstChild("Towers")
         if towers then
             for _, unit in ipairs(towers:GetChildren()) do
-                local upgradeLevel = unit:FindFirstChild("Upgrade") and unit.Upgrade.Value or 0
-                local upgradeRemote = game.ReplicatedStorage.Remotes:FindFirstChild("Upgrade")
-                if upgradeRemote then
-                    while upgradeLevel < maxUpgradeLevel do
-                        upgradeRemote:InvokeServer(unit)
-                        wait(.5)
-                        upgradeLevel = unit:FindFirstChild("Upgrade") and unit.Upgrade.Value or upgradeLevel
-                    end
-                end
+                local args = {
+                    [1] = workspace:WaitForChild("Towers"):WaitForChild(tostring(unit))
+                }
+                
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Upgrade"):InvokeServer(unpack(args))                
             end
         end
         wait(1)
@@ -943,10 +981,119 @@ end
 
 function autoGameSpeed()
     while getgenv().autoGameSpeedGG == true do
-
+        local args = {
+            [1] = 3
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeTimeScale"):FireServer(unpack(args))        
         wait()
     end
 end
+
+function getWaypointByPercentage(waypoints, percentage)
+    local n = #waypoints
+    if n == 0 then return nil end
+    local segment = 100 / n
+    local index = percentage >= 100 and n or math.floor(percentage / segment) + 1
+    return waypoints[index]
+end
+
+function getPositionsAroundPoint(center, radius, nPositions)
+    local positions = {}
+    local angleStep = (2 * math.pi) / nPositions
+    for i = 0, nPositions - 1 do
+        local angle = i * angleStep
+        local x = center.X + radius * math.cos(angle)
+        local z = center.Z + radius * math.sin(angle)
+        local pos = Vector3.new(x, center.Y, z)
+        table.insert(positions, pos)
+    end
+    return positions
+end
+
+function placeEquippedUnits(positions, equippedUnits)
+    local remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PlaceTower")
+    
+    for i, unitInfo in ipairs(equippedUnits) do
+        local pos = positions[i]
+        if pos and unitInfo.UnitName then
+            local cf = CFrame.new(pos)
+            remote:FireServer(unitInfo.UnitName, cf)
+        end
+    end
+end
+
+function placeUnits()
+    while getgenv().placeUnitsGG == true do
+        local waypointsFolder = workspace.Map.Waypoints
+        local waypoints = {}
+        for _, child in ipairs(waypointsFolder:GetChildren()) do
+            table.insert(waypoints, child)
+        end
+
+        local selectedPercentage = selectedDistancePercentage
+        local selectedWaypoint = getWaypointByPercentage(waypoints, selectedPercentage)
+
+        if selectedWaypoint then
+            local player = game.Players.LocalPlayer
+            local retorno = game:GetService("ReplicatedStorage")
+                :WaitForChild("Remotes")
+                :WaitForChild("GetPlayerData")
+                :InvokeServer(player)
+
+            if typeof(retorno) == "table" then
+                local unitData = retorno["UnitData"]
+                if typeof(unitData) == "table" then
+                    local equippedUnits = {}
+                    for _, unitInfo in pairs(unitData) do
+                        if unitInfo.Equipped == true then
+                            table.insert(equippedUnits, unitInfo)
+                        end
+                    end
+
+                    if #equippedUnits > 0 then
+                        local groundRadius = (selectedGroundPercentage / 100) * 15
+                        local groundPositions = getPositionsAroundPoint(selectedWaypoint.Position, groundRadius, #equippedUnits)
+                        placeEquippedUnits(groundPositions, equippedUnits)
+                    end
+                end
+            end
+        end
+        wait(1) 
+    end
+end
+
+function autoUniversalSkill()
+    while getgenv().autoUniversalSkillGG == true do
+        local bossHealth = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.BarHolder.Boss
+
+        if getgenv().onlyUseSkillsInBoss and not bossHealth then
+            wait(1)
+        end
+
+        local remoteHandler = game:GetService("Players").LocalPlayer.PlayerScripts.Visuals.RemoteHandler
+        local towersFolder = workspace:WaitForChild("Towers")
+
+        for _, pastaBixo in ipairs(remoteHandler:GetChildren()) do
+            local bixoName = pastaBixo.Name
+            if towersFolder:FindFirstChild(bixoName) then
+                for _, item in ipairs(pastaBixo:GetChildren()) do
+                    local skillNumber = item.Name:match("^Skill(%d+)$")
+                    if skillNumber then
+                        local args = {
+                            [1] = workspace:WaitForChild("Towers"):WaitForChild(tostring(bixoName)),
+                            [2] = tonumber(skillNumber)
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Ability"):InvokeServer(unpack(args))  
+                    end
+                end
+            end
+        end
+        wait(1)
+    end
+end
+
 --Function To Join Game
 
 function autoJoinChallenge()
@@ -1676,7 +1823,7 @@ sections.MainSection1:Toggle({
 	Name = "Auto Replay",
 	Default = false,
 	Callback = function(value)
-		getgenv().autoRetryGG = value
+		getgenv().autoRetry = value
 		autoRetry()
 	end,
 }, "AutoReplay")
@@ -1689,6 +1836,16 @@ sections.MainSection1:Toggle({
 		autoNext()
 	end,
 }, "AutoNext")
+
+
+sections.MainSection1:Toggle({
+	Name = "Auto Gamespeed",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoGameSpeedGG = value
+		autoGameSpeed()
+	end,
+}, "autoGameSpeedGG")
 
 sections.MainSection2:Header({
 	Name = "Webhook"
@@ -1950,17 +2107,6 @@ sections.MainSection15:Header({
 	Name = "Place & Upgrade"
 })
 
-local Dropdown = sections.MainSection15:Dropdown({
-	Name = "Select Max Slot To Put",
-	Multi = false,
-	Required = true,
-	Options = {'1', '2', '3', '4', '5', '6'},
-	Default = None,
-	Callback = function(value)
-        selectedMaxSlot = tonumber(value)
-	end,
-}, "dropdownSlot")
-
 sections.MainSection15:Input({
 	Name = "Start Place at x Wave",
 	Placeholder = "Press enter after paste",
@@ -1973,11 +2119,50 @@ sections.MainSection15:Input({
 	end,
 }, "inputAutoPlaceWaveX")
 
+sections.MainSection15:Slider({
+	Name = "Select Distance Percentage",
+	Default = 0,
+	Minimum = 0,
+	Maximum = 100,
+	DisplayMethod = "Percentage",
+	Precision = 0,
+	Callback = function(Value)
+		selectedDistancePercentage = Value
+	end
+}, "selectedDistancePercentage")
+
+sections.MainSection15:Slider({
+	Name = "Select Ground Percentage",
+	Default = 0,
+	Minimum = 0,
+	Maximum = 100,
+	DisplayMethod = "Percentage",
+	Precision = 0,
+	Callback = function(Value)
+		selectedGroundPercentage = Value
+	end
+}, "selectedGroundPercentage")
+
+sections.MainSection15:Slider({
+	Name = "Select Air Percentage",
+	Default = 0,
+	Minimum = 0,
+	Maximum = 100,
+	DisplayMethod = "Percentage",
+	Precision = 0,
+	Callback = function(Value)
+		selectedAirPercentage = Value
+	end
+}, "selectedAirPercentage")
+
 sections.MainSection15:Toggle({
 	Name = "Auto Place Unit",
 	Default = false,
 	Callback = function(value)
         getgenv().placeUnitsGG = value
+        selectedDistancePercentage = MacLib.Options.selectedDistancePercentage.Value
+        selectedGroundPercentage = MacLib.Options.selectedGroundPercentage.Value
+        selectedAirPercentage = MacLib.Options.selectedAirPercentage.Value
         placeUnits()
 	end,
 }, "autoPlaceUnit")
