@@ -60,10 +60,14 @@ local delayMacro
 
 local macrosFolder = 'Tempest Hub/_ALS_/Macros'
 if not isfolder(macrosFolder) then
+    print("[DEBUG] Pasta de macros não encontrada. Criando:", macrosFolder)
     makefolder(macrosFolder)
+else
+    print("[DEBUG] Pasta de macros encontrada:", macrosFolder)
 end
 
 function updateDropdown()
+    print("[DEBUG] Entrou em updateDropdown()")
     local newMacros = {"None"}
     
     if isfolder(macrosFolder) then
@@ -71,25 +75,33 @@ function updateDropdown()
             local name = file:match("([^/]+)%.json$") or file:match("([^\\]+)%.json$")
             if name then
                 table.insert(newMacros, name)
+                print("[DEBUG] Macro encontrada:", name)
             end
         end
+    else
+        print("[DEBUG] A pasta de macros não existe!")
     end
     
     macros = newMacros
+    print("[DEBUG] Macros atualizadas:", table.concat(macros, ", "))
 
     if SelectedMacro then
         SelectedMacro:SetValues(macros)
         SelectedMacro:SetValue("None")
+        print("[DEBUG] SelectedMacro atualizada com os novos valores")
     end
+    print("[DEBUG] updateDropdown() finalizado")
 end
 
 function createJsonFile(fileName)
+    print("[DEBUG] Entrou em createJsonFile() com fileName:", fileName)
     if fileName == '' or not fileName then
         Window:Notify({
             Title = "Error",
             Description = "Please enter a macro name",
             Lifetime = 3
         })
+        print("[DEBUG] Nome da macro inválido")
         return
     end
 
@@ -100,6 +112,7 @@ function createJsonFile(fileName)
             Description = "Macro already exists",
             Lifetime = 3
         })
+        print("[DEBUG] Macro já existe:", fileName)
         return
     end
 
@@ -110,35 +123,42 @@ function createJsonFile(fileName)
         Description = "Macro created: " .. fileName,
         Lifetime = 3
     })
+    print("[DEBUG] Macro criada com sucesso:", fileName)
 end
 
 function recordingMacro()
+    print("[DEBUG] Entrou em recordingMacro()")
     if not selectedMacro or selectedMacro == "None" then
         RecordMacro:SetValue(false)
+        print("[DEBUG] Macro selecionada inválida ou 'None'")
         return
     end
 
     if not selectedTypeOfRecord or selectedTypeOfRecord == "None" then
         RecordMacro:SetValue(false)
+        print("[DEBUG] Tipo de gravação inválido ou 'None'")
         return
     end
 
     isRecording = not isRecording
     updateRecordingStatus()
+    print("[DEBUG] isRecording alterado para:", isRecording)
 
     if isRecording then
         recordingData = { steps = {}, currentStepIndex = 0 }
+        print("[DEBUG] Dados de gravação reiniciados")
     else
         table.sort(recordingData.steps, function(a, b)
             return a.index < b.index
         end)
-
         local filePath = macrosFolder .. '/' .. selectedMacro .. '.json'
         writefile(filePath, game:GetService("HttpService"):JSONEncode(recordingData))
+        print("[DEBUG] Gravação finalizada e salva em:", filePath)
     end
 end
 
 function collectRemoteInfo(remoteName, args)
+    print("[DEBUG] Entrou em collectRemoteInfo() para action:", remoteName)
     local remoteData = { 
         action = remoteName, 
         arguments = args,
@@ -146,9 +166,11 @@ function collectRemoteInfo(remoteName, args)
     }
 
     recordingData.currentStepIndex = remoteData.index
+    print("[DEBUG] Novo step index:", remoteData.index)
 
     if selectedTypeOfRecord == "Time" or selectedTypeOfRecord == "Hybrid" then
         remoteData.time = tick() - startTime
+        print("[DEBUG] Tempo registrado:", remoteData.time)
     end
 
     if selectedTypeOfRecord == "Money" or selectedTypeOfRecord == "Hybrid" then
@@ -156,6 +178,7 @@ function collectRemoteInfo(remoteName, args)
         local money = player:FindFirstChild("Cash")
         if money then
             remoteData.money = money.Value
+            print("[DEBUG] Valor de dinheiro registrado:", remoteData.money)
         end     
     end
 
@@ -182,15 +205,21 @@ function collectRemoteInfo(remoteName, args)
                 remoteData.arguments[i] = arg
             end
         end
+        print("[DEBUG] Argumentos processados para tabela")
     end
 
     table.insert(recordingData.steps, remoteData)
+    print("[DEBUG] Step adicionado:", remoteData.action, "com index", remoteData.index)
 end
 
 function getUnitRemote(remoteName, args)
-    if not isRecording then return end
+    if not isRecording then 
+        print("[DEBUG] getUnitRemote chamado, mas não está gravando.")
+        return 
+    end
 
     local action = remoteName
+    print("[DEBUG] getUnitRemote processando ação:", action)
     
     if action == "PlaceTower" or action == "Upgrade" or action == "Sell" or action == "ChangeTargeting" then
         collectRemoteInfo(action, args)
@@ -204,18 +233,23 @@ end
 function updateRecordingStatus()
     if isRecording then
         RecordingStatusLabel:UpdateName("Recording Status: Recording...")
+        print("[DEBUG] Status atualizado: Gravando")
     elseif isPlaying then
         RecordingStatusLabel:UpdateName("Playing Status: " .. selectedMacro)
+        print("[DEBUG] Status atualizado: Reproduzindo macro", selectedMacro)
     else
         RecordingStatusLabel:UpdateName("Recording Status: Not Recording or Playing")
+        print("[DEBUG] Status atualizado: Parado")
     end
 end
 
 function updateSlotStatus(selectedSlot, selectedUnit)
     updateStatus("Selected Slot: " .. selectedSlot .. " | Unit: " .. selectedUnit)
+    print("[DEBUG] Slot e unidade atualizados para:", selectedSlot, selectedUnit)
 end
 
 function stringToCFrame(str)
+    print("[DEBUG] Convertendo string para CFrame:", str)
     local parts = {}
     for num in str:gmatch("[%d%.%-]+") do
         table.insert(parts, tonumber(num))
@@ -224,10 +258,12 @@ function stringToCFrame(str)
     if #parts >= 3 then
         return CFrame.new(parts[1], parts[2], parts[3])
     end
+    print("[DEBUG] Falha ao converter string para CFrame")
     return nil
 end
 
 function playMacro(macroName)
+    print("[DEBUG] Iniciando reprodução da macro:", macroName)
     local player = game:GetService("Players").LocalPlayer
     local playerGui = player:WaitForChild("PlayerGui")
     local bottomGui = playerGui:WaitForChild("Bottom")
@@ -243,7 +279,7 @@ function playMacro(macroName)
             end
             
             if textButtonCount == 2 then
-                print("Frame encontrado:", child.Name)
+                print("[DEBUG] Frame encontrado:", child.Name)
                 if child.Visible == true then
                     wait(0.1)
                 end
@@ -257,12 +293,14 @@ function playMacro(macroName)
     end
 
     if not macroName or macroName == "None" then
+        print("[DEBUG] Macro não selecionada para reprodução")
         return
     end
 
     local filePath = macrosFolder .. '/' .. macroName .. '.json'
     
     if not isfile(filePath) then
+        print("[DEBUG] Arquivo da macro não encontrado:", filePath)
         return
     end
 
@@ -272,6 +310,7 @@ function playMacro(macroName)
     end)
     
     if not success then
+        warn("Erro ao ler arquivo da macro:", err)
         return
     end
 
@@ -280,10 +319,12 @@ function playMacro(macroName)
     end)
     
     if not success then
+        warn("Erro ao decodificar JSON da macro")
         return
     end
     
     if not macroData or not macroData.steps then
+        print("[DEBUG] Dados da macro inválidos ou sem steps")
         return
     end
 
@@ -302,7 +343,7 @@ function playMacro(macroName)
 
     for i, step in ipairs(macroData.steps) do
         if not isPlaying then 
-            print("Macro stopped manually at step", i)
+            print("[DEBUG] Macro interrompida manualmente no step", i)
             break 
         end
 
@@ -316,7 +357,7 @@ function playMacro(macroName)
             local waitTime = step.time - elapsed
             
             if waitTime > 0 then
-                print("Waiting for", waitTime, "seconds (time-based)")
+                print("[DEBUG] Aguardando", waitTime, "segundos (baseado em tempo)")
                 wait(waitTime)
             end
         end
@@ -327,11 +368,12 @@ function playMacro(macroName)
             if money then
                 local startWait = tick()
                 while isPlaying and money.Value < step.money and (tick() - startWait) < moneyCheckTimeout do
-                    print("Waiting for money... Current:", moneyValue.Value, "Needed:", step.money)
+                    print("[DEBUG] Aguardando dinheiro... Atual:", money.Value, "Necessário:", step.money)
                     wait(moneyCheckInterval)
                 end
                 
-                if moneyValue.Value < step.money then
+                if money.Value < step.money then
+                    print("[DEBUG] Tempo de espera para dinheiro esgotado")
                     break
                 end
             else
@@ -342,13 +384,12 @@ function playMacro(macroName)
         if step.action then
             local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
             if not remotes then
+                warn("[DEBUG] Remotes não encontrado!")
                 break
             end
             
             local args = step.arguments or {}
-            local remote
-            
-            print("Executing step", i, "Action:", step.action, "Args:", unpack(args or {}))
+            print("[DEBUG] Executando step", i, "Action:", step.action, "Args:", unpack(args or {}))
             
             if step.action == "PlaceTower" and #args >= 2 then
                 local remote = remotes:FindFirstChild("PlaceTower")
@@ -372,30 +413,42 @@ function playMacro(macroName)
                 end
             
                 remote:FireServer(towerName, position)
-                print("Torre colocada:", towerName, "em", position)
+                print("[DEBUG] Torre colocada:", towerName, "em", position)
             elseif step.action == "Upgrade" and #args >= 1 then
-                remote = remotes:FindFirstChild("Upgrade")
+                local remote = remotes:FindFirstChild("Upgrade")
                 local tower = workspace.Towers:FindFirstChild(args[1])
                 if remote and tower then
                     remote:InvokeServer(tower)
+                    print("[DEBUG] Torre atualizada:", args[1])
+                else
+                    warn("Upgrade falhou: Remote ou torre não encontrada")
                 end
             elseif step.action == "Sell" and #args >= 1 then
-                remote = remotes:FindFirstChild("Sell")
+                local remote = remotes:FindFirstChild("Sell")
                 local tower = workspace.Towers:FindFirstChild(args[1])
                 if remote and tower then
                     remote:InvokeServer(tower)
+                    print("[DEBUG] Torre vendida:", args[1])
+                else
+                    warn("Sell falhou: Remote ou torre não encontrada")
                 end
             elseif step.action == "ChangeTargeting" and #args >= 1 then
-                remote = remotes:FindFirstChild("ChangeTargeting")
+                local remote = remotes:FindFirstChild("ChangeTargeting")
                 local tower = workspace.Towers:FindFirstChild(args[1])
                 if remote and tower then
                     remote:InvokeServer(tower)
+                    print("[DEBUG] Targeting alterado para:", args[1])
+                else
+                    warn("ChangeTargeting falhou: Remote ou torre não encontrada")
                 end
             elseif step.action == "SpecialAbility" and #args >= 1 then
-                remote = remotes:FindFirstChild("SpecialAbility")
+                local remote = remotes:FindFirstChild("SpecialAbility")
                 local tower = workspace.Towers:FindFirstChild(args[1])
                 if remote and tower then
                     remote:InvokeServer(tower)
+                    print("[DEBUG] Habilidade especial acionada para:", args[1])
+                else
+                    warn("SpecialAbility falhou: Remote ou torre não encontrada")
                 end
             else
                 warn("Unknown action or missing arguments:", step.action)
@@ -407,6 +460,7 @@ function playMacro(macroName)
     
     isPlaying = false
     updateRecordingStatus()
+    print("[DEBUG] Reprodução da macro finalizada")
 end
 
 local originalNamecall
@@ -417,7 +471,7 @@ originalNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     
     if isRecording and not checkcaller() then
         if method == "FireServer" and remoteName == "PlaceTower" and self.Parent == game.ReplicatedStorage.Remotes then
-            print("[RECORD] PlaceTower:", args[1], args[2])
+            print("[DEBUG][RECORD] PlaceTower:", args[1], args[2])
             local processedArgs = {
                 tostring(args[1]),
                 tostring(args[2])
@@ -426,7 +480,7 @@ originalNamecall = hookmetamethod(game, "__namecall", function(self, ...)
         
         elseif method == "InvokeServer" and self.Parent == game.ReplicatedStorage.Remotes then
             if remoteName == "Upgrade" or remoteName == "Sell" or remoteName == "ChangeTargeting" or remoteName == "SpecialAbility" then
-                print("[RECORD] "..remoteName..":", args[1])
+                print("[DEBUG][RECORD]", remoteName..":", args[1])
                 getUnitRemote(remoteName, {tostring(args[1])})
             end
         end
