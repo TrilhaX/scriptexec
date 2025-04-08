@@ -105,8 +105,6 @@ wait()
 
 --Locals
 local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
 local GuiService = game:GetService("GuiService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local TweenService = game:GetService("TweenService")
@@ -120,6 +118,10 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
 local playerGui = player.PlayerGui
 local character = player.Character
+
+selectedPortalMap = "None"
+selectedPortalTier = {}
+selectedPortalIgnoreModifier = {}
 
 --General Functions
 
@@ -1362,8 +1364,14 @@ end
 function autoUniversalSkill()
 	while getgenv().autoUniversalSkillGG == true do
 		local bossHealth = game:GetService("Players").LocalPlayer.PlayerGui.MainUI.BarHolder.Boss
+		local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+		local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
 
 		if getgenv().onlyUseSkillsInBoss and not bossHealth then
+			wait(1)
+		end
+
+		if getgenv().onlyUseSkillsInWaveX and beforeSlash ~= selectedWaveXToUseSKill then
 			wait(1)
 		end
 
@@ -1389,7 +1397,7 @@ function autoUniversalSkill()
 				end
 			end
 		end
-		wait(1)
+		wait()
 	end
 end
 
@@ -1402,6 +1410,42 @@ function autoLeaveInsta()
 			wait(1)
 		end
 		game:GetService("ReplicatedStorage").Remotes.TeleportBack:FireServer()
+		wait()
+	end
+end
+
+function autoRestart()
+	while getgenv().autoRestartGG == true do
+		local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+		local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
+
+		if selectedWaveXToRestart and beforeSlash ~= selectedWaveXToRestart then
+			wait(1)
+		end
+		game:GetService("ReplicatedStorage").Remotes.RestartMatch:FireServer()
+		wait()
+	end
+end
+
+function autoCannon()
+	while getgenv().autoCannonGG == true do
+		local canhoes = workspace.Map.Map.Cannons
+
+		for _, cannonModel in pairs(canhoes:GetChildren()) do
+			local part = cannonModel:FindFirstChild("Meshes/cannon_Plane.001 (3)")
+			
+			if part then
+				local hasSomethingInside = false
+				for _, child in pairs(part:GetChildren()) do
+					hasSomethingInside = true
+				end
+				
+				if hasSomethingInside then
+					local args = { [1] = cannonModel }
+					game:GetService("ReplicatedStorage").Remotes.FireCannon:FireServer(unpack(args))
+				end
+			end
+		end
 		wait()
 	end
 end
@@ -1568,6 +1612,64 @@ function joinInfCastle()
 
 		wait(1)
 	end
+end
+
+function autoPortal()
+    while getgenv().autoPortalGG == true do
+        local playerData = game:GetService("ReplicatedStorage")
+            :WaitForChild("Remotes")
+            :WaitForChild("GetPlayerData")
+            :InvokeServer(game.Players.LocalPlayer)
+
+        for portalID, portalEntry in pairs(playerData.PortalData) do
+            if not portalEntry or type(portalEntry) ~= "table" then
+				wait()
+            end
+
+            local portalName = portalEntry.PortalName or "N/A"
+			local portalId = portalEntry.PortalID
+            local portalData = portalEntry.PortalData or {}
+            local challenges = portalData.Challenges or "Nenhum"
+            local portalTierFormatted = portalData.Tier and ("Tier " .. tostring(portalData.Tier)) or "N/A"
+
+            local mapMatch = selectedPortalMap == "None" or selectedPortalMap == portalName
+
+            local tierMatch = false
+            if not selectedPortalTier or #selectedPortalTier == 0 then
+                tierMatch = true
+            else
+                for _, selectedTier in ipairs(selectedPortalTier) do
+                    if tostring(selectedTier) == portalTierFormatted then
+                        tierMatch = true
+                    end
+                end
+            end
+
+            local modifierMatch = true
+            if selectedPortalIgnoreModifier and #selectedPortalIgnoreModifier > 0 then
+                for _, ignoredModifier in ipairs(selectedPortalIgnoreModifier) do
+                    if tostring(ignoredModifier) == tostring(challenges) then
+                        modifierMatch = false
+                    end
+                end
+            end
+
+            if mapMatch and tierMatch and modifierMatch then
+				local args = {
+					[1] = tostring(portalId)
+				}
+				
+				game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Portals"):WaitForChild("Activate"):InvokeServer(unpack(args))
+				wait(1)
+				local args = {
+					[1] = "Start"
+				}
+				
+				game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Teleporter"):WaitForChild("Interact"):FireServer(unpack(args))				
+            end
+        end
+        wait(10)
+    end
 end
 
 --Function in Lobby
@@ -1983,7 +2085,7 @@ end)
 -- Info Dropdown
 
 local blacklist = blacklist or {}
-local valuesChallengeInfo = {}
+local valuesChallengeInfo = {"None"}
 local challengeInfo = game:GetService("ReplicatedStorage").Modules.ChallengeInfo
 for i, v in pairs(challengeInfo:GetChildren()) do
 	if v.Name ~= "PackageLink" then
@@ -1993,21 +2095,21 @@ end
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local portals = ReplicatedStorage:FindFirstChild("Portals")
-local ValuesPortalMap = {}
-local ValuesPortalTier = {}
+local ValuesPortalMap = {"None"}
+local ValuesPortalTier = {"None"}
 
 if portals and portals:IsA("Folder") then
-	for _, item in pairs(portals:GetChildren()) do
-		if item:IsA("Instance") and item.Name ~= "PackageLink" and not item.Name:match("^Tier %d$") then
-			table.insert(ValuesPortalMap, item.Name)
-		end
-	end
-
-	for _, item2 in pairs(portals:GetChildren()) do
-		if item2:IsA("Instance") and item2.Name:match("^Tier %d$") then
-			table.insert(ValuesPortalTier, item2.Name)
-		end
-	end
+    for _, item in pairs(portals:GetChildren()) do
+        if item:IsA("Instance") and item.Name ~= "PackageLink" and not item.Name:match("^Tier %d$") then
+            table.insert(ValuesPortalMap, item.Name)
+        end
+    end
+    for _, item2 in pairs(portals:GetChildren()) do
+        if item2:IsA("Instance") and item2.Name:match("^Tier %d$") then
+            table.insert(ValuesPortalTier, item2.Name)
+        end
+    end
+    table.insert(ValuesPortalTier, "Tier 6")
 end
 
 local ValuesMaps = {}
@@ -2049,21 +2151,6 @@ for itemName, _ in pairs(ItemInfo) do
     table.insert(ValuesItemsToFeed, itemName)
 end
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")
-local ItemInfo = require(Modules:WaitForChild("ItemInfo"))
-local ValuesPortal = {}
-
-for key, value in pairs(ItemInfo) do
-    if type(value) == "table" then
-        if value.name then
-            table.insert(ValuesPortal, value.name)
-        end
-    elseif type(key) == "string" then
-        table.insert(ValuesPortal, key)
-    end
-end
-
 local tabGroups = {
 	TabGroup1 = Window:TabGroup(),
 }
@@ -2086,9 +2173,10 @@ local sections = {
 	MainSection3 = tabs.Main:Section({ Side = "Right" }),
 	MainSection4 = tabs.Main:Section({ Side = "Right" }),
 	MainSection10 = tabs.Farm:Section({ Side = "Left" }),
-	MainSection11 = tabs.Farm:Section({ Side = "Right" }),
+	MainSection11 = tabs.Farm:Section({ Side = "Left" }),
 	MainSection12 = tabs.Farm:Section({ Side = "Right" }),
 	MainSection13 = tabs.Farm:Section({ Side = "Right" }),
+	MainSection14 = tabs.Farm:Section({ Side = "Right" }),
 	MainSection15 = tabs.AutoPlay:Section({ Side = "Left" }),
 	MainSection16 = tabs.AutoPlay:Section({ Side = "Right" }),
 	MainSection17 = tabs.AutoPlay:Section({ Side = "Right" }),
@@ -2164,6 +2252,15 @@ sections.MainSection1:Toggle({
 		autoGameSpeed()
 	end,
 }, "autoGameSpeedGG")
+
+sections.MainSection1:Toggle({
+	Name = "Auto Cannon",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoCannonGG = value
+		autoCannon()
+	end,
+}, "autoCannon")
 
 sections.MainSection2:Header({
 	Name = "Webhook",
@@ -2350,10 +2447,74 @@ sections.MainSection10:Toggle({
 }, "autoJoinStory")
 
 sections.MainSection11:Header({
+    Name = "Portal",
+})
+
+local DropdownMap = sections.MainSection11:Dropdown({
+    Name = "Select Portal",
+    Multi = false,
+    Required = true,
+    Options = ValuesPortalMap,
+    Default = nil,
+    Callback = function(value)
+        selectedPortalMap = value
+        print("📥 Mapa selecionado:", selectedPortalMap)
+    end,
+}, "dropdownStoryMap")
+
+local DropdownModifier = sections.MainSection11:Dropdown({
+    Name = "Ignore Modifier",
+    Multi = true,
+    Required = true,
+    Options = valuesChallengeInfo,
+    Default = nil,
+	Callback = function(value)
+		table.clear(selectedPortalIgnoreModifier)
+		for k, v in pairs(value) do
+			if v == true then
+				table.insert(selectedPortalIgnoreModifier, k)
+			elseif typeof(v) == "string" then
+				table.insert(selectedPortalIgnoreModifier, v)
+			end
+		end
+	end,	
+}, "dropdownSelectDifficultyStory")
+
+local DropdownTier = sections.MainSection11:Dropdown({
+    Name = "Select Tier",
+    Multi = true,
+    Required = true,
+    Options = ValuesPortalTier,
+    Default = nil,
+	Callback = function(value)
+				table.clear(selectedPortalTier)
+				for k, v in pairs(value) do
+					if v == true then
+						table.insert(selectedPortalTier, k)
+					end
+				end
+				for _, tier in ipairs(selectedPortalTier) do
+					wait(1)
+				end
+	end,		
+}, "dropdownSelectTierPortal")
+
+sections.MainSection11:Toggle({
+    Name = "Auto Portal",
+    Default = false,
+    Callback = function(value)
+        getgenv().autoPortalGG = value
+        if value then
+            autoPortal()
+        end
+    end,
+}, "autoPortal")
+
+sections.MainSection12:Header({
 	Name = "Raid",
 })
 
-local Dropdown = sections.MainSection11:Dropdown({
+local Dropdown = sections.MainSection12:Dropdown({
 	Name = "Select Raid Map",
 	Multi = false,
 	Required = true,
@@ -2364,7 +2525,7 @@ local Dropdown = sections.MainSection11:Dropdown({
 	end,
 }, "dropdownRaidMap")
 
-local Dropdown = sections.MainSection11:Dropdown({
+local Dropdown = sections.MainSection12:Dropdown({
 	Name = "Select Act",
 	Multi = false,
 	Required = true,
@@ -2375,7 +2536,7 @@ local Dropdown = sections.MainSection11:Dropdown({
 	end,
 }, "dropdownSelectFaseRaid")
 
-sections.MainSection11:Toggle({
+sections.MainSection12:Toggle({
 	Name = "Auto Raid",
 	Default = false,
 	Callback = function(value)
@@ -2384,11 +2545,11 @@ sections.MainSection11:Toggle({
 	end,
 }, "autoJoinRaid")
 
-sections.MainSection12:Header({
+sections.MainSection13:Header({
 	Name = "Challenges",
 })
 
-local Dropdown = sections.MainSection12:Dropdown({
+local Dropdown = sections.MainSection13:Dropdown({
 	Name = "Select Map",
 	Multi = false,
 	Required = true,
@@ -2399,7 +2560,7 @@ local Dropdown = sections.MainSection12:Dropdown({
 	end,
 }, "dropdownChallengeMap")
 
-local Dropdown = sections.MainSection12:Dropdown({
+local Dropdown = sections.MainSection13:Dropdown({
 	Name = "Ignore Difficulty",
 	Multi = false,
 	Required = true,
@@ -2410,7 +2571,7 @@ local Dropdown = sections.MainSection12:Dropdown({
 	end,
 }, "dropdownSelectChallengeInfo")
 
-local Dropdown = sections.MainSection12:Dropdown({
+local Dropdown = sections.MainSection13:Dropdown({
 	Name = "Select Act",
 	Multi = false,
 	Required = true,
@@ -2421,7 +2582,7 @@ local Dropdown = sections.MainSection12:Dropdown({
 	end,
 }, "dropdownSelectActChallenge")
 
-sections.MainSection12:Toggle({
+sections.MainSection13:Toggle({
 	Name = "Auto Challenge",
 	Default = false,
 	Callback = function(value)
@@ -2430,11 +2591,11 @@ sections.MainSection12:Toggle({
 	end,
 }, "autoJoinChallenge")
 
-sections.MainSection13:Header({
+sections.MainSection14:Header({
 	Name = "Infinite Caslte",
 })
 
-local Dropdown = sections.MainSection13:Dropdown({
+local Dropdown = sections.MainSection14:Dropdown({
 	Name = "Method To Join in Inf Castle",
 	Multi = false,
 	Required = true,
@@ -2445,7 +2606,7 @@ local Dropdown = sections.MainSection13:Dropdown({
 	end,
 }, "dropdownMethod")
 
-sections.MainSection13:Input({
+sections.MainSection14:Input({
 	Name = "Choose Inf Castle Room",
 	Placeholder = "Press enter after paste",
 	AcceptedCharacters = "Number",
@@ -2457,7 +2618,7 @@ sections.MainSection13:Input({
 	end,
 }, "InfCastleRoom")
 
-sections.MainSection13:Toggle({
+sections.MainSection14:Toggle({
 	Name = "Auto Inf Caslte",
 	Default = false,
 	Callback = function(value)
@@ -2583,6 +2744,18 @@ sections.MainSection16:Header({
 	Name = "Skills",
 })
 
+sections.MainSection16:Slider({
+    Name = "Start Use Skill in Wave",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+		selectedWaveXToUseSKill = Value
+    end,
+}, "selectedWaveXToUseSKill")
+
 sections.MainSection16:Toggle({
 	Name = "Auto Universal Skill",
 	Default = false,
@@ -2599,6 +2772,14 @@ sections.MainSection16:Toggle({
 		getgenv().onlyBoss = value
 	end,
 }, "onlyUseSkillsInBoss")
+
+sections.MainSection16:Toggle({
+	Name = "Only use skills in Wave X",
+	Default = false,
+	Callback = function(value)
+		getgenv().onlyUseSkillsInWaveX = value
+	end,
+}, "onlyUseSkillsInWaveX")
 
 sections.MainSection17:Header({
 	Name = "Place Max",
@@ -2760,7 +2941,7 @@ sections.MainSection19:Slider({
     Name = "Only Sell Unit in Wave X",
     Default = 0,
     Minimum = 0,
-    Maximum = 20,
+    Maximum = 1000,
     DisplayMethod = "Number",
     Precision = 0,
     Callback = function(Value)
@@ -2781,7 +2962,7 @@ sections.MainSection19:Slider({
     Name = "Only Sell Unit in Wave X",
     Default = 0,
     Minimum = 0,
-    Maximum = 20,
+    Maximum = 1000,
     DisplayMethod = "Number",
     Precision = 0,
     Callback = function(Value)
@@ -2802,7 +2983,7 @@ sections.MainSection19:Slider({
     Name = "Only Leave in Wave X",
     Default = 0,
     Minimum = 0,
-    Maximum = 20,
+    Maximum = 1000,
     DisplayMethod = "Number",
     Precision = 0,
     Callback = function(Value)
@@ -2818,6 +2999,27 @@ sections.MainSection19:Toggle({
 		autoLeaveInsta()
 	end,
 }, "AutoLeave")
+
+sections.MainSection19:Slider({
+    Name = "Only Restart in Wave X",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 1000,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        selectedWaveXToRestart = Value
+    end,
+}, "selectedWaveXToRestart")
+
+sections.MainSection19:Toggle({
+	Name = "Auto Restart",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoRestartGG = value
+		autoRestart()
+	end,
+}, "autoRestart")
 
 sections.MainSection22:Header({
 	Name = "Macro",
