@@ -118,6 +118,8 @@ local quirkInfoModule = require(game:GetService("ReplicatedStorage").Modules.Qui
 local waitTime = 1
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
+local playerGui = player.PlayerGui
+local character = player.Character
 
 --General Functions
 
@@ -204,7 +206,6 @@ function hideUI()
 	UIPadding.PaddingLeft = UDim.new(0.1, 0)
 	UIPadding.PaddingRight = UDim.new(0.1, 0)
 	UIPadding.PaddingBottom = UDim.new(0.1, 0)
-	print("Criado")
 	tempestButton.Activated:Connect(function()
 		local maclib = maclibGui
 		if maclib then
@@ -284,7 +285,6 @@ function firebutton(Button, method)
 		local events = { "MouseButton1Click", "MouseButton1Down", "Activated" }
 		for _, v in pairs(events) do
 			if Button[v] then
-				print("[DEBUG] Disparando evento:", v)
 				firesignal(Button[v])
 			end
 		end
@@ -935,9 +935,39 @@ function autoVolcano()
 	end
 end
 
+function findFrameWithTwoTextButtons(parent)
+    for _, child in ipairs(parent:GetChildren()) do
+        if child:IsA("Frame") then
+            local textButtonCount = 0
+            for _, grandchild in ipairs(child:GetChildren()) do
+                if grandchild:IsA("TextButton") then
+                    textButtonCount = textButtonCount + 1
+                end
+            end
+            
+            if textButtonCount == 2 then
+                return child
+            end
+        end
+    end
+    return nil
+end
+
+function startFrameFind()
+	local targetFrame = findFrameWithTwoTextButtons(bottomFrame)
+	if targetFrame then
+		return true
+	else
+		return false
+	end
+end
+
 function autoStart()
 	while getgenv().autoStartGG == true do
-		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PlayerReady"):FireServer()
+		local startButton = startFrameFind()
+		if startButton == true then
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PlayerReady"):FireServer()
+		end
 		wait()
 	end
 end
@@ -1028,6 +1058,7 @@ function deleteMap()
 			end
 			wait(1)
 		end
+		wait()
 	end
 end
 
@@ -1058,17 +1089,65 @@ function securityMode()
 end
 
 function sellUnit()
-	while getgenv().sellUnit do
+	while getgenv().sellUnitGG do
 		local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
 		local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
 
-		if getgenv().onlysellinwaveX and beforeSlash ~= selectedWaveXToSell then
+		if selectedWaveXToSell and beforeSlash ~= selectedWaveXToSell then
 			wait(1)
 		end
 
-		print("Vendendo unidades na wave", beforeSlash)
+		local towers = workspace:FindFirstChild("Towers")
+		if towers then				
+			for _, unit in ipairs(towers:GetChildren()) do
+				local args = {
+					[1] = workspace:WaitForChild("Towers"):WaitForChild(tostring(unit))
+				}
+				
+				game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Sell"):InvokeServer(unpack(args))	
+			end
+		end	
 		wait(1)
 	end
+end
+
+function sellUnitFarm()
+    local unitsToSell = {
+        "AI Hoshino",
+        "AiHoshinoEvo",
+        "Escanor (Night)",
+        "Speedwagon",
+        "Escanor (Bar)",
+        "Robin",
+        "RobinEvo",
+        "Beast",
+        "Girl Speedwagon"
+    }
+    
+    while getgenv().sellUnitFarmGG == true do
+        local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+        local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
+
+        if selectedWaveXToSellFarm and beforeSlash ~= selectedWaveXToSellFarm then
+            wait(1)
+        end
+
+        local towers = workspace:FindFirstChild("Towers")
+        if towers then                
+            for _, unit in ipairs(towers:GetChildren()) do
+                for _, unitName in ipairs(unitsToSell) do
+                    if unit.Name == unitName then
+                        local args = {
+                            [1] = workspace:WaitForChild("Towers"):WaitForChild(tostring(unit))
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Sell"):InvokeServer(unpack(args))
+                    end
+                end
+            end
+        end    
+        wait(1)
+    end
 end
 
 function upgradeUnit()
@@ -1082,15 +1161,28 @@ function upgradeUnit()
 
 		local towers = workspace:FindFirstChild("Towers")
 		if towers then
-			for _, unit in ipairs(towers:GetChildren()) do
-				local args = {
-					[1] = workspace:WaitForChild("Towers"):WaitForChild(tostring(unit)),
-				}
+			local startButton = startFrameFind()
+			if startButton == false then
+				for _, unit in ipairs(towers:GetChildren()) do
+					local slotValue = unit:FindFirstChild("Config") and unit.Config:FindFirstChild("Slot")
+					local upgradeValue = unit:FindFirstChild("Upgrade")
 
-				game:GetService("ReplicatedStorage")
-					:WaitForChild("Remotes")
-					:WaitForChild("Upgrade")
-					:InvokeServer(unpack(args))
+					if slotValue and upgradeValue then
+						local slotIndex = tonumber(slotValue.Value)
+						local maxUpgrade = _G["upgradeMax" .. tostring(slotIndex)]
+
+						if maxUpgrade and upgradeValue.Value < maxUpgrade then
+							local args = {
+								[1] = unit,
+							}
+							game:GetService("ReplicatedStorage")
+								:WaitForChild("Remotes")
+								:WaitForChild("Upgrade")
+								:InvokeServer(unpack(args))
+						end
+					end
+					wait(1)
+				end
 			end
 		end
 		wait(1)
@@ -1099,92 +1191,172 @@ end
 
 function autoGameSpeed()
 	while getgenv().autoGameSpeedGG == true do
-		local args = {
-			[1] = 3,
-		}
+		local startButton = startFrameFind()
+		if startButton == false then
+			local args = {
+				[1] = 3,
+			}
 
-		game:GetService("ReplicatedStorage")
-			:WaitForChild("Remotes")
-			:WaitForChild("ChangeTimeScale")
-			:FireServer(unpack(args))
-		wait()
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("Remotes")
+				:WaitForChild("ChangeTimeScale")
+				:FireServer(unpack(args))
+			break
+		end
 	end
 end
 
 function getWaypointByPercentage(waypoints, percentage)
-	local n = #waypoints
-	if n == 0 then
-		return nil
-	end
-	local segment = 100 / n
-	local index = percentage >= 100 and n or math.floor(percentage / segment) + 1
-	return waypoints[index]
+    local n = #waypoints
+    if n == 0 then
+        return nil
+    end
+    local segment = 100 / n
+    local index = percentage >= 100 and n or math.floor(percentage / segment) + 1
+    return waypoints[index]
 end
 
 function getPositionsAroundPoint(center, radius, nPositions)
-	local positions = {}
-	local angleStep = (2 * math.pi) / nPositions
-	for i = 0, nPositions - 1 do
-		local angle = i * angleStep
-		local x = center.X + radius * math.cos(angle)
-		local z = center.Z + radius * math.sin(angle)
-		local pos = Vector3.new(x, center.Y, z)
-		table.insert(positions, pos)
-	end
-	return positions
+    local positions = {}
+    local angleStep = (2 * math.pi) / nPositions
+    for i = 0, nPositions - 1 do
+        local angle = i * angleStep
+        local x = center.X + radius * math.cos(angle)
+        local z = center.Z + radius * math.sin(angle)
+        local pos = Vector3.new(x, center.Y, z)
+        table.insert(positions, pos)
+    end
+    return positions
 end
 
 function placeEquippedUnits(positions, equippedUnits)
-	local remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PlaceTower")
-
-	for i, unitInfo in ipairs(equippedUnits) do
-		local pos = positions[i]
-		if pos and unitInfo.UnitName then
-			local cf = CFrame.new(pos)
-			remote:FireServer(unitInfo.UnitName, cf)
-		end
-	end
+    local remote = game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("PlaceTower")
+    
+    for i, unitInfo in ipairs(equippedUnits) do
+        local pos = positions[i]
+        if pos and unitInfo.UnitName then
+            local cf = CFrame.new(pos)
+            remote:FireServer(unitInfo.UnitName, cf)
+        end
+    end
 end
 
 function placeUnits()
-	while getgenv().placeUnitsGG == true do
-		local waypointsFolder = workspace.Map.Waypoints
-		local waypoints = {}
-		for _, child in ipairs(waypointsFolder:GetChildren()) do
-			table.insert(waypoints, child)
-		end
+    while getgenv().placeUnitsGG == true do
+        local waypointsFolder = workspace.Map.Waypoints
+        local waypoints = {}
+        for _, child in ipairs(waypointsFolder:GetChildren()) do
+            table.insert(waypoints, child)
+        end
 
-		local selectedPercentage = selectedDistancePercentage
-		local selectedWaypoint = getWaypointByPercentage(waypoints, selectedPercentage)
+        table.sort(waypoints, function(a, b)
+            local aNum = tonumber(a.Name:match("%d+")) or 0
+            local bNum = tonumber(b.Name:match("%d+")) or 0
+            return aNum < bNum
+        end)
 
-		if selectedWaypoint then
-			local player = game.Players.LocalPlayer
-			local retorno = game:GetService("ReplicatedStorage")
-				:WaitForChild("Remotes")
-				:WaitForChild("GetPlayerData")
-				:InvokeServer(player)
+        local selectedPercentage = selectedDistancePercentage
+        local selectedWaypoint = nil
+        if #waypoints > 0 then
+            local segment = 100 / #waypoints
+            local index = selectedPercentage >= 100 and #waypoints or math.floor(selectedPercentage / segment) + 1
+            selectedWaypoint = waypoints[index]
+        end
 
-			if typeof(retorno) == "table" then
-				local unitData = retorno["UnitData"]
-				if typeof(unitData) == "table" then
-					local equippedUnits = {}
-					for _, unitInfo in pairs(unitData) do
-						if unitInfo.Equipped == true then
-							table.insert(equippedUnits, unitInfo)
-						end
-					end
+        if selectedWaypoint then
+            wait()
+        end
 
-					if #equippedUnits > 0 then
-						local groundRadius = (selectedGroundPercentage / 100) * 15
-						local groundPositions =
-							getPositionsAroundPoint(selectedWaypoint.Position, groundRadius, #equippedUnits)
-						placeEquippedUnits(groundPositions, equippedUnits)
-					end
-				end
+        local targetFrame = nil
+        for _, frame in ipairs(playerGui.Bottom:GetDescendants()) do
+            if frame:IsA("Frame") then
+                local textButtons = {}
+                for _, child in ipairs(frame:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        table.insert(textButtons, child)
+                    end
+                end
+
+                if #textButtons == 6 then
+                    targetFrame = frame
+                    break
+                end
+            end
+        end
+
+        if not targetFrame then
+            wait()
+        end
+
+        local textButtons = {}
+        for _, child in ipairs(targetFrame:GetChildren()) do
+            if child:IsA("TextButton") then
+                table.insert(textButtons, child)
+            end
+        end
+
+        if #textButtons ~= 6 then
+            warn("O Frame não contém 6 TextButtons")
+        end
+
+        local costs = {}
+        for _, textButton in ipairs(textButtons) do
+            local innerFrame = textButton:FindFirstChildOfClass("Frame")
+            if innerFrame then
+                local costLabel = innerFrame:FindFirstChild("Cost")
+                if costLabel and costLabel:IsA("TextLabel") then
+                    local costValue = costLabel.Text:gsub("[$,]", "") or "0"
+                    table.insert(costs, tonumber(costValue) or 0)
+                else
+                    table.insert(costs, 0)
+                end
+            else
+                table.insert(costs, 0)
+            end
+        end
+
+        local equippedUnits = {}
+        local towers = workspace:FindFirstChild("Towers")
+        local slotsFolder = player:WaitForChild("Slots")
+
+        for _, slot in ipairs(slotsFolder:GetChildren()) do
+            local slotNumber = tonumber(slot.Name:match("%d+"))
+            local unitName = slot.Value
+
+            if unitName and unitName ~= "" then
+                local currentCount = 0
+                if towers then
+                    for _, tower in ipairs(towers:GetChildren()) do
+                        if tower.Name == unitName then
+                            currentCount = currentCount + 1
+                        end
+                    end
+                end
+
+                local placeMax = _G["placeMax" .. slotNumber] or 0
+                local playerCash = player.Cash.Value
+                local costForSlot = costs[slotNumber] or 0
+
+                if playerCash < costForSlot then
+                    wait()
+                elseif currentCount < placeMax then
+                    table.insert(equippedUnits, { UnitName = unitName, Slot = slotNumber })
+                end
+            end
+        end
+
+        if #equippedUnits > 0 then
+			local startButton = startFrameFind()
+			if startButton == false then
+				local groundRadius = (selectedGroundPercentage / 100) * 15
+				local groundPositions = getPositionsAroundPoint(selectedWaypoint.Position, groundRadius, #equippedUnits)
+				placeEquippedUnits(groundPositions, equippedUnits)
 			end
-		end
-		wait(1)
-	end
+        end
+        wait(1)
+    end
 end
 
 function autoUniversalSkill()
@@ -1218,6 +1390,19 @@ function autoUniversalSkill()
 			end
 		end
 		wait(1)
+	end
+end
+
+function autoLeaveInsta()
+	while getgenv().autoLeaveInstaGG == true do
+		local waveValue = game.Players.LocalPlayer.PlayerGui.MainUI.Top.Wave.Value.Layered.Text
+		local beforeSlash = string.match(waveValue, "^(.-)/") or waveValue
+
+		if selectedwaveXToLeave and beforeSlash ~= selectedwaveXToLeave then
+			wait(1)
+		end
+		game:GetService("ReplicatedStorage").Remotes.TeleportBack:FireServer()
+		wait()
 	end
 end
 
@@ -1358,15 +1543,11 @@ function joinInfCastle()
 					:WaitForChild("InfiniteCastleManager")
 					:FireServer(unpack(args))
 
-				print("Entrando no quarto:", room)
 				local args = { "Play", tonumber(selectedRoomInfCastle) or 0, false }
 				game:GetService("ReplicatedStorage")
 					:WaitForChild("Remotes")
 					:WaitForChild("InfiniteCastleManager")
 					:FireServer(unpack(args))
-				print("Teleportando")
-			else
-				warn("Nenhum quarto selecionado para Infinite Castle!")
 			end
 		elseif getgenv().joinMethod == "Method 2" then
 			teleportToNPC("Asta")
@@ -1377,14 +1558,11 @@ function joinInfCastle()
 					:WaitForChild("InfiniteCastleManager")
 					:FireServer(unpack(args))
 
-				print("Entrando no quarto:", room)
 				local args = { "Play", tonumber(selectedRoomInfCastle) or 0, false }
 				game:GetService("ReplicatedStorage")
 					:WaitForChild("Remotes")
 					:WaitForChild("InfiniteCastleManager")
 					:FireServer(unpack(args))
-			else
-				warn("Nenhum quarto selecionado para Infinite Castle!")
 			end
 		end
 
@@ -1612,7 +1790,6 @@ function playMacro(macroName)
 			end
 
 			if textButtonCount == 2 then
-				print("Frame encontrado:", child.Name)
 				if child.Visible == true then
 					wait(0.1)
 				end
@@ -1673,12 +1850,10 @@ function playMacro(macroName)
 
 	for i, step in ipairs(macroData.steps) do
 		if not isPlaying then
-			print("Macro stopped manually at step", i)
 			break
 		end
 
 		if not step.action and not step.time and not step.money then
-			warn("Invalid step format at index " .. i .. ": " .. tostring(step))
 			break
 		end
 
@@ -1687,7 +1862,6 @@ function playMacro(macroName)
 			local waitTime = step.time - elapsed
 
 			if waitTime > 0 then
-				print("Waiting for", waitTime, "seconds (time-based)")
 				wait(waitTime)
 			end
 		end
@@ -1698,7 +1872,6 @@ function playMacro(macroName)
 			if money then
 				local startWait = tick()
 				while isPlaying and money.Value < step.money and (tick() - startWait) < moneyCheckTimeout do
-					print("Waiting for money... Current:", moneyValue.Value, "Needed:", step.money)
 					wait(moneyCheckInterval)
 				end
 
@@ -1718,8 +1891,6 @@ function playMacro(macroName)
 
 			local args = step.arguments or {}
 			local remote
-
-			print("Executing step", i, "Action:", step.action, "Args:", unpack(args or {}))
 
 			if step.action == "PlaceTower" and #args >= 2 then
 				local remote = remotes:FindFirstChild("PlaceTower")
@@ -1743,7 +1914,6 @@ function playMacro(macroName)
 				end
 
 				remote:FireServer(towerName, position)
-				print("Torre colocada:", towerName, "em", position)
 			elseif step.action == "Upgrade" and #args >= 1 then
 				remote = remotes:FindFirstChild("Upgrade")
 				local tower = workspace.Towers:FindFirstChild(args[1])
@@ -1846,39 +2016,52 @@ for key, value in pairs(MapData) do
 	table.insert(ValuesMaps, tostring(key))
 end
 
-local player = game:GetService("Players").LocalPlayer
-local scroll = player.PlayerGui:FindFirstChild("Inventory")
-	and player.PlayerGui.Inventory:FindFirstChild("BG")
-	and player.PlayerGui.Inventory.BG:FindFirstChild("Scroll")
+local player = game.Players.LocalPlayer
+local retorno = game:GetService("ReplicatedStorage")
+	:WaitForChild("Remotes")
+	:WaitForChild("GetPlayerData")
+	:InvokeServer(player)
 local ValuesUnitId = {}
-if scroll then
-	for _, child in ipairs(scroll:GetChildren()) do
-		if child:IsA("Instance") then
-			local unitName = child:FindFirstChild("UnitName")
-			local level = child:FindFirstChild("Level")
-			if unitName and level and unitName:IsA("TextLabel") and level:IsA("TextLabel") then
-				table.insert(ValuesUnitId, unitName.Text .. " | " .. level.Text .. " | " .. child.Name)
+
+if typeof(retorno) == "table" then
+	local unitData = retorno["UnitData"]
+	if typeof(unitData) == "table" then
+		for _, unitInfo in pairs(unitData) do
+			if typeof(unitInfo) == "table" then
+				local unitName = unitInfo["UnitName"]
+				local level = unitInfo["Level"]
+				local unitID = unitInfo["UnitID"]
+
+				if unitName and level and unitID then
+					table.insert(ValuesUnitId, unitName .. " | Level: " .. tostring(level) .. " | " .. tostring(unitID))
+				end
 			end
 		end
 	end
-else
-	warn("Scroll GUI not found!")
 end
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Modules = ReplicatedStorage:WaitForChild("Modules")
+local ItemInfo = require(Modules:WaitForChild("ItemInfo"))
 local ValuesItemsToFeed = {}
-local selection = player.PlayerGui:FindFirstChild("Feed")
-	and player.PlayerGui.Feed:FindFirstChild("BG")
-	and player.PlayerGui.Feed.BG:FindFirstChild("Content")
-	and player.PlayerGui.Feed.BG.Content:FindFirstChild("Items")
-	and player.PlayerGui.Feed.BG.Content.Items:FindFirstChild("Selection")
-if selection then
-	for _, child in ipairs(selection:GetChildren()) do
-		if not (child:IsA("UIListLayout") or child:IsA("UIPadding") or child.Name == "Padding") then
-			table.insert(ValuesItemsToFeed, child.Name)
-		end
-	end
-else
-	warn("Feed selection GUI not found!")
+
+for itemName, _ in pairs(ItemInfo) do
+    table.insert(ValuesItemsToFeed, itemName)
+end
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Modules = ReplicatedStorage:WaitForChild("Modules")
+local ItemInfo = require(Modules:WaitForChild("ItemInfo"))
+local ValuesPortal = {}
+
+for key, value in pairs(ItemInfo) do
+    if type(value) == "table" then
+        if value.name then
+            table.insert(ValuesPortal, value.name)
+        end
+    elseif type(key) == "string" then
+        table.insert(ValuesPortal, key)
+    end
 end
 
 local tabGroups = {
@@ -1910,6 +2093,7 @@ local sections = {
 	MainSection16 = tabs.AutoPlay:Section({ Side = "Right" }),
 	MainSection17 = tabs.AutoPlay:Section({ Side = "Right" }),
 	MainSection18 = tabs.AutoPlay:Section({ Side = "Right" }),
+	MainSection19 = tabs.AutoPlay:Section({ Side = "Left" }),
 	MainSection22 = tabs.Macro:Section({ Side = "Left" }),
 	MainSection25 = tabs.Settings:Section({ Side = "Right" }),
 }
@@ -1926,42 +2110,6 @@ sections.MainSection1:Toggle({
 		HidePlayer()
 	end,
 }, "HidePlayerInfo")
-
-sections.MainSection1:Toggle({
-	Name = "Auto Walk",
-	Default = false,
-	Callback = function(value)
-		getgenv().autoWalkGG = value
-		autoWalk()
-	end,
-}, "AutoWalk")
-
-sections.MainSection1:Toggle({
-	Name = "Security Mode",
-	Default = false,
-	Callback = function(value)
-		getgenv().securityModeGG = value
-		securityMode()
-	end,
-}, "SecurityMode")
-
-sections.MainSection1:Toggle({
-	Name = "Delete Map",
-	Default = false,
-	Callback = function(value)
-		getgenv().deleteMapGG = value
-		deleteMap()
-	end,
-}, "DeleteMap")
-
-sections.MainSection1:Toggle({
-	Name = "Delete Notifications",
-	Default = false,
-	Callback = function(value)
-		getgenv().deleteNotErroGG = value
-		deleteNotErro()
-	end,
-}, "DeleteNotErro")
 
 sections.MainSection1:Toggle({
 	Name = "Auto Start",
@@ -2065,6 +2213,42 @@ sections.MainSection2:Toggle({
 sections.MainSection3:Header({
 	Name = "Extra",
 })
+
+sections.MainSection3:Toggle({
+	Name = "Auto Walk",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoWalkGG = value
+		autoWalk()
+	end,
+}, "AutoWalk")
+
+sections.MainSection3:Toggle({
+	Name = "Security Mode",
+	Default = false,
+	Callback = function(value)
+		getgenv().securityModeGG = value
+		securityMode()
+	end,
+}, "SecurityMode")
+
+sections.MainSection3:Toggle({
+	Name = "Delete Map",
+	Default = false,
+	Callback = function(value)
+		getgenv().deleteMapGG = value
+		deleteMap()
+	end,
+}, "DeleteMap")
+
+sections.MainSection3:Toggle({
+	Name = "Delete Notifications",
+	Default = false,
+	Callback = function(value)
+		getgenv().deleteNotErroGG = value
+		deleteNotErro()
+	end,
+}, "DeleteNotErro")
 
 sections.MainSection3:Toggle({
 	Name = "Auto Get Battlepass",
@@ -2342,6 +2526,12 @@ sections.MainSection15:Toggle({
 		selectedDistancePercentage = MacLib.Options.selectedDistancePercentage.Value
 		selectedGroundPercentage = MacLib.Options.selectedGroundPercentage.Value
 		selectedAirPercentage = MacLib.Options.selectedAirPercentage.Value
+		_G["placeMax1"] = MacLib.Options.Unit1.Value
+		_G["placeMax2"] = MacLib.Options.Unit2.Value
+		_G["placeMax3"] = MacLib.Options.Unit3.Value
+		_G["placeMax4"] = MacLib.Options.Unit4.Value
+		_G["placeMax5"] = MacLib.Options.Unit5.Value
+		_G["placeMax6"] = MacLib.Options.Unit6.Value		
 		placeUnits()
 	end,
 }, "autoPlaceUnit")
@@ -2371,6 +2561,12 @@ sections.MainSection15:Toggle({
 	Default = false,
 	Callback = function(value)
 		getgenv().upgradeUnitGG = value
+		_G["upgradeMax1"] = MacLib.Options.Unit1Up.Value
+		_G["upgradeMax2"] = MacLib.Options.Unit2Up.Value
+		_G["upgradeMax3"] = MacLib.Options.Unit3Up.Value
+		_G["upgradeMax4"] = MacLib.Options.Unit4Up.Value
+		_G["upgradeMax5"] = MacLib.Options.Unit5Up.Value
+		_G["upgradeMax6"] = MacLib.Options.Unit6Up.Value	
 		upgradeUnit()
 	end,
 }, "autoUpgradeUnit")
@@ -2403,6 +2599,225 @@ sections.MainSection16:Toggle({
 		getgenv().onlyBoss = value
 	end,
 }, "onlyUseSkillsInBoss")
+
+sections.MainSection17:Header({
+	Name = "Place Max",
+})
+
+sections.MainSection17:Slider({
+    Name = "Unit 1",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["placeMax1"] = Value
+    end,
+}, "Unit1")
+
+sections.MainSection17:Slider({
+    Name = "Unit 2",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["placeMax2"] = Value
+    end,
+}, "Unit2")
+
+sections.MainSection17:Slider({
+    Name = "Unit 3",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["placeMax3"] = Value
+    end,
+}, "Unit3")
+
+sections.MainSection17:Slider({
+    Name = "Unit 4",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["placeMax4"] = Value
+    end,
+}, "Unit4")
+
+sections.MainSection17:Slider({
+    Name = "Unit 5",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["placeMax5"] = Value
+    end,
+}, "Unit5")
+
+sections.MainSection17:Slider({
+    Name = "Unit 6",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["placeMax6"] = Value
+    end,
+}, "Unit6")
+
+sections.MainSection18:Header({
+    Name = "Upgrade Max",
+})
+
+sections.MainSection18:Slider({
+    Name = "Unit 1",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["upgradeMax1"] = Value
+    end,
+}, "Unit1Up")
+
+sections.MainSection18:Slider({
+    Name = "Unit 2",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["upgradeMax2"] = Value
+    end,
+}, "Unit2Up")
+
+sections.MainSection18:Slider({
+    Name = "Unit 3",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["upgradeMax3"] = Value
+    end,
+}, "Unit3Up")
+
+sections.MainSection18:Slider({
+    Name = "Unit 4",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["upgradeMax4"] = Value
+    end,
+}, "Unit4Up")
+
+sections.MainSection18:Slider({
+    Name = "Unit 5",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["upgradeMax5"] = Value
+    end,
+}, "Unit5Up")
+
+sections.MainSection18:Slider({
+    Name = "Unit 6",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        _G["upgradeMax6"] = Value
+    end,
+}, "Unit6Up")
+
+sections.MainSection19:Header({
+	Name = "Other",
+})
+
+sections.MainSection19:Slider({
+    Name = "Only Sell Unit in Wave X",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        selectedWaveXToSell = Value
+    end,
+}, "SellUnitAtWaveX")
+
+sections.MainSection19:Toggle({
+	Name = "Auto Sell Unit",
+	Default = false,
+	Callback = function(value)
+		getgenv().sellUnitGG = value
+		sellUnit()
+	end,
+}, "AutoSellUnit")
+
+sections.MainSection19:Slider({
+    Name = "Only Sell Unit in Wave X",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        selectedWaveXToSellFarm = Value
+    end,
+}, "selectedWaveXToSellFarm")
+
+sections.MainSection19:Toggle({
+	Name = "Auto Sell Farm",
+	Default = false,
+	Callback = function(value)
+		getgenv().sellUnitFarmGG = value
+		sellUnitFarm()
+	end,
+}, "onlysellFarminwaveX")
+
+sections.MainSection19:Slider({
+    Name = "Only Leave in Wave X",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 20,
+    DisplayMethod = "Number",
+    Precision = 0,
+    Callback = function(Value)
+        selectedwaveXToLeave = Value
+    end,
+}, "selectedwaveXToLeave")
+
+sections.MainSection19:Toggle({
+	Name = "Auto Leave",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoLeaveInstaGG = value
+		autoLeaveInsta()
+	end,
+}, "AutoLeave")
 
 sections.MainSection22:Header({
 	Name = "Macro",
