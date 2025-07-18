@@ -2098,7 +2098,6 @@ function autoJoinBreachAct1Function()
 	local enterBattle = ReplicatedStorage:WaitForChild("Events"):WaitForChild("Easter2025"):WaitForChild("EnterBattle")
 
 	enterBattle:FireServer()
-	break
 end
 
 function autoJoinBreachAct2Function()
@@ -2119,7 +2118,6 @@ function autoJoinBreachAct2Function()
 		end
 		task.wait(1)
 	end
-	break
 end
 
 function autoJoinBreachesFunction()
@@ -2144,7 +2142,6 @@ function autoJoinBreachesFunction()
 		end
 		task.wait(5)
 	end
-	break
 end
 
 function autoCollectEggsFunction()
