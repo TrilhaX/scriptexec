@@ -2096,7 +2096,6 @@ function autoJoinBreachAct1Function()
 	task.wait(selectedDelay)
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local enterBattle = ReplicatedStorage:WaitForChild("Events"):WaitForChild("Easter2025"):WaitForChild("EnterBattle")
-
 	enterBattle:FireServer()
 end
 
@@ -2113,6 +2112,7 @@ function autoJoinBreachAct2Function()
 			if breachPart:IsA("BasePart") and #breachPart:GetChildren() > 0 then
 				enterBreach:FireServer(breachPart)
 				enteredAny = true
+				break
 			end
 			task.wait(0.1)
 		end
@@ -2134,11 +2134,13 @@ function autoJoinBreachesFunction()
 			if breachPart:IsA("BasePart") and #breachPart:GetChildren() > 0 then
 				enterBreach:FireServer(breachPart)
 				enteredAny = true
+				break
 			end
 			task.wait(0.1)
 		end
 		if not enteredAny then
 			enterBattle:FireServer()
+			break
 		end
 		task.wait(5)
 	end
