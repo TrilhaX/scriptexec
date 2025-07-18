@@ -151,6 +151,7 @@ selectedUnitToRollStat = ""
 selectedStatToGet = {}
 cardPriorities = {}
 cardPriorities2 = {}
+selectedCavern = {}
 selectedDungeon = ""
 selectedDungeonDebuff = {}
 selectedSurvivalDebuff = {}
@@ -498,9 +499,10 @@ function HidePlayerFunction()
 	end
 end
 
-
 function webhookFunction()
-	if not alreadySentWebhook then return end
+	if not alreadySentWebhook then
+		return
+	end
 	alreadySentWebhook = false
 	task.spawn(function()
 		while true do
@@ -768,8 +770,8 @@ function webhookFunction()
 					local mapDifficulty = tostring(teleportData.Difficulty or "Unknown Difficulty")
 					local mapType = tostring(teleportData.Type or "Unknown Type")
 
-					local resultText =
-						game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("EndGameUI").BG.Container.Stats.Result.Text
+					local resultText = game:GetService("Players").LocalPlayer.PlayerGui
+						:WaitForChild("EndGameUI").BG.Container.Stats.Result.Text
 					local resultOnly = nil
 					if resultText:lower() == "defeat" then
 						resultOnly = "Defeat"
@@ -886,22 +888,18 @@ function webhookFunction()
 					else
 					end
 
-					if response and response.Success then 
+					if response and response.Success then
 						alreadySentWebhook = true
 						break
 					elseif response then
 						alreadySentWebhook = true
 						break
-
-
 					end
-
 				end
 			end
 			wait(1)
 		end
-	end)	
-	
+	end)
 end
 function testWebhookFunction()
 	local discordWebhookUrl = urlwebhook
@@ -1054,7 +1052,7 @@ function webhookTraitRerollFunction(passivaConseguida, personagem)
 				url = images[passivaPlayerGot],
 			}
 		else
-			return;
+			return
 		end
 
 		local payloadJson = HttpService:JSONEncode(payload)
@@ -1205,7 +1203,7 @@ function autoRetryFunction()
 			local button2 = prompt.TextButton:FindFirstChild("TextButton")
 			if button2 then
 				firebutton(button2, "VirtualInputManager")
-				wait(1) 
+				wait(1)
 			end
 		end
 		local uiEndGame = player:FindFirstChild("PlayerGui"):WaitForChild("EndGameUI")
@@ -1213,12 +1211,12 @@ function autoRetryFunction()
 			local button = uiEndGame.BG.Buttons:FindFirstChild("Retry")
 			if button then
 				webhookFunction()
-				wait(3) 
+				wait(3)
 				firebutton(button, "VirtualInputManager")
-				wait(2) 
+				wait(2)
 			end
 		end
-		wait(1) 
+		wait(1)
 	end
 end
 
@@ -1256,7 +1254,6 @@ function autoNextFunction()
 		if uiEndGame then
 			local button = uiEndGame.BG.Buttons:FindFirstChild("Next")
 			if button then
-	
 				webhookFunction()
 				wait(1)
 				firebutton(button, "VirtualInputManager")
@@ -1272,7 +1269,7 @@ function sellUnitFunction()
 		if mainUI then
 			local selectedWave = MacLib.Options.SellUnitAtWaveXToggle.Value
 			local waveValue = game:GetService("ReplicatedStorage"):WaitForChild("Wave").Value
-			if  tonumber(waveValue) >= tonumber(selectedWave) then
+			if tonumber(waveValue) >= tonumber(selectedWave) then
 				local towers = workspace:FindFirstChild("Towers")
 				if towers then
 					for _, unit in ipairs(towers:GetChildren()) do
@@ -1466,7 +1463,9 @@ function placeUnitsFunction()
 	local waveTag = game:GetService("ReplicatedStorage").Wave
 	local bottomGui = player.PlayerGui:WaitForChild("Bottom")
 	local slotsFolder = player:WaitForChild("Slots")
-	if getgenv().isPlacingUnits then return end
+	if getgenv().isPlacingUnits then
+		return
+	end
 	getgenv().isPlacingUnits = true
 	while getgenv().placeUnitsEnabled do
 		local uiEndGame = player.PlayerGui:FindFirstChild("EndGameUI")
@@ -1474,14 +1473,14 @@ function placeUnitsFunction()
 			task.wait(1)
 			continue
 		end
-		local opts           = MacLib.Options
-		local distPercent    = opts.selectedDistancePercentage.Value
-		local groundPercent  = opts.selectedGroundPercentage.Value
+		local opts = MacLib.Options
+		local distPercent = opts.selectedDistancePercentage.Value
+		local groundPercent = opts.selectedGroundPercentage.Value
 
 		local placeMax, waveThreshold = {}, {}
 		for i = 1, 6 do
-			placeMax[i]      = opts["Unit"..i].Value
-			waveThreshold[i] = tonumber(opts["waveUnit"..i.."Slider"].Value) or 0
+			placeMax[i] = opts["Unit" .. i].Value
+			waveThreshold[i] = tonumber(opts["waveUnit" .. i .. "Slider"].Value) or 0
 		end
 
 		-- 2) Coleta e ordenação de waypoints
@@ -1508,16 +1507,18 @@ function placeUnitsFunction()
 					if frame:IsA("Frame") then
 						local btns = {}
 						for _, c in ipairs(frame:GetChildren()) do
-							if c:IsA("TextButton") then table.insert(btns, c) end
+							if c:IsA("TextButton") then
+								table.insert(btns, c)
+							end
 						end
 						if #btns == 6 then
 							for idx, btn in ipairs(btns) do
 								local lbl = btn:FindFirstChild("Cost", true)
 								if not lbl then
 									costs[idx] = 0
-									continue;
+									continue
 								end
-								local _ = lbl and lbl.Text:gsub("[$,]","") or nil
+								local _ = lbl and lbl.Text:gsub("[$,]", "") or nil
 								costs[idx] = lbl and tonumber(_) or 0
 							end
 							break
@@ -1537,18 +1538,21 @@ function placeUnitsFunction()
 
 			-- 5) Seleciona unidades para equipar
 			local waveValue = waveTag.Value
-			local cash      = player:FindFirstChild("Cash")
+			local cash = player:FindFirstChild("Cash")
 			local equippedUnits = {}
 
 			-- 5.1) . PRIORIDADE (slots 1→6)
 			for i = 6, 1, -1 do
 				if waveValue >= waveThreshold[i] then
-					local slot = slotsFolder:FindFirstChild("Slot"..i)
+					local slot = slotsFolder:FindFirstChild("Slot" .. i)
 					local name = slot and slot.Value or ""
-					if name ~= ""
+					if
+						name ~= ""
 						and (towerCounts[name] or 0) < placeMax[i]
-						and cash and cash.Value >= (costs[i] or 0) then
-						table.insert(equippedUnits, { UnitName = name; Slot = i })
+						and cash
+						and cash.Value >= (costs[i] or 0)
+					then
+						table.insert(equippedUnits, { UnitName = name, Slot = i })
 						break
 					end
 				end
@@ -1558,12 +1562,15 @@ function placeUnitsFunction()
 			if #equippedUnits == 0 then
 				for i = 1, 6 do
 					if waveValue >= waveThreshold[i] then
-						local slot = slotsFolder:FindFirstChild("Slot"..i)
+						local slot = slotsFolder:FindFirstChild("Slot" .. i)
 						local name = slot and slot.Value or ""
-						if name ~= ""
+						if
+							name ~= ""
 							and (towerCounts[name] or 0) < placeMax[i]
-							and cash and cash.Value >= (costs[i] or 0) then
-							table.insert(equippedUnits, { UnitName = name; Slot = i })
+							and cash
+							and cash.Value >= (costs[i] or 0)
+						then
+							table.insert(equippedUnits, { UnitName = name, Slot = i })
 						end
 					end
 				end
@@ -1572,10 +1579,10 @@ function placeUnitsFunction()
 			-- 6) Dispara PlaceTower para cada unidade selecionada
 			if #equippedUnits > 0 then
 				table.sort(equippedUnits, function(a, b)
-					return isFarmUnit(a.UnitName) and not isFarmUnit(b.UnitName) 
+					return isFarmUnit(a.UnitName) and not isFarmUnit(b.UnitName)
 				end)
 
-				local radius    = (groundPercent / 100) * 15
+				local radius = (groundPercent / 100) * 15
 				local positions = getPositionsAroundPointFunction(selectedWp.Position, radius, #equippedUnits)
 				for idx, info in ipairs(equippedUnits) do
 					local pos = positions[idx]
@@ -1764,14 +1771,12 @@ function autoLeaveInstaFunction()
 	while getgenv().autoLeaveInstaEnabled == true do
 		local mainUI = game.Players.LocalPlayer.PlayerGui:FindFirstChild("MainUI")
 		if mainUI then
-
 			local selectedWave = MacLib.Options.OnlyLeaveinWave.Value
 			local waveValue = game:GetService("ReplicatedStorage"):WaitForChild("Wave").Value
 
 			OnlyLeaveinWave = MacLib.Options.OnlyLeaveinWave.Value
 
 			if selectedwaveXToLeave and tonumber(waveValue) == tonumber(selectedWave) then
-			
 				webhookFunction()
 				wait(1)
 				game:GetService("ReplicatedStorage").Remotes.TeleportBack:FireServer()
@@ -1963,7 +1968,7 @@ function autoBossRushCardFunction()
 							wait(1)
 							local buttonConfirm =
 								game:GetService("Players").LocalPlayer.PlayerGui.Prompt.TextButton.Frame
-								:GetChildren()[5].TextButton
+									:GetChildren()[5].TextButton
 							firebutton(buttonConfirm, "VirtualInputManager")
 						end
 					end
@@ -1974,6 +1979,7 @@ function autoBossRushCardFunction()
 	end
 end
 
+--Rework TS in future
 function autoJoinChallengeFunction()
 	while getgenv().autoJoinChallengeEnabled == true do
 		local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
@@ -2039,17 +2045,35 @@ function autoJoinStoryFunction()
 					:InvokeServer(unpack(args))
 				selectedStoryYet = true
 			else
-				local args = {
-					[1] = tostring(selectedStoryMap),
-					[2] = selectedActStory,
-					[3] = tostring(selectedDifficultyStory),
-					[4] = false,
-				}
-				game:GetService("ReplicatedStorage")
-					:WaitForChild("Remotes")
-					:WaitForChild("Story")
-					:WaitForChild("Select")
-					:InvokeServer(unpack(args))
+				if selectedActStory == "Infinite" then
+					local args = {
+						[1] = "Select",
+						[2] = tostring(selectedStoryMap),
+						[3] = 1,
+						[4] = tostring(selectedDifficultyStory),
+						[5] = "Infinite",
+					}
+
+					game:GetService("ReplicatedStorage")
+						:WaitForChild("Remotes")
+						:WaitForChild("Teleporter")
+						:WaitForChild("Interact")
+						:FireServer(unpack(args))
+				else
+					local args = {
+						[1] = "Select",
+						[2] = tostring(selectedStoryMap),
+						[3] = selectedActStory,
+						[4] = tostring(selectedDifficultyStory),
+						[5] = "Story",
+					}
+
+					game:GetService("ReplicatedStorage")
+						:WaitForChild("Remotes")
+						:WaitForChild("Teleporter")
+						:WaitForChild("Interact")
+						:FireServer(unpack(args))
+				end
 				selectedStoryYet = true
 			end
 			wait(1)
@@ -2072,10 +2096,10 @@ function autoJoinBreachAct1Function()
 	task.wait(selectedDelay)
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local enterBattle = ReplicatedStorage:WaitForChild("Events"):WaitForChild("Easter2025"):WaitForChild("EnterBattle")
-	
-	enterBattle:FireServer()
-end
 
+	enterBattle:FireServer()
+	break
+end
 
 function autoJoinBreachAct2Function()
 	local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
@@ -2085,19 +2109,18 @@ function autoJoinBreachAct2Function()
 	local lobbyFolder = workspace:WaitForChild("Lobby", 60)
 	local breachesFolder = lobbyFolder:WaitForChild("Breaches", 60)
 	while true do
-    
 		local enteredAny = false
-    for _, breachPart in ipairs(breachesFolder:GetChildren()) do
-        if breachPart:IsA("BasePart") and #breachPart:GetChildren() > 0 then
-            enterBreach:FireServer(breachPart)
-            enteredAny = true
-        end
-        task.wait(0.1)    
+		for _, breachPart in ipairs(breachesFolder:GetChildren()) do
+			if breachPart:IsA("BasePart") and #breachPart:GetChildren() > 0 then
+				enterBreach:FireServer(breachPart)
+				enteredAny = true
+			end
+			task.wait(0.1)
+		end
+		task.wait(1)
 	end
-	task.wait(1)
-	end
+	break
 end
-
 
 function autoJoinBreachesFunction()
 	local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
@@ -2108,43 +2131,46 @@ function autoJoinBreachesFunction()
 	local lobbyFolder = workspace:WaitForChild("Lobby", 60)
 	local breachesFolder = lobbyFolder:WaitForChild("Breaches", 60)
 	while true do
-    local enteredAny = false
-    for _, breachPart in ipairs(breachesFolder:GetChildren()) do
-        if breachPart:IsA("BasePart") and #breachPart:GetChildren() > 0 then
-            enterBreach:FireServer(breachPart)
-            enteredAny = true
-        end
-        task.wait(0.1)
-    end
-    if not enteredAny then
-        enterBattle:FireServer()
-    end
-    task.wait(5)
+		local enteredAny = false
+		for _, breachPart in ipairs(breachesFolder:GetChildren()) do
+			if breachPart:IsA("BasePart") and #breachPart:GetChildren() > 0 then
+				enterBreach:FireServer(breachPart)
+				enteredAny = true
+			end
+			task.wait(0.1)
+		end
+		if not enteredAny then
+			enterBattle:FireServer()
+		end
+		task.wait(5)
 	end
+	break
 end
-	
+
 function autoCollectEggsFunction()
 	local Map = workspace:WaitForChild("Map", 30)
 	local lp = game:GetService("Players").LocalPlayer
 	local char = lp.Character or lp.CharacterAdded:Wait()
 	local hrp = char:WaitForChild("HumanoidRootPart")
-	if not Map then return end
+	if not Map then
+		return
+	end
 	local function fireProximityPrompts()
-    for _, egg in ipairs(workspace:GetChildren()) do
-        local num = tonumber(egg.Name)
-        if num and egg:IsA("Model") then
-            local prompt = egg:FindFirstChildWhichIsA("ProximityPrompt", true)
-            if prompt then
-                hrp.CFrame = egg:FindFirstChild("HumanoidRootPart").CFrame
-                fireproximityprompt(prompt)
-            	end
-        	end
-    	end
+		for _, egg in ipairs(workspace:GetChildren()) do
+			local num = tonumber(egg.Name)
+			if num and egg:IsA("Model") then
+				local prompt = egg:FindFirstChildWhichIsA("ProximityPrompt", true)
+				if prompt then
+					hrp.CFrame = egg:FindFirstChild("HumanoidRootPart").CFrame
+					fireproximityprompt(prompt)
+				end
+			end
+		end
 	end
 
-		while true do
-    	fireProximityPrompts()
-    	task.wait(1)
+	while true do
+		fireProximityPrompts()
+		task.wait(1)
 	end
 end
 
@@ -2160,29 +2186,29 @@ function autoJoinRaidFunction()
 				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(doorCFrame)
 				wait(1)
 				if getgenv().OnlyFriends == true then
-					local argsRaid = {
-						[1] = selectedRaidMap,
-						[2] = selectedFaseRaid,
-						[3] = "Nightmare",
-						[4] = true,
+					local args = {
+						[1] = "Select",
+						[2] = selectedRaidMap,
+						[3] = selectedFaseRaid,
 					}
+
 					game:GetService("ReplicatedStorage")
 						:WaitForChild("Remotes")
-						:WaitForChild("Raids")
-						:WaitForChild("Select")
-						:InvokeServer(unpack(argsRaid))
+						:WaitForChild("Teleporter")
+						:WaitForChild("Interact")
+						:FireServer(unpack(args))
 				else
-					local argsRaid = {
-						[1] = selectedRaidMap,
-						[2] = selectedFaseRaid,
-						[3] = "Nightmare",
-						[4] = false,
+					local args = {
+						[1] = "Select",
+						[2] = selectedRaidMap,
+						[3] = selectedFaseRaid,
 					}
+
 					game:GetService("ReplicatedStorage")
 						:WaitForChild("Remotes")
-						:WaitForChild("Raids")
-						:WaitForChild("Select")
-						:InvokeServer(unpack(argsRaid))
+						:WaitForChild("Teleporter")
+						:WaitForChild("Interact")
+						:FireServer(unpack(args))
 				end
 				wait(1)
 				local argsTeleporter = {
@@ -2357,7 +2383,7 @@ function autoNextPortalFunction()
 				local uiEndGame = player:WaitForChild("PlayerGui"):WaitForChild("EndGameUI")
 				if uiEndGame and uiEndGame.Enabled == true then
 					wait(1)
-	
+
 					webhookFunction()
 					wait(6)
 					local args = {
@@ -2486,28 +2512,28 @@ function autoElementalCavernFunction()
 				wait(1)
 				if getgenv().OnlyFriends == true then
 					local args = {
-						[1] = tostring(selectedCavern),
-						[2] = tostring(selectedDifficultyCavern),
-						[3] = true,
+						[1] = "Select",
+						[2] = tostring(selectedCavern),
+						[3] = tostring(selectedDifficultyCavern),
 					}
 
 					game:GetService("ReplicatedStorage")
 						:WaitForChild("Remotes")
-						:WaitForChild("ElementalCaverns")
-						:WaitForChild("Select")
-						:InvokeServer(unpack(args))
+						:WaitForChild("Teleporter")
+						:WaitForChild("Interact")
+						:FireServer(unpack(args))
 				else
 					local args = {
-						[1] = tostring(selectedCavern),
-						[2] = tostring(selectedDifficultyCavern),
-						[3] = false,
+						[1] = "Select",
+						[2] = tostring(selectedCavern),
+						[3] = tostring(selectedDifficultyCavern),
 					}
 
 					game:GetService("ReplicatedStorage")
 						:WaitForChild("Remotes")
-						:WaitForChild("ElementalCaverns")
-						:WaitForChild("Select")
-						:InvokeServer(unpack(args))
+						:WaitForChild("Teleporter")
+						:WaitForChild("Interact")
+						:FireServer(unpack(args))
 				end
 				wait(1)
 				local argsTeleporter = {
@@ -2974,7 +3000,7 @@ function autoTraitFunction()
 							Lifetime = 3,
 						})
 						webhookTraitRerollFunction(quirkName, tostring(personagemName))
-						return;
+						return
 					else
 						if quirkName == nil or quirkName == "None" then
 							QuirksRoll:InvokeServer(selectedUnitStr)
@@ -2983,7 +3009,7 @@ function autoTraitFunction()
 						end
 					end
 					webhookTraitRerollFunction(quirkName, tostring(personagemName))
-					break;
+					break
 				end
 			end
 		end
@@ -3148,14 +3174,12 @@ LPH_NO_VIRTUALIZE(function()
 		for _, v in pairs(getgc()) do
 			if typeof(v) == "function" and debug.info(v, "n") == "Place" then
 				local old
-				old = hookfunction(
-					v,
-					function(...)
-						if getgenv().placeAnywhereEnabled then
-							debug.setupvalue(old, 2, true)
-						end
-						return old(...)
-					end)
+				old = hookfunction(v, function(...)
+					if getgenv().placeAnywhereEnabled then
+						debug.setupvalue(old, 2, true)
+					end
+					return old(...)
+				end)
 				break
 			end
 		end
@@ -4316,7 +4340,7 @@ sections.MainSection4:Button({
 })
 
 sections.MainSection26:Header({
-	Name = "Easter Event",
+	Name = "Breach Event",
 })
 sections.MainSection26:Toggle({
 	Name = "Auto Join Breach Act 1",
@@ -4534,7 +4558,7 @@ sections.MainSection31:Header({
 local Dropdown = sections.MainSection31:Dropdown({
 	Name = "Select Elemental Cavern",
 	Search = true,
-	Multi = false,
+	Multi = true,
 	Required = true,
 	Options = { "Water", "Fire", "Nature", "Dark", "Light" },
 	Default = nil,
@@ -4547,7 +4571,7 @@ local Dropdown = sections.MainSection31:Dropdown({
 	Name = "Select Difficulty",
 	Multi = false,
 	Required = true,
-	Options = { "Normal", "Nightmare", "Purgatory" },
+	Options = { "Normal", "Nightmare", "Purgatory", "Insanity" },
 	Default = nil,
 	Callback = function(value)
 		selectedDifficultyCavern = value
@@ -5380,7 +5404,6 @@ sellUnitsToggle = sections.MainSection19:Toggle({
 	end,
 }, "AutoSellUnitToggle")
 
-
 sections.MainSection19:Slider({
 	Name = "Only Sell Farm in Wave",
 	Default = 5,
@@ -5403,7 +5426,6 @@ sellFarmUnitsToggle = sections.MainSection19:Toggle({
 		end
 	end,
 }, "onlysellFarminwaveXToggle")
-
 
 sections.MainSection19:Slider({
 	Name = "Only Leave in Wave",
@@ -5459,7 +5481,7 @@ sections.MainSection19:Slider({
 	DisplayMethod = "Number",
 	Precision = 0,
 	Callback = function(Value)
-		MacLib.Options.selectedMatchXToRestartSlider.Value = Value 
+		MacLib.Options.selectedMatchXToRestartSlider.Value = Value
 	end,
 }, "selectedMatchXToRestartSlider")
 
@@ -5831,7 +5853,7 @@ sections.MainSection22:Button({
 	end,
 })
 
-RecordMacro = sections.MainSection22:Toggle({	
+RecordMacro = sections.MainSection22:Toggle({
 	Name = "Record Macro",
 	Default = false,
 	Callback = function(value)
@@ -5978,7 +6000,7 @@ local player = game.Players.LocalPlayer
 MacLib:LoadConfig(player.Name .. GameConfigName)
 spawn(function()
 	while task.wait() do
-		MacLib:SaveConfig(player.Name .. GameConfigName)	
+		MacLib:SaveConfig(player.Name .. GameConfigName)
 	end
 end)
 
