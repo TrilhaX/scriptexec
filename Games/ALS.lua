@@ -1976,7 +1976,7 @@ end
 
 function autoJoinChallengeFunction()
 	while getgenv().autoJoinChallengeEnabled == true do
-		local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+		local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 		local challenge = workspace:FindFirstChild("TeleporterFolder")
 			and workspace.TeleporterFolder.Challenge.Teleporter.Door
 
@@ -2019,7 +2019,7 @@ end
 function autoJoinStoryFunction()
 	while getgenv().autoJoinStoryEnabled == true do
 		local story = workspace:FindFirstChild("TeleporterFolder") and workspace.TeleporterFolder.Story.Teleporter.Door
-		local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+		local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 		if story then
 			task.wait(tonumber(selectedDelay))
 			local doorCFrame = GetCFrame(story)
@@ -2078,7 +2078,7 @@ end
 
 
 function autoJoinBreachAct2Function()
-	local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+	local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 	task.wait(tonumber(selectedDelay))
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local enterBreach = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Breach"):WaitForChild("Enter")
@@ -2100,7 +2100,7 @@ end
 
 
 function autoJoinBreachesFunction()
-	local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+	local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 	task.wait(tonumber(selectedDelay))
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local enterBreach = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Breach"):WaitForChild("Enter")
@@ -2150,7 +2150,7 @@ end
 
 function autoJoinRaidFunction()
 	while getgenv().autoJoinRaidEnabled == true do
-		local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+		local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 		local raidFolder = workspace:FindFirstChild("TeleporterFolder")
 		if raidFolder and raidFolder:FindFirstChild("Raids") then
 			local door = raidFolder.Raids.Teleporter:FindFirstChild("Door")
@@ -2215,7 +2215,7 @@ end
 
 function joinInfCastleFunction()
 	while getgenv().joinInfCastleEnabled == true do
-		local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+		local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 		task.wait(tonumber(selectedDelay))
 		teleportToNPC("Asta")
 
@@ -2239,7 +2239,7 @@ end
 
 function autoPortalFunction()
 	while getgenv().autoPortalEnabled == true do
-		local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+		local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 		local playerData = game:GetService("ReplicatedStorage")
 			:WaitForChild("Remotes")
 			:WaitForChild("GetPlayerData")
@@ -2462,7 +2462,7 @@ if not sucess then
 end
 
 function autoBossRushFunction()
-	local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+	local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 	while getgenv().autoBossRushEnabled == true do
 		task.wait(tonumber(selectedDelay))
 		local remote = game:GetService("ReplicatedStorage").Remotes:FindFirstChild("Snej")
@@ -2474,7 +2474,7 @@ function autoBossRushFunction()
 end
 
 function autoElementalCavernFunction()
-	local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+	local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 	while getgenv().autoElementalCavernEnabled == true do
 		local raidFolder = workspace:FindFirstChild("TeleporterFolder")
 		if raidFolder and raidFolder:FindFirstChild("ElementalCaverns") then
@@ -2545,7 +2545,7 @@ function checkForToken(tbl, tokenName)
 end
 
 function autoJoinExtremeBoostFunction()
-	local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+	local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 	local retorno =
 		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("GetPlayerData"):InvokeServer(player)
 	while getgenv().autoJoinExtremeBoostEnabled == true do
@@ -2665,7 +2665,7 @@ function selectDebuffs(dungeonEntry, debuffsList)
 end
 
 function autoDungeonFunction()
-	local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+	local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 	local canTeleport = true
 	while getgenv().autoDungeonEnabled == true do
 		task.wait(tonumber(selectedDelay))
@@ -2729,7 +2729,7 @@ function getCardPositionByY(scrollingFrame, card)
 end
 
 function autoSurvivalFunction()
-	local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+	local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 	local canTeleport = true
 	while getgenv().autoSurvivalEnabled do
 		task.wait(tonumber(selectedDelay))
@@ -2876,7 +2876,7 @@ function autoSurvivalFunction()
 end
 
 function autoJoinLegendFunction()
-	local selectedDelay = MacLib.Options.SelectedDelayToJoinGamemodes.Value
+	local selectedDelay = MacLib.Options.selectedDelayToJoinInGamemodes.Value
 	while getgenv().autoJoinLegendEnabled == true do
 		task.wait(tonumber(selectedDelay))
 		local door = workspace:FindFirstChild("TeleporterFolder") and workspace.TeleporterFolder.Story.Teleporter.Door
