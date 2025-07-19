@@ -2600,9 +2600,9 @@ function autoJoinBreachesFunction()
 	end
 end
 
-function autoCollectEggsFunction()
+function autoCollectChestsFunction()
 	task.wait(2)
-	local Map = workspace:WaitForChild("Map", 30)
+	local Map = workspace:WaitForChild("Map", 1)
 	local lp = game:GetService("Players").LocalPlayer
 	local char = lp.Character or lp.CharacterAdded:Wait()
 	local hrp = char:WaitForChild("HumanoidRootPart")
@@ -2610,12 +2610,12 @@ function autoCollectEggsFunction()
 		return
 	end
 	local function fireProximityPrompts()
-		for _, egg in ipairs(workspace:GetChildren()) do
-			local num = tonumber(egg.Name)
-			if num and egg:IsA("Model") then
-				local prompt = egg:FindFirstChildWhichIsA("ProximityPrompt", true)
+		for _, chest in ipairs(workspace:GetChildren()) do
+			local num = tonumber(chest.Name)
+			if num and chest:IsA("Model") then
+				local prompt = chest:FindFirstChildWhichIsA("ProximityPrompt", true)
 				if prompt then
-					hrp.CFrame = egg:FindFirstChild("HumanoidRootPart").CFrame
+					hrp.CFrame = chest:FindFirstChild("HumanoidRootPart").CFrame
 					fireproximityprompt(prompt)
 				end
 			end
@@ -5126,11 +5126,11 @@ sections.MainSection26:Toggle({
 }, "AutoJoinBreaches")
 
 sections.MainSection26:Toggle({
-	Name = "Auto Collect Eggs",
+	Name = "Auto Collect Chests",
 	Default = false,
 	Callback = function(value)
 		if value then
-			autoCollectEggsFunction()
+			autoCollectChestsFunction()
 		end
 	end,
 }, "AutoJoinBreaches")
