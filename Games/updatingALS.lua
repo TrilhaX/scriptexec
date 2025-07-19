@@ -2489,14 +2489,14 @@ function autoJoinSharkmanBreachFunction()
 	task.wait(1)
 	local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local lobbyFolder = workspace:WaitForChild("Lobby", 60)
+	local lobbyFolder = workspace:WaitForChild("Lobby", 1)
 	local enterBreach = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Breach"):WaitForChild("Enter")
 
 	if not lobbyFolder then
 		return
 	end
 
-	local breachesFolder = lobbyFolder:WaitForChild("Breaches", 60)
+	local breachesFolder = lobbyFolder:WaitForChild("Breaches", 1)
 	if not breachesFolder then
 		return
 	end
@@ -2511,6 +2511,7 @@ function autoJoinSharkmanBreachFunction()
 				if breachPart:IsA("BasePart") and #breachPart:GetChildren() > 0 then
 					if breachPart.Color == Color3.fromRGB(34, 236, 255) then
 						task.wait(1)
+
 						enterBreach:FireServer(breachPart)
 						hrp.CFrame = breachPart.CFrame + Vector3.new(0, 5, 0)
 						task.wait(0.5)
@@ -5050,7 +5051,7 @@ sections.MainSection4:Button({
 })
 
 sections.MainSection26:Header({
-	Name = "Easter Event",
+	Name = "Breach Event",
 })
 
 sections.MainSection26:Toggle({
@@ -5064,7 +5065,7 @@ sections.MainSection26:Toggle({
 }, "AutoJoinBreachAct1")
 
 sections.MainSection26:Toggle({
-	Name = "Auto Join Breach Act 2",
+	Name = "Auto Join Sharkman Breach",
 	Default = false,
 	Callback = function(value)
 		if value then
@@ -7414,15 +7415,16 @@ sections.MainSection25:Toggle({
 
 sections.MainSection25:Slider({
 	Name = "Change UI Size",
-	Default = 1,
+	Default = 0.8,
 	Minimum = 0.5,
 	Maximum = 1.5,
-	DisplayMethod = "Number",
+	Increment = 0.05,
+	DisplayMethod = "Round",
 	Precision = 1,
-	Callback = function(Value)
-		MacLib:changeUISize(Value)
+	Callback = function(scale)
+		resizeFrames(scale)
 	end,
-}, "ChangeUISizeSlider")
+}, "changeUISize")
 
 Window.onUnloaded(function() end)
 tabs.Main:Select()
