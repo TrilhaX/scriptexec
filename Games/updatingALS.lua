@@ -467,8 +467,8 @@ function webhookFunction()
 					local duskPearl = retorno.ItemData.DuskPearl
 					local amountDuskPearl = 0
 					local amountPearl = 0
-                    local corals = retorno.SummerCorals or 0
-                    local treasure = retorno.SummerTreasure or 0
+					local corals = retorno.SummerCorals or 0
+					local treasure = retorno.SummerTreasure or 0
 					if duskPearl ~= nil then
 						amountDuskPearl = duskPearl.Amount
 					end
@@ -683,8 +683,8 @@ function webhookFunction()
 												.. "<:godlybossrush:1360300746691575909> Titan Rush Tokens: %s\n"
 												.. "<:Pearl:1361859005944696902> Pearl: %s\n"
 												.. "<:DuskPearl:1361858992233644082> Dusk Pearl: %s\n"
-                                                .. "<:SummerCoral:1395937400617963683> Red Coral: %s\n"
-                                                .. "<:SummerTreasure:1395936937520402503> Pirate Treasure: %s",
+												.. "<:SummerCoral:1395937400617963683> Red Coral: %s\n"
+												.. "<:SummerTreasure:1395936937520402503> Pirate Treasure: %s",
 											AddComma(emeralds),
 											AddComma(jewels),
 											AddComma(rerolls),
@@ -1697,11 +1697,12 @@ function autoUniversalSkillFunction()
 			elseif tonumber(waveValue) == tonumber(selectedWave) then
 				for i, v in pairs(workspace.Towers:GetChildren()) do
 					local ohInstance1 = v
-                    local skills = game:GetService("ReplicatedStorage"):FindFirstChild("UnitVFX"):FindFirstChild("Abilities")
-                    for allSkills, skill in pairs(skills:GetChildren())do
+					local skills =
+						game:GetService("ReplicatedStorage"):FindFirstChild("UnitVFX"):FindFirstChild("Abilities")
+					for allSkills, skill in pairs(skills:GetChildren()) do
 						game:GetService("ReplicatedStorage").Remotes.Ability:InvokeServer(ohInstance1, allSkills)
-                        wait(.1)
-                    end
+						wait(0.1)
+					end
 				end
 			end
 		end
@@ -2476,12 +2477,49 @@ function autoJoinStoryFunction()
 	end
 end
 
-function autoJoinBreachAct1Function()
+function autoJoinShinjukuBreachFunction()
 	task.wait(getgenv().selectedDelay)
+    task.wait(1)
+	local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local enterBattle = ReplicatedStorage:WaitForChild("Events"):WaitForChild("Easter2025"):WaitForChild("EnterBattle")
-	task.wait(1)
-	enterBattle:FireServer()
+	local lobbyFolder = workspace:WaitForChild("Lobby", 1)
+	local enterBreach = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Breach"):WaitForChild("Enter")
+
+	if not lobbyFolder then
+		return
+	end
+
+	local breachesFolder = lobbyFolder:WaitForChild("Breaches", 1)
+	if not breachesFolder then
+		return
+	end
+
+	while true do
+		local lp = Players.LocalPlayer
+		local char = lp.Character or lp.CharacterAdded:Wait()
+		local hrp = char:WaitForChild("HumanoidRootPart")
+
+		if hrp then
+			for _, breachPart in ipairs(breachesFolder:GetChildren()) do
+				if breachPart:IsA("BasePart") and #breachPart:GetChildren() > 0 then
+					local c = breachPart.Color
+					if
+						math.abs(c.R - 1) < 0.01
+						and math.abs(c.G - 0.235294) < 0.01
+						and math.abs(c.B - 0.133333) < 0.01
+					then
+						task.wait(1)
+						enterBreach:FireServer(breachPart)
+						hrp.CFrame = breachPart.CFrame + Vector3.new(0, 5, 0)
+						task.wait(0.5)
+						break
+					end
+				end
+				task.wait(0.1)
+			end
+		end
+	end
+    task.wait(5)
 end
 
 function autoJoinSharkmanBreachFunction()
@@ -2509,9 +2547,13 @@ function autoJoinSharkmanBreachFunction()
 		if hrp then
 			for _, breachPart in ipairs(breachesFolder:GetChildren()) do
 				if breachPart:IsA("BasePart") and #breachPart:GetChildren() > 0 then
-					if breachPart.Color == Color3.fromRGB(34, 236, 255) then
+					local c = breachPart.Color
+					if
+						math.abs(c.R - 0.639216) < 0.01
+						and math.abs(c.G - 0.635294) < 0.01
+						and math.abs(c.B - 0.647059) < 0.01
+					then
 						task.wait(1)
-
 						enterBreach:FireServer(breachPart)
 						hrp.CFrame = breachPart.CFrame + Vector3.new(0, 5, 0)
 						task.wait(0.5)
@@ -2522,7 +2564,6 @@ function autoJoinSharkmanBreachFunction()
 			end
 		end
 	end
-
 	task.wait(5)
 end
 
@@ -5055,14 +5096,14 @@ sections.MainSection26:Header({
 })
 
 sections.MainSection26:Toggle({
-	Name = "Auto Join Breach Act 1",
+	Name = "Auto Join Shinjuku Breach",
 	Default = false,
 	Callback = function(value)
 		if value then
-			autoJoinBreachAct1Function()
+			autoJoinShinjukuBreachFunction()
 		end
 	end,
-}, "AutoJoinBreachAct1")
+}, "AutoJoinShinjukuBreach")
 
 sections.MainSection26:Toggle({
 	Name = "Auto Join Sharkman Breach",
@@ -5072,7 +5113,7 @@ sections.MainSection26:Toggle({
 			autoJoinSharkmanBreachFunction()
 		end
 	end,
-}, "AutoJoinBreachAct2")
+}, "AutoJoinSharkmanBreach")
 
 sections.MainSection26:Toggle({
 	Name = "Auto Join Breaches",
