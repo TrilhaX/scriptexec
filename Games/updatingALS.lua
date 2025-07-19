@@ -2,8 +2,10 @@ if game.GameId ~= 4509896324 then
 	return
 end
 
-if getgenv().executedEnabled == true then return warn("Cannot Run the script more than 1 time") end;
-getgenv().executedEnabled = true;
+if getgenv().executedEnabled == "A" then
+	return warn("Cannot Run the script more than 1 time")
+end
+getgenv().executedEnabled = true
 repeat
 	task.wait()
 until game:IsLoaded()
@@ -197,7 +199,7 @@ task.spawn(function()
 	local FusionPackage = game:GetService("ReplicatedStorage").FusionPackage
 	local v_u_2 = require(FusionPackage.Fusion)
 	local v_u_11 = require(game:GetService("ReplicatedStorage").Modules.ReplicaHolder.State)
-	local l_scoped_0 = v_u_2.scoped
+	local l_scoped_0 = v_u_2:FindFirstChild("scoped")
 	Scoped = l_scoped_0(v_u_2, v_u_11)
 end)
 
@@ -302,21 +304,21 @@ end
 
 local teleportQueued
 game.Players.LocalPlayer.OnTeleport:Connect(function(State)
-    if
-        LPH_OBFUSCATED
-        and (State == Enum.TeleportState.Started or State == Enum.TeleportState.InProgress)
-        and not teleportQueued
-    then
-        teleportQueued = true
-        getgenv().executedEnabled = false;
-        queue_on_teleport(([[         
+	if
+		LPH_OBFUSCATED
+		and (State == Enum.TeleportState.Started or State == Enum.TeleportState.InProgress)
+		and not teleportQueued
+	then
+		teleportQueued = true
+		getgenv().executedEnabled = false
+		queue_on_teleport(([[         
                 repeat task.wait() until game:IsLoaded()
                 task.wait(5)
                 if (executedEnabled) then return end
                 script_key="%s";
                 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/40d75f5df50d851207c664ea09c75938.lua"))()
         ]]):format(tostring(rawget(getfenv(), "script_key"))))
-    end
+	end
 end)
 
 function firebutton(Button, method)
@@ -465,6 +467,8 @@ function webhookFunction()
 					local duskPearl = retorno.ItemData.DuskPearl
 					local amountDuskPearl = 0
 					local amountPearl = 0
+                    local corals = retorno.SummerCorals or 0
+                    local treasure = retorno.SummerTreasure or 0
 					if duskPearl ~= nil then
 						amountDuskPearl = duskPearl.Amount
 					end
@@ -678,7 +682,9 @@ function webhookFunction()
 												.. "<:titanbossrush:1360300733282517134> Boss Rush Tokens: %s\n"
 												.. "<:godlybossrush:1360300746691575909> Titan Rush Tokens: %s\n"
 												.. "<:Pearl:1361859005944696902> Pearl: %s\n"
-												.. "<:DuskPearl:1361858992233644082> Dusk Pearl: %s\n",
+												.. "<:DuskPearl:1361858992233644082> Dusk Pearl: %s\n"
+                                                .. "<:SummerCoral:1395937400617963683> Red Coral: %s\n"
+                                                .. "<:SummerTreasure:1395936937520402503> Pirate Treasure: %s",
 											AddComma(emeralds),
 											AddComma(jewels),
 											AddComma(rerolls),
@@ -985,17 +991,20 @@ function autoVolcanoFunction()
 	end
 end
 
-
 function autoAntiZoneFunction()
-    while getgenv().autoAntiZoneEnabled and task.wait(0.1) do
-        local character = game.Players.LocalPlayer.Character
-        if not character then continue end
-        
-        local zone = workspace.EffectZones:FindFirstChild("ZoneHitbox")
-        if not zone then continue end
+	while getgenv().autoAntiZoneEnabled and task.wait(0.1) do
+		local character = game.Players.LocalPlayer.Character
+		if not character then
+			continue
+		end
 
-        character:PivotTo(zone.CFrame)
-    end
+		local zone = workspace.EffectZones:FindFirstChild("ZoneHitbox")
+		if not zone then
+			continue
+		end
+
+		character:PivotTo(zone.CFrame)
+	end
 end
 
 function autoAntiOrbFunction()
@@ -1034,21 +1043,36 @@ function autoAntiOrbFunction()
 end
 
 function startFrameFind()
-	local bottom = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Bottom")
-	local frameCount = 0
+	local player = game:GetService("Players").LocalPlayer
+	local bottom = player:WaitForChild("PlayerGui"):FindFirstChild("Bottom")
 
 	if bottom then
-		local bottomGui = bottom:FindFirstChild("Frame")
-		for i, v in pairs(bottomGui:GetChildren()) do
-			if v.Name == "Frame" then
-				frameCount = frameCount + 1
-			end
-		end
+		local bottomFrame = bottom:FindFirstChild("Frame")
+		if bottomFrame then
+			local found = false
 
-		if frameCount == 3 then
-			return false
-		else
-			return true
+			for _, childFrame in ipairs(bottomFrame:GetChildren()) do
+				if childFrame:IsA("Frame") and childFrame.Name == "Frame" then
+					local count = 0
+
+					for _, subChild in ipairs(childFrame:GetChildren()) do
+						if subChild:IsA("Frame") and subChild.Name == "Frame" then
+							count += 1
+						end
+					end
+
+					if count == 3 then
+						found = true
+						break
+					end
+				end
+			end
+
+			if found then
+				return false
+			else
+				return true
+			end
 		end
 	end
 end
@@ -1673,9 +1697,11 @@ function autoUniversalSkillFunction()
 			elseif tonumber(waveValue) == tonumber(selectedWave) then
 				for i, v in pairs(workspace.Towers:GetChildren()) do
 					local ohInstance1 = v
-					for fafa = 1, 4 do
-						game:GetService("ReplicatedStorage").Remotes.Ability:InvokeServer(ohInstance1, fafa)
-					end
+                    local skills = game:GetService("ReplicatedStorage"):FindFirstChild("UnitVFX"):FindFirstChild("Abilities")
+                    for allSkills, skill in pairs(skills:GetChildren())do
+						game:GetService("ReplicatedStorage").Remotes.Ability:InvokeServer(ohInstance1, allSkills)
+                        wait(.1)
+                    end
 				end
 			end
 		end
@@ -1915,12 +1941,13 @@ function autoIdolFunction()
 			local remoteIdol = game:GetService("ReplicatedStorage").Remotes:FindFirstChild("Ability")
 			if IdolInMap and remoteIdol and IdolInMap.Upgrade.Value == 6 then
 				local ohInstance1 = workspace.Towers.AiHoshinoEvo
-				local ohNumber2 = 1
+				local ohNumber2 = "Concert"
 				remoteIdol:InvokeServer(ohInstance1, ohNumber2)
 				task.wait(10)
 			end
 		end
 	end
+
 	task.wait()
 end
 
@@ -1933,7 +1960,7 @@ function autoGojoTSFunction()
 			local remoteGojo = game:GetService("ReplicatedStorage").Remotes:FindFirstChild("Ability")
 			if GojoInMap and remoteGojo then
 				local ohInstance1 = workspace.Towers.GojoEvo2EZA
-				local ohNumber2 = 1
+				local ohNumber2 = "Unlimited Void"
 				remoteGojo:InvokeServer(ohInstance1, ohNumber2)
 				task.wait(10)
 			end
@@ -1953,7 +1980,7 @@ function autoPucciResetFunction()
 			local remotePucci = game:GetService("ReplicatedStorage").Remotes:FindFirstChild("Ability")
 			if PucciInMap and remotePucci and PucciInMap.Upgrade.Value >= 10 then
 				local ohInstance1 = workspace.Towers["Pucci Made In Heave"]
-				local ohNumber2 = 1
+				local ohNumber2 = "Reset The Universe"
 				remotePucci:InvokeServer(ohInstance1, ohNumber2)
 				task.wait(1)
 				break
@@ -2457,7 +2484,7 @@ function autoJoinBreachAct1Function()
 	enterBattle:FireServer()
 end
 
-function autoJoinBreachAct2Function()
+function autoJoinSharkmanBreachFunction()
 	task.wait(getgenv().selectedDelay)
 	task.wait(1)
 	local Players = game:GetService("Players")
@@ -2468,29 +2495,33 @@ function autoJoinBreachAct2Function()
 	if not lobbyFolder then
 		return
 	end
+
 	local breachesFolder = lobbyFolder:WaitForChild("Breaches", 60)
 	if not breachesFolder then
 		return
 	end
 
 	while true do
-		local lp = game:GetService("Players").LocalPlayer
+		local lp = Players.LocalPlayer
 		local char = lp.Character or lp.CharacterAdded:Wait()
 		local hrp = char:WaitForChild("HumanoidRootPart")
 
 		if hrp then
 			for _, breachPart in ipairs(breachesFolder:GetChildren()) do
 				if breachPart:IsA("BasePart") and #breachPart:GetChildren() > 0 then
-					task.wait(1)
-					enterBreach:FireServer(breachPart)
-					hrp.CFrame = breachPart.CFrame + Vector3.new(0, 5, 0)
-					task.wait(0.5)
-					break
+					if breachPart.Color == Color3.fromRGB(34, 236, 255) then
+						task.wait(1)
+						enterBreach:FireServer(breachPart)
+						hrp.CFrame = breachPart.CFrame + Vector3.new(0, 5, 0)
+						task.wait(0.5)
+						break
+					end
 				end
 				task.wait(0.1)
 			end
 		end
 	end
+
 	task.wait(5)
 end
 
@@ -5021,6 +5052,7 @@ sections.MainSection4:Button({
 sections.MainSection26:Header({
 	Name = "Easter Event",
 })
+
 sections.MainSection26:Toggle({
 	Name = "Auto Join Breach Act 1",
 	Default = false,
@@ -5036,7 +5068,7 @@ sections.MainSection26:Toggle({
 	Default = false,
 	Callback = function(value)
 		if value then
-			autoJoinBreachAct2Function()
+			autoJoinSharkmanBreachFunction()
 		end
 	end,
 }, "AutoJoinBreachAct2")
@@ -5835,9 +5867,9 @@ sections.MainSection16:Toggle({
 	Callback = function(value)
 		getgenv().autoAntiZoneEnabled = value
 		if value then
-		autoAntiZoneFunction()
-	end
-end,
+			autoAntiZoneFunction()
+		end
+	end,
 }, "autoAntiZoneToggle")
 
 sections.MainSection16:Toggle({
@@ -7393,7 +7425,6 @@ sections.MainSection25:Slider({
 }, "ChangeUISizeSlider")
 
 Window.onUnloaded(function() end)
-
 tabs.Main:Select()
 
 local GameConfigName = "_ALS_"
