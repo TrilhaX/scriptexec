@@ -6,6 +6,7 @@ local Games = {
 	["AnimeRealms"] = { 84188796720288, 100222912269336 },
 	["AA"] = { 8304191830, 8349889591, 14229762361, 14918509670, 14229839966, 3183403065 },
 	["JJI"] = { 10450270085, 16379688837, 119359147980471, 78904562518018 , 3808223175, 16379684339 }
+	["Anime Ghosts"] = { 101640913672688 }
 }
 
 local function IsPlaceAllowed(PlaceId)
@@ -188,5 +189,6 @@ local function LoadGame(GameId)
 		LoaderGui:Destroy()
 	end
 end
+
 
 LoadGame(game.PlaceId)
