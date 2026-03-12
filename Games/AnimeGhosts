@@ -755,6 +755,28 @@ function autoQuestFunction()
 	end
 end
 
+function autoClaimQuestFunction()
+	while getgenv().autoClaimQuestEnabled do
+		local args = {
+			{
+				{
+					"QuestSystem",
+					"Check",
+					"Main",
+					100,
+					n = 4,
+				},
+				"\002",
+			},
+		}
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
+		task.wait(5)
+	end
+end
+
 function autoRollEggFunction()
 	while getgenv().autoRollEggEnabled do
 		local eggData = getgenv().selectedEgg
@@ -1165,6 +1187,17 @@ sections.MainSection1:Toggle({
 		end
 	end,
 }, "AutoQuestToggle")
+
+sections.MainSection1:Toggle({
+	Name = "Auto Claim Quest",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoClaimQuestEnabled = value
+		if value == true then
+			autoClaimQuestFunction()
+		end
+	end,
+}, "AutoClaimQuestToggle")
 
 local DropdownMapRaidSelect = sections.MainSection2:Dropdown({
 	Name = "Select Map",
