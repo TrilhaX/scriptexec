@@ -86,7 +86,7 @@ imageLogo.BorderColor3 = Color3.new(0, 0, 0)
 imageLogo.BorderSizePixel = 0
 imageLogo.Position = UDim2.new(0.5, 0, 0.35, 0)
 imageLogo.Size = UDim2.new(0, 300, 0, 250)
-imageLogo.Image = "rbxassetid://127947035573463"
+imageLogo.Image = "rbxassetid://100199291949935"
 
 textLoader.Name = "textLoader"
 textLoader.Parent = backgroundFrame
@@ -192,3 +192,4 @@ end
 
 
 LoadGame(game.PlaceId)
+
