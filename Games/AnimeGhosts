@@ -25,6 +25,12 @@ local Window = MacLib:Window({
 	AcrylicBlur = true,
 })
 
+local Library = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
+
+repeat
+	task.wait()
+until Library.PlayerData
+
 function findGui(parent, name)
 	return parent:FindFirstChild(name, true)
 end
@@ -87,6 +93,10 @@ local pcSize2 = Vector2.new(850, 650)
 local mobileSize2 = Vector2.new(750, 500)
 local speed = 1000
 selectedsAlienUpgrades = {}
+selectedPassives = {}
+selectedEnchants = {}
+selectedWarriorSell = {}
+selectedSwordSell = {}
 
 function isMobile()
 	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
@@ -340,7 +350,7 @@ function autoRollAvatarFunction()
 				:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 				:WaitForChild("dataRemoteEvent")
 				:FireServer(unpack(args))
-			task.wait(1)
+			task.wait(2)
 			local banner = workspace._MAP.Lobby.Interactions:GetChildren()[6].Rig
 			local bannerCFrame = GetCFrame(banner, 0, 0)
 			game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
@@ -429,7 +439,7 @@ function autoRollSwordFunction()
 				:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 				:WaitForChild("dataRemoteEvent")
 				:FireServer(unpack(args))
-			task.wait(1)
+			task.wait(2)
 			local banner = workspace._MAP.Lobby.Interactions.Banner.Rig
 			local bannerCFrame = GetCFrame(banner, 0, 0)
 			game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
@@ -519,7 +529,7 @@ function autoRollWarriorsFunction()
 				:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 				:WaitForChild("dataRemoteEvent")
 				:FireServer(unpack(args))
-			task.wait(1)
+			task.wait(2)
 			local banner = workspace._MAP["1"].Interactions.Banner.Range
 			local bannerCFrame = GetCFrame(banner, 0, 0)
 			game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
@@ -623,7 +633,7 @@ function autoRollBloodlineFunction()
 					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 					:WaitForChild("dataRemoteEvent")
 					:FireServer(unpack(args))
-				task.wait(1)
+				task.wait(2)
 				local bannerCFrame = GetCFrame(banner, 0, 0)
 				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
 				teleported = true
@@ -727,7 +737,7 @@ function autoRollTitaSerumFunction()
 					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 					:WaitForChild("dataRemoteEvent")
 					:FireServer(unpack(args))
-				task.wait(1)
+				task.wait(2)
 				local bannerCFrame = GetCFrame(banner, 0, 0)
 				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
 				teleported = true
@@ -829,7 +839,7 @@ function autoRollPossesionsFunction()
 					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 					:WaitForChild("dataRemoteEvent")
 					:FireServer(unpack(args))
-				task.wait(1)
+				task.wait(2)
 				local bannerCFrame = GetCFrame(banner, 0, 0)
 				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
 				teleported = true
@@ -932,7 +942,7 @@ function autoRollPsychicPowersFunction()
 					:WaitForChild("dataRemoteEvent")
 					:FireServer(unpack(args))
 
-				task.wait(1)
+				task.wait(2)
 				local bannerCFrame = GetCFrame(banner, 0, 0)
 
 				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
@@ -1316,7 +1326,7 @@ function autoRollEggFunction()
 				:FireServer(unpack(args))
 		end
 
-		task.wait(0.1)
+		task.wait(1)
 	end
 end
 
@@ -1471,6 +1481,21 @@ function autoGetTimeRewardsFunction()
 				:WaitForChild("dataRemoteEvent")
 				:FireServer(unpack(args))
 		end
+		local args = {
+			{
+				{
+					"TimeRewardSystem",
+					"Reset",
+					"General",
+					n = 3,
+				},
+				"\002",
+			},
+		}
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
 		task.wait(120)
 	end
 end
@@ -1607,6 +1632,376 @@ function autoGetAchievementsFunction()
 	end
 end
 
+function hasDesiredPassive(currentPassive)
+	for passive, _ in pairs(selectedPassives) do
+		if passive == currentPassive then
+			return true
+		end
+	end
+	return false
+end
+
+function hasDesiredEnchant(currentEnchant)
+	for enchant, _ in pairs(selectedEnchants) do
+		if enchant == currentEnchant then
+			return true
+		end
+	end
+	return false
+end
+
+function autoPassiveUnitFunction()
+	local teleported = false
+	while getgenv().autoPassiveUnitEnabled do
+		if not teleported then
+			local args = {
+				{
+					{
+						"TeleportSystem",
+						"To",
+						"Lobby",
+						n = 3,
+					},
+					"\002",
+				},
+			}
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+				:WaitForChild("dataRemoteEvent")
+				:FireServer(unpack(args))
+			task.wait(2)
+			local banner = workspace._MAP.Lobby.Interactions:GetChildren()[3].Rig
+			local bannerCFrame = GetCFrame(banner, 0, 0)
+			game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
+			teleported = true
+		end
+		local PlayerData = Library.PlayerData
+		local selectedPet = getgenv().selectedPassiveUnit
+
+		if not PlayerData or not PlayerData.Pets then
+			task.wait()
+			continue
+		end
+
+		local petData = PlayerData.Pets[selectedPet]
+
+		if not petData then
+			task.wait()
+			continue
+		end
+
+		local currentPassive = petData.Buffs and petData.Buffs.Passive
+		if currentPassive and hasDesiredPassive(currentPassive) then
+			getgenv().autoPassiveUnitEnabled = false
+			break
+		end
+
+		local args = {
+			{
+				{
+					"GachaSystem",
+					"Spin",
+					"Passive",
+					"Normal",
+					{},
+					tostring(selectedPet),
+					n = 6,
+				},
+				"\002",
+			},
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
+
+		task.wait(1)
+	end
+end
+
+function autoEnchantSwordFunction()
+	local teleported = false
+	while getgenv().autoEnchantSwordEnabled do
+		local player = game.Players.LocalPlayer
+		if not player.Character or not player.Character.PrimaryPart then
+			task.wait(0.5)
+			continue
+		end
+
+		if not teleported then
+			local args = {
+				{
+					{
+						"TeleportSystem",
+						"To",
+						"Lobby",
+						n = 3,
+					},
+					"\002",
+				},
+			}
+
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+				:WaitForChild("dataRemoteEvent")
+				:FireServer(unpack(args))
+			wait(2)
+			local banner = workspace._MAP.Lobby.Interactions.GachaSelect.Rig
+			if banner then
+				local bannerCFrame = GetCFrame(banner, 0, 0)
+				player.Character:SetPrimaryPartCFrame(bannerCFrame)
+			end
+
+			teleported = true
+		end
+
+		local Library = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
+		local PlayerData = Library.PlayerData
+		local selectedSword = getgenv().selectedSword
+
+		if not PlayerData or not PlayerData.Weapons then
+			task.wait(1)
+			continue
+		end
+
+		local swordData = PlayerData.Weapons[selectedSword]
+		if not swordData then
+			task.wait(1)
+			continue
+		end
+
+		local currentEnchant = swordData.Buffs and swordData.Buffs.Enchantment
+
+		if currentEnchant and hasDesiredEnchant(currentEnchant) then
+			break
+		end
+
+		local enchantArgs = {
+			{
+				{
+					"GachaSystem",
+					"Spin",
+					"Enchantment",
+					"Normal",
+					{
+						TrueQuincy = true,
+						Yeager = true,
+						BlackHaki = true,
+						Electric6 = true,
+						Shirayuki = true,
+						DarkFruit = true,
+						SRank = true,
+						Flame = true,
+						Singularity = true,
+						Blessed6 = true,
+						Sonic = true,
+						Ruin5 = true,
+						Haunt5 = true,
+						EvilEye = true,
+						Visored = true,
+						Blessing6 = true,
+						Jupiter = true,
+						AttackSerum = true,
+						Mythical = true,
+						Secret = true,
+						Earth = true,
+						DragonFruit = true,
+						PhoenixFruit = true,
+						OperationFruit = true,
+						Electric5 = true,
+						ColossalSerum = true,
+						Blessed5 = true,
+						TurboGranny = true,
+						Haunt6 = true,
+						ForceField = true,
+						Ruin6 = true,
+						Afterlife = true,
+						National = true,
+						Holy = true,
+						Nozarashi = true,
+						RedHaki = true,
+						Blessing5 = true,
+						Ackerman = true,
+						Blessing = true,
+						Phantom = true,
+						Mist = true,
+					},
+					tostring(selectedSword),
+					n = 6,
+				},
+				"\002",
+			},
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(enchantArgs))
+
+		task.wait(1)
+	end
+end
+
+function checkSelectedSwordUUID()
+	local PlayerData = Library.PlayerData
+	local selectedSword = getgenv().selectedSwordSell
+
+	if not PlayerData or not PlayerData.Weapons then
+		return
+	end
+
+	for uuid, weapon in pairs(PlayerData.Weapons) do
+		if weapon.Id == selectedSword then
+			print("UUID da espada encontrada:", uuid)
+		end
+	end
+end
+
+function autoSellSwordFunction()
+	while getgenv().autoSellSwordEnabled do
+		local PlayerData = Library.PlayerData
+		local selectedSwords = getgenv().selectedSwordSell
+
+		if not PlayerData or not PlayerData.Weapons then
+			task.wait(1)
+			continue
+		end
+
+		for uuid, weapon in pairs(PlayerData.Weapons) do
+			if selectedSwords and selectedSwords[weapon.Id] then
+				print("Vendendo espada:", weapon.Id, uuid)
+
+				local args = {
+					{
+						{
+							"WeaponSystem",
+							"Delete",
+							'["' .. uuid .. '"]',
+							n = 3,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+			end
+		end
+
+		task.wait(1)
+	end
+end
+
+function checkSelectedWarriorUUID()
+	local PlayerData = Library.PlayerData
+	local selectedWarriorSell2 = selectedWarriorSell
+
+	if not PlayerData or not PlayerData.Pets then
+		return
+	end
+
+	for uuid, pet in pairs(PlayerData.Pets) do
+		if pet.Id == selectedWarriorSell2 then
+			print("UUID do warrior encontrado:", uuid)
+		end
+	end
+end
+
+function autoSellWarriorsFunction()
+	while getgenv().autoSellWarriorEnabled do
+		local PlayerData = Library.PlayerData
+		local selectedWarriorSell2 = selectedWarriorSell
+
+		if not PlayerData or not PlayerData.Warriors then
+			task.wait(1)
+			continue
+		end
+
+		local soldSomething = false
+
+		for uuid, warrior in pairs(PlayerData.Warriors) do
+			if selectedWarriorSell2 and selectedWarriorSell2[warrior.Id] then
+				local jsonUuid = '["' .. uuid .. '"]'
+
+				local args = {
+					{
+						{
+							"WarriorSystem",
+							"Delete",
+							jsonUuid,
+							n = 3,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+
+				soldSomething = true
+				task.wait(0.5)
+			end
+		end
+
+		if not soldSomething then
+			task.wait(1)
+		end
+	end
+end
+
+function equipBestAvatarFunction()
+	while getgenv().equipBestAvatarEnabled do
+		local PlayerAvatars = {
+			Sasuke = { Buffs = {}, XP = 0, Level = 1 },
+			Emilia = { XP = 232, Buffs = {}, Equipped = true, Level = 16 },
+			Ace = { Buffs = {}, XP = 0, Level = 1 },
+		}
+
+		local function getBestAvatar(avatars)
+			local bestName = nil
+			local bestLevel = -1
+			local bestXP = -1
+
+			for name, data in pairs(avatars) do
+				local level = data.Level or 0
+				local xp = data.XP or 0
+
+				if level > bestLevel or (level == bestLevel and xp > bestXP) then
+					bestName = name
+					bestLevel = level
+					bestXP = xp
+				end
+			end
+
+			return bestName, bestLevel, bestXP
+		end
+
+		local name = getBestAvatar(PlayerAvatars)
+		local args = {
+			{
+				{
+					"AvatarSystem",
+					"Equip",
+					tostring(name),
+					n = 3,
+				},
+				"\002",
+			},
+		}
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
+		local interval = equipBestInterval or 1
+		task.wait(interval * 60)
+	end
+end
+
 local ValuesMob = {}
 local added = {}
 local enemiesFolder = workspace._ENEMIES.Client
@@ -1649,6 +2044,106 @@ for name, data in pairs(raidData) do
 	end
 end
 
+local Library = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
+local PlayerData = Library["PlayerData"]
+
+--Sword Enchantments
+local weaponsTable = {}
+local optionsSword = {}
+local swordMap = {}
+local unitsTable = {}
+
+for uuid, weapon in pairs(PlayerData.Weapons) do
+	table.insert(weaponsTable, {
+		Name = weapon.Id,
+		UUID = uuid,
+	})
+end
+
+for _, sword in pairs(weaponsTable) do
+	local text = sword.Name .. " | " .. sword.UUID
+	table.insert(optionsSword, text)
+
+	swordMap[text] = sword.UUID
+end
+
+for uuid, weapon in pairs(PlayerData.Weapons) do
+	table.insert(weaponsTable, {
+		Name = weapon.Id,
+		UUID = uuid,
+	})
+end
+
+local weaponData = require(game:GetService("ReplicatedStorage").Framework.Modules.Data.WeaponData)
+
+local optionsSword2 = {}
+local swordMap2 = {}
+
+for swordName, data in pairs(weaponData) do
+	table.insert(optionsSword2, swordName)
+	swordMap2[swordName] = swordName
+end
+
+--Unit Passive
+local petsTable = {}
+local optionsPets = {}
+local petMap = {}
+
+for uuid, pet in pairs(PlayerData.Pets) do
+	table.insert(petsTable, {
+		Name = pet.Id,
+		UUID = uuid,
+	})
+end
+
+for _, pet in pairs(petsTable) do
+	local text = pet.Name .. " | " .. pet.UUID
+	table.insert(optionsPets, text)
+
+	petMap[text] = pet.UUID
+end
+
+local PassiveData = require(game:GetService("ReplicatedStorage").Framework.Modules.Data.GachaData.Passive)
+local EnchantData = require(game:GetService("ReplicatedStorage").Framework.Modules.Data.GachaData.Enchantment)
+
+local passiveOptions = {}
+local enchantOptions = {}
+
+local passiveList = PassiveData[2] and PassiveData[2].Normal
+local enchantList = EnchantData[2] and EnchantData[2].Normal
+
+if passiveList then
+	for _, data in pairs(passiveList) do
+		if #data.Tiers == 1 then
+			table.insert(passiveOptions, data.Name)
+		else
+			for tier = 1, #data.Tiers do
+				table.insert(passiveOptions, data.Name .. tier)
+			end
+		end
+	end
+end
+
+if enchantList then
+	for _, data in pairs(enchantList) do
+		for tier = 1, #data.Tiers do
+			table.insert(enchantOptions, data.Name .. tier)
+		end
+	end
+end
+
+local WarriorData = require(game:GetService("ReplicatedStorage").Framework.Modules.Data.WarriorData)
+
+local warriorOptions = {}
+local warriorMap = {}
+
+for id, data in pairs(WarriorData) do
+	if type(data) == "table" and data.Name then
+		table.insert(warriorOptions, data.Name)
+		warriorMap[data.Name] = id
+	end
+end
+
 local tabGroups = {
 	TabGroup1 = Window:TabGroup(),
 }
@@ -1657,8 +2152,9 @@ local tabGroups = {
 
 local tabs = {
 	Main = tabGroups.TabGroup1:Tab({ Name = "Main", Image = "rbxassetid://18821914323" }),
-	Rerolls = tabGroups.TabGroup1:Tab({ Name = "Rerolls", Image = "rbxassetid://10734950309" }),
-	TeamSwap = tabGroups.TabGroup1:Tab({ Name = "Team Swap", Image = "rbxassetid://10734950309" }),
+	Rerolls = tabGroups.TabGroup1:Tab({ Name = "Rerolls", Image = "rbxassetid://11570018265" }),
+	Sell = tabGroups.TabGroup1:Tab({ Name = "Sell", Image = "rbxassetid://13555335421" }),
+	TeamSwap = tabGroups.TabGroup1:Tab({ Name = "Team Swap", Image = "rbxassetid://15443966088" }),
 	Settings = tabGroups.TabGroup1:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" }),
 }
 
@@ -1668,6 +2164,7 @@ local sections = {
 	MainSection20 = tabs.Rerolls:Section({ Side = "Left" }),
 	MainSection21 = tabs.Rerolls:Section({ Side = "Right" }),
 	MainSection22 = tabs.Rerolls:Section({ Side = "Left" }),
+	MainSection40 = tabs.Sell:Section({ Side = "Left" }),
 	MainSection80 = tabs.TeamSwap:Section({ Side = "Left" }),
 	MainSection100 = tabs.Settings:Section({ Side = "Left" }),
 	MainSection101 = tabs.Settings:Section({ Side = "Right" }),
@@ -1952,6 +2449,128 @@ sections.MainSection22:Toggle({
 	end,
 }, "AutoUpgradeExchangesUpgradesToggle")
 
+local DropdownSwordSelect = sections.MainSection22:Dropdown({
+	Name = "Select Sword",
+	Search = true,
+	Multi = false,
+	Required = true,
+	Options = optionsSword,
+	Default = nil,
+	Callback = function(value)
+		getgenv().selectedSword = swordMap[value]
+	end,
+}, "dropdownSwordRoll")
+
+local DropdownEnchant = sections.MainSection22:Dropdown({
+	Name = "Select Enchant",
+	Search = true,
+	Multi = true,
+	Required = false,
+	Options = enchantOptions,
+	Default = {},
+	Callback = function(values)
+		selectedEnchants = values
+	end,
+}, "dropdownEnchantStop")
+
+sections.MainSection22:Toggle({
+	Name = "Auto Enchant Sword",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoEnchantSwordEnabled = value
+		if value == true then
+			autoEnchantSwordFunction()
+		end
+	end,
+}, "AutoEnchantSwordToggle")
+
+local DropdownSwordSelect = sections.MainSection22:Dropdown({
+	Name = "Select Unit",
+	Search = true,
+	Multi = false,
+	Required = true,
+	Options = optionsPets,
+	Default = nil,
+	Callback = function(value)
+		getgenv().selectedPassiveUnit = petMap[value]
+	end,
+}, "dropdownUnitPassiveRoll")
+
+local DropdownPassive = sections.MainSection22:Dropdown({
+	Name = "Select Passive",
+	Search = true,
+	Multi = true,
+	Required = false,
+	Options = passiveOptions,
+	Default = {},
+	Callback = function(values)
+		selectedPassives = values
+	end,
+}, "dropdownPassiveStop")
+
+sections.MainSection22:Toggle({
+	Name = "Auto Passive Unit",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoPassiveUnitEnabled = value
+		if value == true then
+			autoPassiveUnitFunction()
+		end
+	end,
+}, "AutoPassiveUnitToggle")
+
+local DropdownSwordSelect = sections.MainSection40:Dropdown({
+	Name = "Select Sword",
+	Search = true,
+	Multi = true,
+	Required = true,
+	Options = optionsSword2,
+	Default = nil,
+	Callback = function(value)
+		selectedSwordSell = swordMap[value]
+	end,
+}, "dropdownSwordSell")
+
+sections.MainSection40:Toggle({
+	Name = "Auto Sell Sword",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoSellSwordEnabled = value
+		if value == true then
+			autoSellSwordFunction()
+		end
+	end,
+}, "AutoSellSwordToggle")
+
+local DropdownWarriorSelect = sections.MainSection40:Dropdown({
+	Name = "Select Warrior",
+	Search = true,
+	Multi = true,
+	Required = true,
+	Options = warriorOptions,
+	Default = nil,
+	Callback = function(values)
+		selectedWarriorSell = {}
+		for name, _ in pairs(values) do
+			local id = warriorMap[name]
+			if id then
+				selectedWarriorSell[id] = true
+			end
+		end
+	end,
+}, "dropdownWarriorSell")
+
+sections.MainSection40:Toggle({
+	Name = "Auto Sell Warrior",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoSellWarriorEnabled = value
+		if value == true then
+			autoSellWarriorsFunction()
+		end
+	end,
+}, "AutoSellWarriorToggle")
+
 local DropdownEggSelect = sections.MainSection80:Dropdown({
 	Name = "Select Team To Farm",
 	Search = true,
@@ -2042,6 +2661,17 @@ sections.MainSection101:Toggle({
 		end
 	end,
 }, "EquipBestWarriorToggle")
+
+sections.MainSection101:Toggle({
+	Name = "Equip Best Avatar",
+	Default = false,
+	Callback = function(value)
+		getgenv().equipBestAvatarEnabled = value
+		if value then
+			equipBestAvatarFunction()
+		end
+	end,
+}, "EquipBestAvatarToggle")
 
 sections.MainSection101:Toggle({
 	Name = "Equip Best Sword",
