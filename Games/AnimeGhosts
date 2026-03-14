@@ -35,6 +35,10 @@ function findGui(parent, name)
 	return parent:FindFirstChild(name, true)
 end
 
+function normalize(str)
+	return str:gsub("%s+", ""):lower()
+end
+
 local globalSettings = {
 	UIBlurToggle = Window:GlobalSetting({
 		Name = "UI Blur",
@@ -415,7 +419,7 @@ function autoRollAvatarFunction()
 			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 			:WaitForChild("dataRemoteEvent")
 			:FireServer(unpack(args))
-		task.wait(1)
+		task.wait()
 	end
 end
 
@@ -505,7 +509,7 @@ function autoRollSwordFunction()
 			:WaitForChild("dataRemoteEvent")
 			:FireServer(unpack(args))
 
-		task.wait(1)
+		task.wait()
 	end
 end
 
@@ -597,7 +601,7 @@ function autoRollWarriorsFunction()
 			:WaitForChild("dataRemoteEvent")
 			:FireServer(unpack(args))
 
-		task.wait(1)
+		task.wait()
 	end
 end
 
@@ -701,7 +705,7 @@ function autoRollBloodlineFunction()
 			:WaitForChild("dataRemoteEvent")
 			:FireServer(unpack(args))
 
-		task.wait(1)
+		task.wait()
 	end
 end
 
@@ -803,7 +807,7 @@ function autoRollTitaSerumFunction()
 			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 			:WaitForChild("dataRemoteEvent")
 			:FireServer(unpack(args))
-		task.wait(1)
+		task.wait()
 	end
 end
 
@@ -905,7 +909,7 @@ function autoRollPossesionsFunction()
 			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 			:WaitForChild("dataRemoteEvent")
 			:FireServer(unpack(args))
-		task.wait(1)
+		task.wait()
 	end
 end
 
@@ -1011,6 +1015,737 @@ function autoRollPsychicPowersFunction()
 			:WaitForChild("dataRemoteEvent")
 			:FireServer(unpack(gachaArgs))
 
+		task.wait()
+	end
+end
+
+function autoRollSoulFoundationFunction()
+	local teleported = false
+	local banner
+	while getgenv().autoRollSoulFoundationEnabled do
+		if not teleported then
+			for _, v in pairs(workspace._MAP["3"].Interactions:GetChildren()) do
+				if v.Name == "Gacha" then
+					local Name = v:GetAttribute("Name")
+					if Name == "Soul Fundation" then
+						banner = v.Rig
+						break
+					end
+				end
+			end
+
+			if banner then
+				local args = {
+					{
+						{
+							"TeleportSystem",
+							"To",
+							3,
+							n = 3,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+
+				task.wait(2)
+				local bannerCFrame = GetCFrame(banner, 0, 0)
+				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
+				teleported = true
+			end
+		end
+
+		local args = {
+			{
+				{
+					"GachaSystem",
+					"Spin",
+					"Soul Fundation",
+					"Normal",
+					{
+						AlphaCore = true,
+						ForceField = true,
+						Phantom = true,
+						BlackHaki = true,
+						Electric6 = true,
+						Shirayuki = true,
+						DarkFruit = true,
+						SRank = true,
+						Flame = true,
+						Singularity = true,
+						Blessed6 = true,
+						Sonic = true,
+						OperationFruit = true,
+						Haunt5 = true,
+						EvilEye = true,
+						Visored = true,
+						N6 = true,
+						Jupiter = true,
+						Ackerman = true,
+						Blessing5 = true,
+						Secret = true,
+						Earth = true,
+						RedHaki = true,
+						Holy = true,
+						DragonFruit = true,
+						Mist = true,
+						PhoenixFruit = true,
+						Ruin6 = true,
+						Yeager = true,
+						ColossalSerum = true,
+						AdaptiveCore = true,
+						TurboGranny = true,
+						Haunt6 = true,
+						TrueQuincy = true,
+						Ruin5 = true,
+						Afterlife = true,
+						N9 = true,
+						Blessed5 = true,
+						Nozarashi = true,
+						Electric5 = true,
+						National = true,
+						Mythical = true,
+						Blessing = true,
+						Blessing6 = true,
+						AttackSerum = true,
+					},
+					n = 5,
+				},
+				"\002",
+			},
+		}
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
+
+		task.wait()
+	end
+end
+
+function autoRollZanpakutoFunction()
+	local teleported = false
+	local banner
+	while getgenv().autoRollZanpakutoEnabled do
+		if not teleported then
+			for _, v in pairs(workspace._MAP["3"].Interactions:GetChildren()) do
+				if v.Name == "Gacha" then
+					local Name = v:GetAttribute("Name")
+					if Name == "Zanpakutos" then
+						banner = v.Rig
+						break
+					end
+				end
+			end
+
+			if banner then
+				local args = {
+					{
+						{
+							"TeleportSystem",
+							"To",
+							3,
+							n = 3,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+
+				task.wait(2)
+				local bannerCFrame = GetCFrame(banner, 0, 0)
+				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
+				teleported = true
+			end
+		end
+
+		local args = {
+			{
+				{
+					"GachaSystem",
+					"Spin",
+					"Zanpakuto",
+					"Normal",
+					{
+						AlphaCore = true,
+						ForceField = true,
+						Phantom = true,
+						BlackHaki = true,
+						Electric6 = true,
+						Shirayuki = true,
+						DarkFruit = true,
+						SRank = true,
+						Flame = true,
+						Singularity = true,
+						Blessed6 = true,
+						Sonic = true,
+						OperationFruit = true,
+						Haunt5 = true,
+						EvilEye = true,
+						Visored = true,
+						N6 = true,
+						Jupiter = true,
+						Ackerman = true,
+						Blessing5 = true,
+						Secret = true,
+						Earth = true,
+						RedHaki = true,
+						Holy = true,
+						DragonFruit = true,
+						Mist = true,
+						PhoenixFruit = true,
+						Ruin6 = true,
+						Yeager = true,
+						ColossalSerum = true,
+						AdaptiveCore = true,
+						TurboGranny = true,
+						Haunt6 = true,
+						TrueQuincy = true,
+						Ruin5 = true,
+						Afterlife = true,
+						N9 = true,
+						Blessed5 = true,
+						Nozarashi = true,
+						Electric5 = true,
+						National = true,
+						Mythical = true,
+						Blessing = true,
+						Blessing6 = true,
+						AttackSerum = true,
+					},
+					n = 5,
+				},
+				"\002",
+			},
+		}
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
+		task.wait()
+	end
+end
+
+function autoRollPowerOfThePlanetsFunction()
+	local teleported = false
+	local banner
+	while getgenv().autoRollPowerOfThePlanetsEnabled do
+		if not teleported then
+			for _, v in pairs(workspace._MAP["3"].Interactions:GetChildren()) do
+				if v.Name == "Gacha" then
+					local Name = v:GetAttribute("Name")
+					if Name == "Power of the Planets" then
+						banner = v.RenjiAbarai
+						break
+					end
+				end
+			end
+
+			if banner then
+				local args = {
+					{
+						{
+							"TeleportSystem",
+							"To",
+							3,
+							n = 3,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+
+				task.wait(2)
+				local bannerCFrame = GetCFrame(banner, 0, 0)
+				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
+				teleported = true
+			end
+		end
+
+		local args = {
+			{
+				{
+					"GachaSystem",
+					"Spin",
+					"Power of the Planet",
+					"Normal",
+					{
+						AlphaCore = true,
+						ForceField = true,
+						Phantom = true,
+						BlackHaki = true,
+						Electric6 = true,
+						Shirayuki = true,
+						DarkFruit = true,
+						SRank = true,
+						Flame = true,
+						Singularity = true,
+						Blessed6 = true,
+						Sonic = true,
+						OperationFruit = true,
+						Haunt5 = true,
+						EvilEye = true,
+						Visored = true,
+						N6 = true,
+						Jupiter = true,
+						Ackerman = true,
+						Blessing5 = true,
+						Secret = true,
+						Earth = true,
+						RedHaki = true,
+						Holy = true,
+						DragonFruit = true,
+						Mist = true,
+						PhoenixFruit = true,
+						Ruin6 = true,
+						Yeager = true,
+						ColossalSerum = true,
+						AdaptiveCore = true,
+						TurboGranny = true,
+						Haunt6 = true,
+						TrueQuincy = true,
+						Ruin5 = true,
+						Afterlife = true,
+						N9 = true,
+						Blessed5 = true,
+						Nozarashi = true,
+						Electric5 = true,
+						National = true,
+						Mythical = true,
+						Blessing = true,
+						Blessing6 = true,
+						AttackSerum = true,
+					},
+					n = 5,
+				},
+				"\002",
+			},
+		}
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
+		task.wait()
+	end
+end
+
+function autoRollTraitFunction()
+	local teleported = false
+	local banner
+
+	while getgenv().autoRollTraitEnabled do
+		if not teleported then
+			for _, v in pairs(workspace._MAP["Lobby"].Interactions:GetChildren()) do
+				if v.Name == "Gacha" then
+					local Name = v:GetAttribute("Name")
+					if Name == "Traits" then
+						banner = v.Rig
+						break
+					end
+				end
+			end
+
+			if banner then
+				local args = {
+					{
+						{
+							"TeleportSystem",
+							"To",
+							"Lobby",
+							n = 3,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+
+				task.wait(2)
+
+				local bannerCFrame = GetCFrame(banner, 0, 0)
+				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
+
+				teleported = true
+			end
+		end
+
+		local args = {
+			{
+				{
+					"GachaSystem",
+					"Spin",
+					"Trait",
+					"Normal",
+					{},
+					n = 5,
+				},
+				"\002",
+			},
+		}
+
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
+
+		task.wait()
+	end
+end
+
+function autoRollMountFunction()
+	local teleported = false
+	local banner
+	while getgenv().autoRollMountEnabled do
+		if not teleported then
+			for _, v in pairs(workspace._MAP["Lobby"].Interactions:GetChildren()) do
+				if v.Name == "Gacha" then
+					local Name = v:GetAttribute("Name")
+					if Name == "Mounts" then
+						banner = v.SungJinWooFinal
+						break
+					end
+				end
+			end
+
+			if banner then
+				local args = {
+					{
+						{
+							"TeleportSystem",
+							"To",
+							"Lobby",
+							n = 3,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+
+				task.wait(2)
+				local bannerCFrame = GetCFrame(banner, 0, 0)
+				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
+				teleported = true
+			end
+		end
+
+		local args = {
+			{
+				{
+					"GachaSystem",
+					"Spin",
+					"Trait",
+					"Normal",
+					{
+						AlphaCore = true,
+						ForceField = true,
+						Phantom = true,
+						BlackHaki = true,
+						Electric6 = true,
+						Shirayuki = true,
+						DarkFruit = true,
+						SRank = true,
+						Flame = true,
+						Singularity = true,
+						Blessed6 = true,
+						Sonic = true,
+						OperationFruit = true,
+						Haunt5 = true,
+						EvilEye = true,
+						Visored = true,
+						N6 = true,
+						Jupiter = true,
+						Ackerman = true,
+						Blessing5 = true,
+						Secret = true,
+						Earth = true,
+						RedHaki = true,
+						Holy = true,
+						DragonFruit = true,
+						Mist = true,
+						PhoenixFruit = true,
+						Ruin6 = true,
+						Yeager = true,
+						ColossalSerum = true,
+						AdaptiveCore = true,
+						TurboGranny = true,
+						Haunt6 = true,
+						TrueQuincy = true,
+						Ruin5 = true,
+						Afterlife = true,
+						N9 = true,
+						Blessed5 = true,
+						Nozarashi = true,
+						Electric5 = true,
+						National = true,
+						Mythical = true,
+						Blessing = true,
+						Blessing6 = true,
+						AttackSerum = true,
+					},
+					n = 5,
+				},
+				"\002",
+			},
+		}
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
+		task.wait()
+	end
+end
+
+function autoRollHunterRanksFunction()
+	local teleported = false
+	local banner
+	while getgenv().autoRollHunterRanksEnabled do
+		if not teleported then
+			for _, v in pairs(workspace._MAP["4"].Interactions:GetChildren()) do
+				if v.Name == "Gacha" then
+					local Name = v:GetAttribute("Name")
+					if Name == "Hunter Ranks" then
+						banner = v.Rig
+						break
+					end
+				end
+			end
+
+			if banner then
+				local args = {
+					{
+						{
+							"TeleportSystem",
+							"To",
+							4,
+							n = 3,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+
+				task.wait(2)
+				local bannerCFrame = GetCFrame(banner, 0, 0)
+				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
+				teleported = true
+			end
+		end
+
+		local args = {
+			{
+				{
+					"GachaSystem",
+					"Spin",
+					"Hunter Rank",
+					"Normal",
+					{
+						AlphaCore = true,
+						ForceField = true,
+						Phantom = true,
+						BlackHaki = true,
+						Electric6 = true,
+						Shirayuki = true,
+						DarkFruit = true,
+						SRank = true,
+						Flame = true,
+						Singularity = true,
+						Blessed6 = true,
+						Sonic = true,
+						OperationFruit = true,
+						Haunt5 = true,
+						EvilEye = true,
+						Visored = true,
+						N6 = true,
+						Jupiter = true,
+						Ackerman = true,
+						Blessing5 = true,
+						Secret = true,
+						Earth = true,
+						RedHaki = true,
+						Holy = true,
+						DragonFruit = true,
+						Mist = true,
+						PhoenixFruit = true,
+						Ruin6 = true,
+						Yeager = true,
+						ColossalSerum = true,
+						AdaptiveCore = true,
+						TurboGranny = true,
+						Haunt6 = true,
+						TrueQuincy = true,
+						Ruin5 = true,
+						Afterlife = true,
+						N9 = true,
+						Blessed5 = true,
+						Nozarashi = true,
+						Electric5 = true,
+						National = true,
+						Mythical = true,
+						Blessing = true,
+						Blessing6 = true,
+						AttackSerum = true,
+					},
+					n = 5,
+				},
+				"\002",
+			},
+		}
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
+		task.wait()
+	end
+end
+
+function autoRollShadowFunction()
+	local teleported = false
+	local banner
+	while getgenv().autoRollShadowEnabled do
+		if not teleported then
+			for _, v in pairs(workspace._MAP["4"].Interactions:GetChildren()) do
+				if v.Name == "Banner" then
+					local Name = v:GetAttribute("Name")
+					if Name == "Shadows" then
+						banner = v.IgrisShadow
+						break
+					end
+				end
+			end
+
+			if banner then
+				local args = {
+					{
+						{
+							"TeleportSystem",
+							"To",
+							4,
+							n = 3,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+
+				task.wait(2)
+				local bannerCFrame = GetCFrame(banner, 0, 0)
+				game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(bannerCFrame)
+				teleported = true
+			end
+		end
+
+		local args = {
+			{
+				{
+					"GachaSystem",
+					"Spin",
+					"Warrior",
+					"Shadow",
+					{
+						AlphaCore = true,
+						ForceField = true,
+						Phantom = true,
+						BlackHaki = true,
+						Electric6 = true,
+						Shirayuki = true,
+						DarkFruit = true,
+						SRank = true,
+						Flame = true,
+						Singularity = true,
+						Blessed6 = true,
+						Sonic = true,
+						OperationFruit = true,
+						Haunt5 = true,
+						EvilEye = true,
+						Visored = true,
+						N6 = true,
+						Jupiter = true,
+						Ackerman = true,
+						Blessing5 = true,
+						Secret = true,
+						Earth = true,
+						RedHaki = true,
+						Holy = true,
+						DragonFruit = true,
+						Mist = true,
+						PhoenixFruit = true,
+						Ruin6 = true,
+						Yeager = true,
+						ColossalSerum = true,
+						AdaptiveCore = true,
+						TurboGranny = true,
+						Haunt6 = true,
+						TrueQuincy = true,
+						Ruin5 = true,
+						Afterlife = true,
+						N9 = true,
+						Blessed5 = true,
+						Nozarashi = true,
+						Electric5 = true,
+						National = true,
+						Mythical = true,
+						Blessing = true,
+						Blessing6 = true,
+						AttackSerum = true,
+					},
+					n = 5,
+				},
+				"\002",
+			},
+		}
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
+		task.wait()
+	end
+end
+
+function autoUpgradeShinigamiLevelingFunction()
+	while getgenv().autoUpgradeShinigamiLevelingEnabled do
+		local args = {
+			{
+				{
+					"UpgradeSystem",
+					"Buy",
+					"Shinigami Leveling",
+					"Damage",
+					n = 4,
+				},
+				"\002",
+			},
+		}
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+			:WaitForChild("dataRemoteEvent")
+			:FireServer(unpack(args))
 		task.wait(1)
 	end
 end
@@ -1039,6 +1774,110 @@ function autoAlienUpgradeFunction()
 				task.wait(0.2)
 			end
 		end
+
+		task.wait(1)
+	end
+end
+
+function autoDungeonUpgradeFunction()
+	while getgenv().autoDungeonUpgradeEnabled do
+		if selectedsDungeonUpgrades then
+			for _, upgrade in pairs(selectedsDungeonUpgrades) do
+				local args = {
+					{
+						{
+							"UpgradeSystem",
+							"Buy",
+							"Dungeon",
+							upgrade,
+							n = 4,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+			end
+		end
+
+		task.wait(1)
+	end
+end
+
+function autoMonarchUpgradeFunction()
+	while getgenv().autoMonarchUpgradeEnabled do
+		if selectedsMonarchUpgrades then
+			for _, upgrade in pairs(selectedsMonarchUpgrades) do
+				local args = {
+					{
+						{
+							"UpgradeSystem",
+							"Buy",
+							"Monarch",
+							_,
+							n = 4,
+						},
+						"\002",
+					},
+				}
+
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+					:WaitForChild("dataRemoteEvent")
+					:FireServer(unpack(args))
+			end
+		end
+
+		task.wait(1)
+	end
+end
+
+function autoDungeonFunction()
+	local teleported = false
+
+	while getgenv().autoDungeonEnabled do
+		if not teleported then
+			game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer({
+				{
+					"TeleportSystem",
+					"To",
+					4,
+					n = 3,
+				},
+				"\002",
+			})
+
+			task.wait(2)
+			teleported = true
+		end
+
+		game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer({
+			{
+				"GamemodeSystem",
+				"Create",
+				"Dungeon",
+				tostring(getgenv().selectedMapDungeon),
+				tostring(getgenv().selectedDiffDungeon),
+				n = 6,
+			},
+			"\002",
+		})
+
+		task.wait(1)
+
+		game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer({
+			{
+				"GamemodeSystem",
+				"Start",
+				"Dungeon",
+				1271973640,
+				n = 4,
+			},
+			"\002",
+		})
 
 		task.wait(1)
 	end
@@ -1532,12 +2371,33 @@ function updateMobDropdownFunction()
 end
 
 function autoRaidFunction()
+	local teleported = false
 	while getgenv().autoRaidEnabled do
 		local selectedMap = getgenv().selectedMapRaid
 		local selectedDiff = getgenv().selectedDiffRaid
 		local onlyFriends = getgenv().onlyFriednsEnabled or false
 
 		local mapName = tostring(selectedMap):gsub("%s+", "")
+
+		if not teleported then
+			local args = {
+				{
+					{
+						"TeleportSystem",
+						"To",
+						1,
+						n = 3,
+					},
+					"\002",
+				},
+			}
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+				:WaitForChild("dataRemoteEvent")
+				:FireServer(unpack(args))
+			task.wait(2)
+			teleported = true
+		end
 
 		local argsCreate = {
 			{
@@ -1579,6 +2439,66 @@ function autoRaidFunction()
 			:WaitForChild("dataRemoteEvent")
 			:FireServer(unpack(argsStart))
 
+		task.wait(1)
+	end
+end
+
+function autoLeaveRaidWaveXFuntion()
+	while getgenv().autoLeaveRaidWaveXEnabled do
+		local wave = game:GetService("Players").LocalPlayer.PlayerGui.Mode.Content.Start.Label
+		local numero
+		for n in wave.Text:gmatch("%d+") do
+			numero = tonumber(n)
+		end
+
+		local selectedWave = getgenv().selectedWave
+		if tonumber(selectedWave) == numero then
+			local args = {
+				{
+					{
+						"TeleportSystem",
+						"To",
+						1,
+						n = 3,
+					},
+					"\002",
+				},
+			}
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+				:WaitForChild("dataRemoteEvent")
+				:FireServer(unpack(args))
+		end
+		task.wait(1)
+	end
+end
+
+function autoLeaveDungeonWaveXFuntion()
+	while getgenv().autoLeaveDungeonWaveXEnabled do
+		local wave = game:GetService("Players").LocalPlayer.PlayerGui.Mode.Content.Start.Label
+		local numero
+		for n in wave.Text:gmatch("%d+") do
+			numero = tonumber(n)
+		end
+
+		local selectedWave = getgenv().selectedWaveDungeon
+		if tonumber(selectedWave) == numero then
+			local args = {
+				{
+					{
+						"TeleportSystem",
+						"To",
+						1,
+						n = 3,
+					},
+					"\002",
+				},
+			}
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+				:WaitForChild("dataRemoteEvent")
+				:FireServer(unpack(args))
+		end
 		task.wait(1)
 	end
 end
@@ -1843,25 +2763,10 @@ function autoEnchantSwordFunction()
 	end
 end
 
-function checkSelectedSwordUUID()
-	local PlayerData = Library.PlayerData
-	local selectedSword = getgenv().selectedSwordSell
-
-	if not PlayerData or not PlayerData.Weapons then
-		return
-	end
-
-	for uuid, weapon in pairs(PlayerData.Weapons) do
-		if weapon.Id == selectedSword then
-			print("UUID da espada encontrada:", uuid)
-		end
-	end
-end
-
 function autoSellSwordFunction()
 	while getgenv().autoSellSwordEnabled do
 		local PlayerData = Library.PlayerData
-		local selectedSwords = getgenv().selectedSwordSell
+		local selectedSwords = selectedSwordSell
 
 		if not PlayerData or not PlayerData.Weapons then
 			task.wait(1)
@@ -1869,9 +2774,7 @@ function autoSellSwordFunction()
 		end
 
 		for uuid, weapon in pairs(PlayerData.Weapons) do
-			if selectedSwords and selectedSwords[weapon.Id] then
-				print("Vendendo espada:", weapon.Id, uuid)
-
+			if selectedSwords[weapon.Id] or selectedSwords[normalize(weapon.Id)] then
 				local args = {
 					{
 						{
@@ -1884,29 +2787,13 @@ function autoSellSwordFunction()
 					},
 				}
 
-				game:GetService("ReplicatedStorage")
+				local remoteEvent = game:GetService("ReplicatedStorage")
 					:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 					:WaitForChild("dataRemoteEvent")
-					:FireServer(unpack(args))
+				remoteEvent:FireServer(unpack(args))
 			end
 		end
-
 		task.wait(1)
-	end
-end
-
-function checkSelectedWarriorUUID()
-	local PlayerData = Library.PlayerData
-	local selectedWarriorSell2 = selectedWarriorSell
-
-	if not PlayerData or not PlayerData.Pets then
-		return
-	end
-
-	for uuid, pet in pairs(PlayerData.Pets) do
-		if pet.Id == selectedWarriorSell2 then
-			print("UUID do warrior encontrado:", uuid)
-		end
 	end
 end
 
@@ -1956,11 +2843,8 @@ end
 
 function equipBestAvatarFunction()
 	while getgenv().equipBestAvatarEnabled do
-		local PlayerAvatars = {
-			Sasuke = { Buffs = {}, XP = 0, Level = 1 },
-			Emilia = { XP = 232, Buffs = {}, Equipped = true, Level = 16 },
-			Ace = { Buffs = {}, XP = 0, Level = 1 },
-		}
+		local Library = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
+		local PlayerAvatars = Library.PlayerData and Library.PlayerData.Avatars or {}
 
 		local function getBestAvatar(avatars)
 			local bestName = nil
@@ -1981,13 +2865,61 @@ function equipBestAvatarFunction()
 			return bestName, bestLevel, bestXP
 		end
 
-		local name = getBestAvatar(PlayerAvatars)
+		local bestName = getBestAvatar(PlayerAvatars)
+
+		if bestName and not PlayerAvatars[bestName].Equipped then
+			local args = {
+				{
+					{
+						"AvatarSystem",
+						"Equip",
+						tostring(bestName),
+						n = 3,
+					},
+					"\002",
+				},
+			}
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("ffrostflame_bridgenet2@1.0.0")
+				:WaitForChild("dataRemoteEvent")
+				:FireServer(unpack(args))
+		end
+
+		local interval = equipBestInterval or 1
+		task.wait(interval * 60)
+	end
+end
+
+function codeFunction()
+	local codes = {
+		"50KLIKES",
+		"DUNGEONSHOP",
+		"MILIMSECRET",
+		"10MVISITS",
+		"45KLIKES",
+		"INFINITYCASTLE",
+		"40KLIKES",
+		"DEVILFRUITS",
+		"PIRATELEVEL",
+		"35KLIKES",
+		"20KPLAYERS",
+		"WARRIORS",
+		"25KLIKES",
+		"30KLIKES",
+		"EXCHANGE",
+		"20KLIKES",
+		"SHUTDOWN",
+		"10KLIKES",
+		"5KLIKES",
+		"RELEASE",
+	}
+	for i, v in pairs(codes) do
 		local args = {
 			{
 				{
-					"AvatarSystem",
-					"Equip",
-					tostring(name),
+					"CodeSystem",
+					"Use",
+					v,
 					n = 3,
 				},
 				"\002",
@@ -1997,8 +2929,7 @@ function equipBestAvatarFunction()
 			:WaitForChild("ffrostflame_bridgenet2@1.0.0")
 			:WaitForChild("dataRemoteEvent")
 			:FireServer(unpack(args))
-		local interval = equipBestInterval or 1
-		task.wait(interval * 60)
+		task.wait(1)
 	end
 end
 
@@ -2041,6 +2972,15 @@ local ValuesRaid = {}
 for name, data in pairs(raidData) do
 	if data.Name then
 		table.insert(ValuesRaid, data.Name)
+	end
+end
+
+local dungeonData = require(game:GetService("ReplicatedStorage").Framework.Modules.Data.GamemodeData.Dungeon)
+local ValuesDungeon = {}
+
+for name, data in pairs(dungeonData) do
+	if data.Name then
+		table.insert(ValuesDungeon, data.Name)
 	end
 end
 
@@ -2144,6 +3084,13 @@ for id, data in pairs(WarriorData) do
 	end
 end
 
+local TraitModule = require(game:GetService("ReplicatedStorage").Framework.Modules.Data.GachaData.Trait)
+local optionsTraits = {}
+
+for id, data in pairs(TraitModule[2].Normal) do
+	table.insert(optionsTraits, data.Name)
+end
+
 local tabGroups = {
 	TabGroup1 = Window:TabGroup(),
 }
@@ -2174,16 +3121,44 @@ sections.MainSection1:Toggle({
 	Name = "Hide Player Info",
 	Default = false,
 	Callback = function(value)
-		for _, character in pairs(workspace._CHARACTERS:GetDescendants()) do
-			local gui = character:FindFirstChild("GUI")
-			if gui then
-				gui.Enabled = false
-				break
+		while value do
+			for _, character in pairs(workspace._CHARACTERS:GetDescendants()) do
+				local gui = character:FindFirstChild("GUI")
+				if gui then
+					gui.Enabled = false
+					break
+				end
 			end
+			MacLib:HidePlayer(value)
+			task.wait(0.1)
 		end
-		MacLib:HidePlayer(value)
 	end,
 }, "HidePlayerInfoToggle")
+
+sections.MainSection1:Toggle({
+	Name = "Remove Animation",
+	Default = false,
+	Callback = function(value)
+		while value do
+			local animationEgg = game:GetService("Players").LocalPlayer.PlayerGui.CenterGUI:FindFirstChild("Eggs")
+			if animationEgg then
+				animationEgg:Destroy()
+			end
+			task.wait(1)
+		end
+	end,
+}, "HidePlayerInfoToggle")
+
+sections.MainSection1:Button({
+	Name = "All Gamepass",
+	Callback = function()
+		local Library = require(game.ReplicatedStorage.Framework.Library)
+
+		for k in pairs(Library.PlayerData.Gamepasses) do
+			Library.PlayerData.Gamepasses[k] = true
+		end
+	end,
+})
 
 sections.MainSection1:Toggle({
 	Name = "Only Friends",
@@ -2256,6 +3231,13 @@ sections.MainSection1:Toggle({
 	end,
 }, "AutoClaimQuestToggle")
 
+sections.MainSection1:Button({
+	Name = "Reedem Codes",
+	Callback = function()
+		codeFunction()
+	end,
+})
+
 local DropdownMapRaidSelect = sections.MainSection2:Dropdown({
 	Name = "Select Map",
 	Search = true,
@@ -2290,6 +3272,87 @@ sections.MainSection2:Toggle({
 		end
 	end,
 }, "AutoRaidToggle")
+
+sections.MainSection2:Slider({
+	Name = "Wave X to Leave",
+	Default = 1,
+	Minimum = 1,
+	Maximum = 100,
+	DisplayMethod = "Number",
+	Precision = 0,
+	Callback = function(Value)
+		getgenv().selectedWave = Value
+	end,
+}, "selectedWaveToggle")
+
+sections.MainSection2:Toggle({
+	Name = "Leave in Wave X",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoLeaveRaidWaveXEnabled = value
+		if value == true then
+			autoLeaveRaidWaveXFuntion()
+		end
+	end,
+}, "AutoLeaveRaidWaveXToggle")
+
+local DropdownMapDungeonSelect = sections.MainSection2:Dropdown({
+	Name = "Select Map",
+	Search = true,
+	Multi = false,
+	Required = true,
+	Options = ValuesDungeon,
+	Default = nil,
+	Callback = function(value)
+		getgenv().selectedMapDungeon = value:gsub("%s+", "")
+	end,
+}, "dropdownMapDungeon")
+
+local DropdownDiffDungeonSelect = sections.MainSection2:Dropdown({
+	Name = "Select Difficulty",
+	Search = true,
+	Multi = false,
+	Required = true,
+	Options = { "Easy", "Normal", "Hard" },
+	Default = nil,
+	Callback = function(value)
+		getgenv().selectedDiffDungeon = value
+	end,
+}, "dropdownDiffDungeon")
+
+sections.MainSection2:Toggle({
+	Name = "Auto Dungeon",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoDungeonEnabled = value
+		if value == true then
+			autoDungeonFunction()
+		end
+	end,
+}, "AutoDungeonToggle")
+
+sections.MainSection2:Slider({
+	Name = "Wave X to Dungeon",
+	Default = 1,
+	Minimum = 1,
+	Maximum = 100,
+	DisplayMethod = "Number",
+	Precision = 0,
+	Callback = function(Value)
+		getgenv().selectedWaveDungeon = Value
+	end,
+}, "selectedWaveDungeonToggle")
+
+sections.MainSection2:Toggle({
+	Name = "Leave in Wave X",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoLeaveDungeonWaveXEnabled = value
+		if value == true then
+			autoLeaveDungeonWaveXFuntion()
+		end
+	end,
+}, "AutoLeaveDungeonWaveXToggle")
 
 local DropdownEggSelect = sections.MainSection20:Dropdown({
 	Name = "Select Egg",
@@ -2349,6 +3412,17 @@ sections.MainSection21:Toggle({
 }, "AutoRollSwordToggle")
 
 sections.MainSection21:Toggle({
+	Name = "Auto Roll Trait",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoRollTraitEnabled = value
+		if value == true then
+			autoRollTraitFunction()
+		end
+	end,
+}, "AutoTraitToggle")
+
+sections.MainSection21:Toggle({
 	Name = "Auto Roll Warriors",
 	Default = false,
 	Callback = function(value)
@@ -2403,6 +3477,72 @@ sections.MainSection21:Toggle({
 	end,
 }, "AutoRollPsychicPowersToggle")
 
+sections.MainSection21:Toggle({
+	Name = "Auto Roll Soul Foundation",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoRollSoulFoundationEnabled = value
+		if value == true then
+			autoRollSoulFoundationFunction()
+		end
+	end,
+}, "AutoRollSoulFoundationToggle")
+
+sections.MainSection21:Toggle({
+	Name = "Auto Roll Zanpakuto",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoRollZanpakutoEnabled = value
+		if value == true then
+			autoRollZanpakutoFunction()
+		end
+	end,
+}, "AutoRollZanpakutoToggle")
+
+sections.MainSection21:Toggle({
+	Name = "Auto Roll Power of Planets",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoRollPowerOfThePlanetsEnabled = value
+		if value == true then
+			autoRollPowerOfThePlanetsFunction()
+		end
+	end,
+}, "AutoRollPowerOfThePlanetsToggle")
+
+sections.MainSection21:Toggle({
+	Name = "Auto Roll Hunter Ranks",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoRollHunterRanksEnabled = value
+		if value == true then
+			autoRollHunterRanksFunction()
+		end
+	end,
+}, "AutoRollHunterRanksToggle")
+
+sections.MainSection21:Toggle({
+	Name = "Auto Roll Shadow",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoRollShadowEnabled = value
+		if value == true then
+			autoRollShadowFunction()
+		end
+	end,
+}, "AutoRollShadowToggle")
+
+sections.MainSection22:Toggle({
+	Name = "Auto Upgrade Shinigami Leveling",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoUpgradeShinigamiLevelingEnabled = value
+		if value == true then
+			autoUpgradeShinigamiLevelingFunction()
+		end
+	end,
+}, "AutoUpgradeShinigamiLevelingToggle")
+
 local DropdownAlienUpgradesSelect = sections.MainSection22:Dropdown({
 	Name = "Select Alien Upgrades",
 	Search = true,
@@ -2448,6 +3588,52 @@ sections.MainSection22:Toggle({
 		end
 	end,
 }, "AutoUpgradeExchangesUpgradesToggle")
+
+local DropdownDungeonUpgradesSelect = sections.MainSection22:Dropdown({
+	Name = "Select Dungeon Upgrades",
+	Search = true,
+	Multi = true,
+	Required = true,
+	Options = { "Energy", "Damage", "Ghost", "CritDMG", "ModeDelay", "DungeonEnemyScale" },
+	Default = nil,
+	Callback = function(value)
+		selectedsDungeonUpgrades = value
+	end,
+}, "dropdownDungeonUpgrades ")
+
+sections.MainSection22:Toggle({
+	Name = "Auto Upgrade Dungeon Upgrades",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoDungeonUpgradeEnabled = value
+		if value == true then
+			autoDungeonUpgradeFunction()
+		end
+	end,
+}, "AutoUpgradeDungeonUpgradesToggle")
+
+local DropdownMonarchUpgradesSelect = sections.MainSection22:Dropdown({
+	Name = "Select Monarch Upgrades",
+	Search = true,
+	Multi = true,
+	Required = true,
+	Options = { "Energy", "Damage", "CritChance", "CritDMG", "AtkSPD" },
+	Default = nil,
+	Callback = function(value)
+		selectedsMonarchUpgrades = value
+	end,
+}, "dropdownMonarchUpgrades ")
+
+sections.MainSection22:Toggle({
+	Name = "Auto Upgrade Monarch Upgrades",
+	Default = false,
+	Callback = function(value)
+		getgenv().autoMonarchUpgradeEnabled = value
+		if value == true then
+			autoMonarchUpgradeFunction()
+		end
+	end,
+}, "AutoUpgradeMonarchUpgradesToggle")
 
 local DropdownSwordSelect = sections.MainSection22:Dropdown({
 	Name = "Select Sword",
@@ -2526,8 +3712,12 @@ local DropdownSwordSelect = sections.MainSection40:Dropdown({
 	Required = true,
 	Options = optionsSword2,
 	Default = nil,
-	Callback = function(value)
-		selectedSwordSell = swordMap[value]
+	Callback = function(values)
+		selectedSwordSell = {}
+
+		for name, _ in pairs(values) do
+			selectedSwordSell[name] = true
+		end
 	end,
 }, "dropdownSwordSell")
 
@@ -2537,7 +3727,7 @@ sections.MainSection40:Toggle({
 	Callback = function(value)
 		getgenv().autoSellSwordEnabled = value
 		if value == true then
-			autoSellSwordFunction()
+			task.spawn(autoSellSwordFunction)
 		end
 	end,
 }, "AutoSellSwordToggle")
